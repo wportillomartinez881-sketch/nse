@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NEXUS - Sistema de Gestión Empresarial</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #2563eb;
+            --primary-hover: #1d4ed8;
+            --bg-color: #f8fafc;
+            --sidebar-bg: #1e293b;
+            --text-color: #334155;
+            --text-light: #94a3b8;
+            --white: #ffffff;
+            --border-color: #e2e8f0;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            display: flex;
+            height: 100vh;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            overflow: hidden;
+        }
+
+        /* Sidebar Styles */
+        .sidebar {
+            width: 260px;
+            background-color: var(--sidebar-bg);
+            color: var(--white);
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+        }
+
+        .sidebar-header {
+            padding: 20px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            border-bottom: 1px solid #334155;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .nav-category {
+            padding: 15px 20px 5px;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-light);
+            font-weight: 600;
+        }
+
+        .nav-list {
+            list-style: none;
+            padding-bottom: 10px;
+        }
+
+        .nav-link {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 20px;
+            color: var(--text-light);
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+
+        .nav-link:hover, .nav-link.active {
+            color: var(--white);
+            background-color: rgba(255, 255, 255, 0.1);
+            border-left: 4px solid var(--primary-color);
+        }
+
+        /* Main Content Styles */
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+        }
+
+        .top-header {
+            background-color: var(--white);
+            padding: 15px 30px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .content-area {
+            padding: 25px;
+            flex: 1;
+        }
+
+        .app-section {
+            display: none;
+            animation: fadeIn 0.3s ease-in-out;
+        }
+
+        .app-section.active {
+            display: block;
+        }
+
+        .section-header {
+            margin-bottom: 20px;
+        }
+
+        .section-header h2 {
+            font-size: 1.5rem;
+            color: #0f172a;
+            margin-bottom: 5px;
+        }
+
+        .section-header p {
+            color: #64748b;
+            font-size: 0.9rem;
+        }
+
+        /* Container genérico para la inyección de tablas/módulos JS */
+        .dynamic-container {
+            background: var(--white);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 20px;
+            min-height: 200px;
+        }
+
+        /* Container iframe de contacto */
+        .iframe-container {
+            position: relative;
+            width: 100%;
+            height: calc(100vh - 180px);
+            min-height: 550px;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            background-color: var(--white);
+            border: 1px solid var(--border-color);
+        }
+
+        .iframe-container iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @media (max-width: 768px) {
+            body { flex-direction: column; }
+            .sidebar { width: 100%; height: auto; }
+            .nav-list { display: flex; overflow-x: auto; }
+            .nav-category { display: none; }
+            .iframe-container { height: calc(100vh - 140px); min-height: 450px; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Menú Lateral / Sidebar -->
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <i class="fas fa-cubes"></i>
+            <span>NEXUS</span>
+        </div>
+
+        <div class="nav-category">General</div>
+        <ul class="nav-list">
+            <li><a href="#inicio" class="nav-link active" onclick="mostrarSeccion('inicio', this)"><i class="fas fa-home"></i> <span>Inicio</span></a></li>
+            <li><a href="#empresa" class="nav-link" onclick="mostrarSeccion('empresa', this)"><i class="fas fa-building"></i> <span>Empresa</span></a></li>
+            <li><a href="#empleados" class="nav-link" onclick="mostrarSeccion('empleados', this)"><i class="fas fa-users"></i> <span>Empleados</span></a></li>
+            <li><a href="#novedades" class="nav-link" onclick="mostrarSeccion('novedades', this)"><i class="fas fa-bell"></i> <span>Novedades</span></a></li>
+        </ul>
+
+        <div class="nav-category">Gestión Contable</div>
+        <ul class="nav-list">
+            <li><a href="#planillas" class="nav-link" onclick="mostrarSeccion('planillas', this)"><i class="fas fa-file-invoice-dollar"></i> <span>Planillas</span></a></li>
+            <li><a href="#detalle-planilla" class="nav-link" onclick="mostrarSeccion('detalle-planilla', this)"><i class="fas fa-list-alt"></i> <span>Detalle Planilla</span></a></li>
+            <li><a href="#validaciones" class="nav-link" onclick="mostrarSeccion('validaciones', this)"><i class="fas fa-check-circle"></i> <span>Validaciones</span></a></li>
+        </ul>
+
+        <div class="nav-category">Consultas y Auditoría</div>
+        <ul class="nav-list">
+            <li><a href="#reportes" class="nav-link" onclick="mostrarSeccion('reportes', this)"><i class="fas fa-chart-bar"></i> <span>Reportes</span></a></li>
+            <li><a href="#historial-nexus" class="nav-link" onclick="mostrarSeccion('historial-nexus', this)"><i class="fas fa-history"></i> <span>Historial Nexus</span></a></li>
+            <li><a href="#parametros" class="nav-link" onclick="mostrarSeccion('parametros', this)"><i class="fas fa-sliders-h"></i> <span>Parámetros</span></a></li>
+            <li><a href="#auditoria" class="nav-link" onclick="mostrarSeccion('auditoria', this)"><i class="fas fa-shield-alt"></i> <span>Auditoría</span></a></li>
+            <li><a href="#fundamento-legal" class="nav-link" onclick="mostrarSeccion('fundamento-legal', this)"><i class="fas fa-gavel"></i> <span>Fundamento Legal</span></a></li>
+        </ul>
+
+        <div class="nav-category">Soporte</div>
+        <ul class="nav-list">
+            <li><a href="#contacto-nexus" class="nav-link" onclick="mostrarSeccion('contacto-nexus', this)"><i class="fas fa-envelope"></i> <span>Contactar a Nexus</span></a></li>
+        </ul>
+    </aside>
+
+    <!-- Área Principal de Contenido -->
+    <main class="main-content">
+        <header class="top-header">
+            <h3>Plataforma de Gestión Empresarial</h3>
+            <span class="user-badge"><i class="fas fa-user-circle"></i> Usuario Rol</span>
+        </header>
+
+        <div class="content-area">
+            <!-- Secciones con IDs para la vinculación JS -->
+            <section id="inicio" class="app-section active">
+                <div class="section-header">
+                    <h2>Inicio</h2>
+                    <p>Tu aliado estratégico en gestión empresarial.</p>
+                </div>
+                <div id="inicio-content" class="dynamic-container">
+                    <!-- Los scripts insertan aquí el Dashboard / Tarjetas -->
+                </div>
+            </section>
+
+            <section id="empresa" class="app-section">
+                <div class="section-header"><h2>Gestión de Empresa</h2></div>
+                <div id="empresa-content" class="dynamic-container"></div>
+            </section>
+
+            <section id="empleados" class="app-section">
+                <div class="section-header"><h2>Gestión de Empleados</h2></div>
+                <div id="empleados-content" class="dynamic-container"></div>
+            </section>
+
+            <section id="novedades" class="app-section">
+                <div class="section-header"><h2>Novedades</h2></div>
+                <div id="novedades-content" class="dynamic-container"></div>
+            </section>
+
+            <section id="planillas" class="app-section">
+                <div class="section-header"><h2>Planillas</h2></div>
+                <div id="planillas-content" class="dynamic-container"></div>
+            </section>
+
+            <section id="detalle-planilla" class="app-section">
+                <div class="section-header"><h2>Detalle de Planilla</h2></div>
+                <div id="detalle-planilla-content" class="dynamic-container"></div>
+            </section>
+
+            <section id="validaciones" class="app-section">
+                <div class="section-header"><h2>Validaciones</h2></div>
+                <div id="validaciones-content" class="dynamic-container"></div>
+            </section>
+
+            <section id="reportes" class="app-section">
+                <div class="section-header"><h2>Reportes</h2></div>
+                <div id="reportes-content" class="dynamic-container"></div>
+            </section>
+
+            <section id="historial-nexus" class="app-section">
+                <div class="section-header"><h2>Historial Nexus</h2></div>
+                <div id="historial-content" class="dynamic-container"></div>
+            </section>
+
+            <section id="parametros" class="app-section">
+                <div class="section-header"><h2>Parámetros</h2></div>
+                <div id="parametros-content" class="dynamic-container"></div>
+            </section>
+
+            <section id="auditoria" class="app-section">
+                <div class="section-header"><h2>Auditoría</h2></div>
+                <div id="auditoria-content" class="dynamic-container"></div>
+            </section>
+
+            <section id="fundamento-legal" class="app-section">
+                <div class="section-header"><h2>Fundamento Legal</h2></div>
+                <div id="fundamento-content" class="dynamic-container"></div>
+            </section>
+
+            <!-- Sección Contactar a Nexus -->
+            <section id="contacto-nexus" class="app-section">
+                <div class="section-header">
+                    <h2>Contactar a Nexus</h2>
+                    <p>Envíanos un mensaje directamente a través de nuestra plataforma oficial de contacto.</p>
+                </div>
+                <div class="iframe-container">
+                    <iframe 
+                        src="https://wportillomartinez881-sketch.github.io/correo/" 
+                        title="Correo de Nexus"
+                        loading="lazy"
+                        allow="autoplay; clipboard-write">
+                    </iframe>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <!-- Contenedor para Asistente Virtual / Atena si aplica -->
+    <div id="asistente-container"></div>
+
+    <!-- Carga de todos los scripts de la carpeta js -->
+    <script src="js/config.js"></script>
+    <script src="js/state.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/fiscal-engine.js"></script>
+    <script src="js/validaciones.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/conocimiento-atena.js"></script>
+    <script src="js/asistente-virtual.js"></script>
+
+    <!-- Función de Navegación -->
+    <script>
+        function mostrarSeccion(idSeccion, elementoLink) {
+            const secciones = document.querySelectorAll('.app-section');
+            secciones.forEach(sec => sec.classList.remove('active'));
+
+            const links = document.querySelectorAll('.nav-link');
+            links.forEach(link => link.classList.remove('active'));
+
+            const seccionActiva = document.getElementById(idSeccion);
+            if (seccionActiva) {
+                seccionActiva.classList.add('active');
+            }
+
+            if (elementoLink) {
+                elementoLink.classList.add('active');
+            }
+        }
+    </script>
+</body>
+</html>
