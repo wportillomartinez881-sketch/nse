@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NEXUS - Sistema de Gestión Empresarial</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #2563eb;
+            --primary-hover: #1d4ed8;
+            --bg-color: #f8fafc;
+            --sidebar-bg: #1e293b;
+            --text-color: #334155;
+            --text-light: #94a3b8;
+            --white: #ffffff;
+            --border-color: #e2e8f0;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            display: flex;
+            height: 100vh;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            overflow: hidden;
+        }
+
+        /* Sidebar Styles */
+        .sidebar {
+            width: 260px;
+            background-color: var(--sidebar-bg);
+            color: var(--white);
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+        }
+
+        .sidebar-header {
+            padding: 20px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            border-bottom: 1px solid #334155;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .nav-category {
+            padding: 15px 20px 5px;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-light);
+            font-weight: 600;
+        }
+
+        .nav-list {
+            list-style: none;
+            padding-bottom: 10px;
+        }
+
+        .nav-link {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 20px;
+            color: var(--text-light);
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+
+        .nav-link:hover, .nav-link.active {
+            color: var(--white);
+            background-color: rgba(255, 255, 255, 0.1);
+            border-left: 4px solid var(--primary-color);
+        }
+
+        /* Main Content Styles */
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+        }
+
+        .top-header {
+            background-color: var(--white);
+            padding: 15px 30px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .content-area {
+            padding: 25px;
+            flex: 1;
+        }
+
+        .app-section {
+            display: none;
+            animation: fadeIn 0.3s ease-in-out;
+        }
+
+        .app-section.active {
+            display: block;
+        }
+
+        .section-header {
+            margin-bottom: 20px;
+        }
+
+        .section-header h2 {
+            font-size: 1.5rem;
+            color: #0f172a;
+            margin-bottom: 5px;
+        }
+
+        .section-header p {
+            color: #64748b;
+            font-size: 0.9rem;
+        }
+
+        .dynamic-container {
+            background: var(--white);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 20px;
+            min-height: 200px;
+        }
+
+        .iframe-container {
+            position: relative;
+            width: 100%;
+            height: calc(100vh - 180px);
+            min-height: 550px;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            background-color: var(--white);
+            border: 1px solid var(--border-color);
+        }
+
+        .iframe-container iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+            display: block;
+        }
+
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 20px;
+            margin-bottom: 25px;
+        }
+
+        .kpi-card {
+            background: #f8fafc;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 20px;
+        }
+
+        .kpi-card h4 {
+            font-size: 0.85rem;
+            color: #64748b;
+            text-transform: uppercase;
+        }
+
+        .kpi-card p {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #0f172a;
+            margin-top: 5px;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @media (max-width: 768px) {
+            body { flex-direction: column; }
+            .sidebar { width: 100%; height: auto; }
+            .nav-list { display: flex; overflow-x: auto; }
+            .nav-category { display: none; }
+            .iframe-container { height: calc(100vh - 140px); min-height: 450px; }
+        }
+
+        /* --- Asistente virtual (Atena) --- */
+        .nexus-chat { position: fixed; right: 20px; bottom: 20px; z-index: 9999; }
+        .nexus-chat__boton {
+            background: var(--primary-color); color: #fff; border: none; border-radius: 999px;
+            padding: 12px 18px; font-size: 15px; cursor: pointer; box-shadow: 0 4px 14px rgba(0,0,0,.2);
+        }
+        .nexus-chat__panel {
+            position: absolute; right: 0; bottom: 60px; width: 320px; max-height: 440px;
+            background: #fff; border-radius: 12px; box-shadow: 0 8px 30px rgba(0,0,0,.25);
+            display: flex; flex-direction: column; overflow: hidden;
+        }
+        /* BUG CORREGIDO: la regla de arriba forzaba "display:flex" siempre,
+           y eso le ganaba al estilo por defecto del navegador para el
+           atributo [hidden] (que normalmente pone display:none). Por eso
+           la "X" y el botón de Atena no cerraban el panel: técnicamente sí
+           se le ponía el atributo hidden, pero visualmente seguía flex.
+           Esta regla, al ser más específica, es la que debe ganar. */
+        .nexus-chat__panel[hidden] { display: none; }
+        .nexus-chat__header {
+            background: var(--primary-color); color: #fff; padding: 10px 12px;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .nexus-chat__cerrar { background: transparent; border: none; color: #fff; cursor: pointer; font-size: 18px; }
+        .nexus-chat__mensajes { flex: 1; overflow-y: auto; padding: 10px; display: flex; flex-direction: column; gap: 8px; background: #f4f6fb; min-height: 180px; }
+        .nexus-chat__mensaje { padding: 8px 10px; border-radius: 10px; max-width: 85%; font-size: 14px; line-height: 1.35; }
+        .nexus-chat__mensaje--usuario { align-self: flex-end; background: var(--primary-color); color: #fff; }
+        .nexus-chat__mensaje--bot { align-self: flex-start; background: #e4e9f5; color: #1a1a1a; }
+        .nexus-chat__form { display: flex; gap: 6px; padding: 8px; border-top: 1px solid #e2e2e2; }
+        .nexus-chat__input { flex: 1; border: 1px solid #ccc; border-radius: 8px; padding: 8px; font-size: 14px; }
+        .nexus-chat__mic, .nexus-chat__stop, .nexus-chat__enviar {
+            border: none; border-radius: 8px; padding: 8px 10px; cursor: pointer; background: var(--primary-color); color: #fff; font-size: 13px;
+        }
+        .nexus-chat__mic:disabled { opacity: .5; cursor: not-allowed; }
+
+        /* --- Overlay de inicio de sesion / registro (rediseñado) --- */
+        .nexus-login-overlay {
+            display: none; position: fixed; inset: 0;
+            background: linear-gradient(135deg, rgba(15,23,42,.92), rgba(30,58,138,.92));
+            z-index: 10000; align-items: center; justify-content: center; padding: 20px;
+        }
+        .nexus-login-shell {
+            display: flex; width: 100%; max-width: 780px; min-height: 460px;
+            background: var(--white); border-radius: 18px; overflow: hidden;
+            box-shadow: 0 25px 60px rgba(0,0,0,.4);
+        }
+        .nexus-login-brand {
+            flex: 0 0 42%;
+            background: linear-gradient(160deg, var(--primary-color), var(--sidebar-bg));
+            color: #fff; padding: 40px 32px; display: flex; flex-direction: column; justify-content: center; gap: 18px;
+        }
+        .nexus-login-brand i.fa-cubes { font-size: 2rem; }
+        .nexus-login-brand h1 { font-size: 1.6rem; letter-spacing: 0.5px; }
+        .nexus-login-brand p { font-size: 0.9rem; color: #dbeafe; line-height: 1.5; }
+        .nexus-login-brand ul { list-style: none; display: flex; flex-direction: column; gap: 10px; margin-top: 6px; }
+        .nexus-login-brand li { font-size: 0.85rem; display: flex; align-items: center; gap: 10px; color: #e2e8f0; }
+        .nexus-login-brand li i { color: #93c5fd; }
+        .nexus-login-forms { flex: 1; display: flex; align-items: center; justify-content: center; padding: 36px 32px; }
+        .nexus-login-card {
+            width: 100%; max-width: 320px;
+            display: flex; flex-direction: column; gap: 4px;
+        }
+        .nexus-login-card h2 { color: #0f172a; font-size: 1.3rem; margin-bottom: 2px; display: flex; align-items: center; gap: 8px; }
+        .nexus-login-card h2 i { color: var(--primary-color); }
+        .nexus-login-sub { color: #64748b; font-size: 0.85rem; margin-bottom: 14px; }
+        .nexus-login-card label { font-size: 0.78rem; color: #334155; font-weight: 600; margin-top: 10px; }
+        .nexus-login-card input, .nexus-login-card select {
+            padding: 10px 12px; border: 1px solid var(--border-color); border-radius: 8px;
+            font-size: 0.9rem; margin-top: 4px; transition: border-color .15s, box-shadow .15s;
+        }
+        .nexus-login-card input:focus, .nexus-login-card select:focus {
+            outline: none; border-color: var(--primary-color); box-shadow: 0 0 0 3px rgba(37,99,235,.15);
+        }
+        .nexus-login-card button {
+            margin-top: 18px; background: var(--primary-color); color: #fff; border: none;
+            border-radius: 8px; padding: 11px; font-size: 0.9rem; font-weight: 600; cursor: pointer;
+            display: flex; align-items: center; justify-content: center; gap: 8px; transition: background .15s;
+        }
+        .nexus-login-card button:hover { background: var(--primary-hover); }
+        .nexus-login-error { color: #dc2626; font-size: 0.8rem; min-height: 1.1em; margin-top: 8px; }
+        .nexus-login-switch { text-align: center; font-size: 0.82rem; color: #64748b; margin-top: 16px; }
+        .nexus-login-switch a { color: var(--primary-color); font-weight: 600; text-decoration: none; }
+        .nexus-login-switch a:hover { text-decoration: underline; }
+        @media (max-width: 700px) {
+            .nexus-login-shell { flex-direction: column; max-width: 380px; }
+            .nexus-login-brand { padding: 26px 24px; }
+            .nexus-login-forms { padding: 28px 24px; }
+        }
+
+        /* --- Formularios inline (Nuevo empleado / Nueva novedad) --- */
+        .nexus-form-inline { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+        .nexus-form-inline input, .nexus-form-inline select {
+            padding: 8px 10px; border: 1px solid var(--border-color); border-radius: 6px; font-size: 0.85rem; flex: 1; min-width: 160px;
+        }
+        .nexus-form-inline button {
+            background: var(--primary-color); color: #fff; border: none; border-radius: 6px;
+            padding: 9px 14px; font-size: 0.85rem; cursor: pointer; white-space: nowrap;
+        }
+        .nexus-form-inline button:hover { background: var(--primary-hover); }
+        .nexus-form-mensaje { font-size: 0.8rem; margin-top: 8px; min-height: 1em; }
+        .nexus-form-mensaje.exito { color: #16a34a; }
+        .nexus-form-mensaje.error { color: #dc2626; }
+    </style>
+</head>
+<body>
+
+    <!-- Menú Lateral -->
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <i class="fas fa-cubes"></i>
+            <span>NEXUS</span>
+        </div>
+
+        <div class="nav-category">General</div>
+        <ul class="nav-list">
+            <li><a href="#inicio" class="nav-link active" onclick="mostrarSeccion('inicio', this)"><i class="fas fa-home"></i> <span>Inicio</span></a></li>
+            <li><a href="#empresa" class="nav-link" onclick="mostrarSeccion('empresa', this)"><i class="fas fa-building"></i> <span>Empresa</span></a></li>
+            <li><a href="#empleados" class="nav-link" onclick="mostrarSeccion('empleados', this)"><i class="fas fa-users"></i> <span>Empleados</span></a></li>
+            <li><a href="#novedades" class="nav-link" onclick="mostrarSeccion('novedades', this)"><i class="fas fa-bell"></i> <span>Novedades</span></a></li>
+        </ul>
+
+        <div class="nav-category">Gestión Contable</div>
+        <ul class="nav-list">
+            <li><a href="#planillas" class="nav-link" onclick="mostrarSeccion('planillas', this)"><i class="fas fa-file-invoice-dollar"></i> <span>Planillas</span></a></li>
+            <li><a href="#detalle-planilla" class="nav-link" onclick="mostrarSeccion('detalle-planilla', this)"><i class="fas fa-list-alt"></i> <span>Detalle Planilla</span></a></li>
+            <li><a href="#validaciones" class="nav-link" onclick="mostrarSeccion('validaciones', this)"><i class="fas fa-check-circle"></i> <span>Validaciones</span></a></li>
+        </ul>
+
+        <div class="nav-category">Consultas y Auditoría</div>
+        <ul class="nav-list">
+            <li><a href="#reportes" class="nav-link" onclick="mostrarSeccion('reportes', this)"><i class="fas fa-chart-bar"></i> <span>Reportes</span></a></li>
+            <li><a href="#historial-nexus" class="nav-link" onclick="mostrarSeccion('historial-nexus', this)"><i class="fas fa-history"></i> <span>Historial Nexus</span></a></li>
+            <li><a href="#parametros" class="nav-link" onclick="mostrarSeccion('parametros', this)"><i class="fas fa-sliders-h"></i> <span>Parámetros</span></a></li>
+            <li><a href="#auditoria" class="nav-link" onclick="mostrarSeccion('auditoria', this)"><i class="fas fa-shield-alt"></i> <span>Auditoría</span></a></li>
+            <li><a href="#fundamento-legal" class="nav-link" onclick="mostrarSeccion('fundamento-legal', this)"><i class="fas fa-gavel"></i> <span>Fundamento Legal</span></a></li>
+        </ul>
+
+        <div class="nav-category">Soporte</div>
+        <ul class="nav-list">
+            <li><a href="#contacto-nexus" class="nav-link" onclick="mostrarSeccion('contacto-nexus', this)"><i class="fas fa-envelope"></i> <span>Contactar a Nexus</span></a></li>
+        </ul>
+    </aside>
+
+    <!-- Área Principal -->
+    <main class="main-content">
+        <header class="top-header">
+            <h3>Plataforma de Gestión Empresarial</h3>
+            <span class="user-badge" id="nexus-usuario-badge"><i class="fas fa-user-circle"></i> Administrador</span>
+        </header>
+
+        <div class="content-area">
+            <section id="inicio" class="app-section active">
+                <div class="section-header">
+                    <h2>Inicio</h2>
+                    <p>Tu aliado estratégico en gestión empresarial.</p>
+                </div>
+                <div id="dashboard-view" class="dynamic-container">
+                    <div class="kpi-grid">
+                        <div class="kpi-card"><h4>Estado del Sistema</h4><p>Activo</p></div>
+                        <div class="kpi-card"><h4>Módulos Conectados</h4><p>12 / 12</p></div>
+                        <div class="kpi-card"><h4>Base de Datos Local</h4><p>Sincronizada</p></div>
+                    </div>
+                    <p>Bienvenido a <strong>NEXUS Servicios Empresariales</strong>. Selecciona cualquiera de las opciones del menú lateral para gestionar la información.</p>
+                </div>
+            </section>
+
+            <section id="empresa" class="app-section">
+                <div class="section-header"><h2>Gestión de Empresa</h2></div>
+                <div id="empresa-view" class="dynamic-container"><p>Cargando datos de empresa...</p></div>
+            </section>
+
+            <section id="empleados" class="app-section">
+                <div class="section-header"><h2>Gestión de Empleados</h2></div>
+                <div class="dynamic-container" style="margin-bottom:15px;">
+                    <h3 style="font-size:1rem; margin-bottom:10px;">Nuevo empleado</h3>
+                    <form id="nexus-form-empleado" class="nexus-form-inline">
+                        <input type="text" id="empleado-nombre" placeholder="Nombre completo" required>
+                        <input type="text" id="empleado-dui" placeholder="DUI" required>
+                        <input type="number" step="0.01" id="empleado-salario" placeholder="Salario base" required>
+                        <button type="submit"><i class="fas fa-plus"></i> Agregar empleado</button>
+                    </form>
+                    <p id="empleado-form-mensaje" class="nexus-form-mensaje"></p>
+                </div>
+                <div id="empleados-view" class="dynamic-container"><p>Cargando lista de empleados...</p></div>
+            </section>
+
+            <section id="novedades" class="app-section">
+                <div class="section-header"><h2>Novedades</h2></div>
+                <div class="dynamic-container" style="margin-bottom:15px;">
+                    <h3 style="font-size:1rem; margin-bottom:10px;">Nueva novedad</h3>
+                    <form id="nexus-form-novedad" class="nexus-form-inline">
+                        <input type="text" id="novedad-empleado" placeholder="ID o nombre del empleado" required>
+                        <select id="novedad-tipo" required>
+                            <option value="" disabled selected>Tipo de novedad</option>
+                            <option value="Horas extra">Horas extra</option>
+                            <option value="Ausencia">Ausencia</option>
+                            <option value="Bono">Bono</option>
+                            <option value="Comision">Comisión</option>
+                            <option value="Otro">Otro</option>
+                        </select>
+                        <input type="text" id="novedad-detalle" placeholder="Detalle (ej. 4 horas, $50, etc.)" required>
+                        <button type="submit"><i class="fas fa-plus"></i> Agregar novedad</button>
+                    </form>
+                    <p id="novedad-form-mensaje" class="nexus-form-mensaje"></p>
+                </div>
+                <div id="novedades-view" class="dynamic-container"><p>No hay novedades registradas.</p></div>
+            </section>
+
+            <section id="planillas" class="app-section">
+                <div class="section-header"><h2>Planillas</h2></div>
+                <div id="planillas-view" class="dynamic-container"><p>Cargando planillas...</p></div>
+            </section>
+
+            <section id="detalle-planilla" class="app-section">
+                <div class="section-header"><h2>Detalle de Planilla</h2></div>
+                <div id="detalle-view" class="dynamic-container"><p>Seleccione una planilla para ver el detalle.</p></div>
+            </section>
+
+            <section id="validaciones" class="app-section">
+                <div class="section-header"><h2>Validaciones</h2></div>
+                <div id="validaciones-view" class="dynamic-container"><p>Sin errores de validación detectados.</p></div>
+            </section>
+
+            <section id="reportes" class="app-section">
+                <div class="section-header"><h2>Reportes</h2></div>
+                <div id="reportes-view" class="dynamic-container"><p>Generador de reportes listo.</p></div>
+            </section>
+
+            <section id="historial-nexus" class="app-section">
+                <div class="section-header"><h2>Historial Nexus</h2></div>
+                <div id="historial-view" class="dynamic-container"><p>Historial del sistema activo.</p></div>
+            </section>
+
+            <section id="parametros" class="app-section">
+                <div class="section-header"><h2>Parámetros</h2></div>
+                <div id="parametros-view" class="dynamic-container"><p>Configuración de parámetros fiscales y de ley.</p></div>
+            </section>
+
+            <section id="auditoria" class="app-section">
+                <div class="section-header"><h2>Auditoría</h2></div>
+                <div id="auditoria-view" class="dynamic-container"><p>Bitácora de auditoría del sistema.</p></div>
+            </section>
+
+            <section id="fundamento-legal" class="app-section">
+                <div class="section-header"><h2>Fundamento Legal</h2></div>
+                <div id="fundamento-view" class="dynamic-container"><p>Marco regulatorio y legal aplicable.</p></div>
+            </section>
+
+            <!-- Sección Contactar a Nexus -->
+            <section id="contacto-nexus" class="app-section">
+                <div class="section-header">
+                    <h2>Contactar a Nexus</h2>
+                    <p>Envíanos un mensaje directamente a través de nuestra plataforma oficial de contacto.</p>
+                </div>
+                <div class="iframe-container">
+                    <iframe 
+                        src="https://wportillomartinez881-sketch.github.io/correo/" 
+                        title="Correo de Nexus"
+                        loading="lazy"
+                        allow="autoplay; clipboard-write">
+                    </iframe>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <div id="asistente-container">
+        <div id="nexus-chat" class="nexus-chat">
+            <button id="nexus-chat-toggle" class="nexus-chat__boton" type="button" aria-expanded="false" aria-controls="nexus-chat-panel">
+                <i class="fas fa-robot"></i> Atena
+            </button>
+            <section id="nexus-chat-panel" class="nexus-chat__panel" hidden>
+                <header class="nexus-chat__header">
+                    <strong>Atena · Asistente NEXUS</strong>
+                    <button id="nexus-chat-close" class="nexus-chat__cerrar" type="button" aria-label="Cerrar asistente">&times;</button>
+                </header>
+                <div id="nexus-chat-messages" class="nexus-chat__mensajes" aria-live="polite"></div>
+                <form id="nexus-chat-form" class="nexus-chat__form">
+                    <input id="nexus-chat-input" class="nexus-chat__input" type="text" placeholder="Escribe tu pregunta..." autocomplete="off" />
+                    <button id="nexus-chat-mic" class="nexus-chat__mic" type="button" title="Hablar"><i class="fas fa-microphone"></i></button>
+                    <button id="nexus-chat-stop" class="nexus-chat__stop" type="button" title="Detener voz"><i class="fas fa-volume-mute"></i></button>
+                    <button class="nexus-chat__enviar" type="submit"><i class="fas fa-paper-plane"></i></button>
+                </form>
+            </section>
+        </div>
+    </div>
+
+    <!-- Overlay de inicio de sesion / registro: bloquea la app hasta que haya sesion -->
+    <div id="nexus-login-overlay" class="nexus-login-overlay">
+      <div class="nexus-login-shell">
+        <div class="nexus-login-brand">
+            <i class="fas fa-cubes"></i>
+            <h1>NEXUS</h1>
+            <p>Gestión de planillas para empresas: un solo lugar para tus empleados, novedades y cumplimiento legal.</p>
+            <ul>
+                <li><i class="fas fa-check-circle"></i> Empleados y novedades centralizados</li>
+                <li><i class="fas fa-check-circle"></i> Cálculo de planillas y prestaciones</li>
+                <li><i class="fas fa-check-circle"></i> Asistente Atena disponible 24/7</li>
+            </ul>
+        </div>
+        <div class="nexus-login-forms">
+        <form id="nexus-login-form" class="nexus-login-card">
+            <h2><i class="fas fa-right-to-bracket"></i> Iniciar sesión</h2>
+            <p class="nexus-login-sub">Ingresa con tu cuenta para continuar.</p>
+            <label for="nexus-login-correo">Correo</label>
+            <input id="nexus-login-correo" type="email" required autocomplete="username" />
+            <label for="nexus-login-contrasena">Contraseña</label>
+            <input id="nexus-login-contrasena" type="password" required autocomplete="current-password" />
+            <p id="nexus-login-error" class="nexus-login-error"></p>
+            <button type="submit"><i class="fas fa-right-to-bracket"></i> Iniciar sesión</button>
+            <p class="nexus-login-switch">¿Tu empresa aún no tiene cuenta?
+                <a href="#" id="nexus-ir-a-registro">Regístrala aquí</a></p>
+        </form>
+
+        <form id="nexus-registro-form" class="nexus-login-card" hidden>
+            <h2><i class="fas fa-building"></i> Registrar empresa</h2>
+            <p class="nexus-login-sub">Crea la cuenta de tu empresa en NEXUS.</p>
+            <label for="registro-empresa">Nombre de la empresa</label>
+            <input id="registro-empresa" type="text" required />
+            <label for="registro-nit">NIT</label>
+            <input id="registro-nit" type="text" required />
+            <label for="registro-representante">Representante legal</label>
+            <input id="registro-representante" type="text" required />
+            <label for="registro-correo">Correo</label>
+            <input id="registro-correo" type="email" required autocomplete="username" />
+            <label for="registro-contrasena">Contraseña</label>
+            <input id="registro-contrasena" type="password" required autocomplete="new-password" />
+            <p id="nexus-registro-error" class="nexus-login-error"></p>
+            <button type="submit"><i class="fas fa-user-plus"></i> Registrar empresa</button>
+            <p class="nexus-login-switch">¿Ya tienes cuenta?
+                <a href="#" id="nexus-ir-a-login">Inicia sesión</a></p>
+        </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- Archivos JavaScript de la carpeta js -->
+    <script src="js/config.js"></script>
+    <script src="js/state.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/fiscal-engine.js"></script>
+    <script src="js/validaciones.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/conocimiento-atena.js"></script>
+    <script src="js/asistente-virtual.js"></script>
+    <script src="js/app.js"></script>
+
+    <!-- La inicializacion (login, carga de secciones) corre sola desde js/app.js -->
+    
+</body>
+</html>
