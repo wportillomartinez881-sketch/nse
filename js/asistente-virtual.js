@@ -17,73 +17,61 @@ const AsistenteVirtual = (() => {
     const pregunta = normalizar(texto);
     const contexto = typeof Auth !== 'undefined' ? Auth.contextoAsistente() : { nombre: 'usuario' };
 
-    // OJO: antes esta regla incluia "ayuda", y como "ayuda" es substring de
-    // palabras comunes como "ayudarme"/"ayudame", cualquier pregunta que
-    // contuviera esa palabra caia aqui primero y nunca llegaba a las reglas
-    // de abajo (por eso preguntas distintas daban la misma respuesta).
-    // Ahora el saludo solo dispara si el mensaje ES basicamente un saludo,
-    // no si solo contiene la palabra "ayuda" de paso.
+    // El saludo se responde localmente (instantaneo, usa el nombre del
+    // usuario que Gemini no conoce). El resto de reglas locales de abajo
+    // SOLO disparan cuando la pregunta trae un monto en dolares, es decir,
+    // cuando se pide un calculo exacto (aguinaldo/vacaciones/indemnizacion/
+    // planilla) donde una formula determinista es mas confiable que lo que
+    // pueda "adivinar" un modelo de lenguaje. Para todo lo demas (saludos
+    // con dudas, conceptos, "como se calcula X" sin monto, etc.) se
+    // devuelve null para que generarRespuesta() consulte primero a Gemini.
+    // ANTES: reglas como /planilla|calcul/ o /retencion|isss|afp/ atrapaban
+    // cualquier pregunta que solo mencionara esas palabras (ej. "como
+    // calculo las horas extra"), asi que Atena nunca llegaba a usar la IA
+    // real ni la base de conocimiento correcta.
     if (/^\s*(hola|buenas|hey|hi)\b[\s.,!¡]*$/.test(pregunta) || /^\s*(necesito ayuda|me ayudas)\s*[?.!]*\s*$/.test(pregunta)) {
       return `Hola, ${contexto.nombre}. Puedo orientarte sobre planillas, empleados, retenciones, validaciones, aguinaldo, vacaciones e indemnizacion.`;
     }
-    if (/registr.*emplead|agreg.*emplead|nuevo empleado|dar de alta.*emplead/.test(pregunta)) {
-      return 'Ve a Empleados > Nuevo empleado, completa nombre, DUI, salario y los datos obligatorios; después guarda el registro. Antes de incluirlo en planilla, revisa que tenga salario y DUI.';
-    }
+
+    const salario = extraerMonto(pregunta);
+    if (!salario) return null; // Sin monto: que responda Gemini.
+
     if (/aguinaldo/.test(pregunta)) {
-      const salario = extraerMonto(pregunta);
       const anos = extraerAnos(pregunta);
-      if (salario && typeof FiscalEngine !== 'undefined') {
+      if (typeof FiscalEngine !== 'undefined') {
         const valor = FiscalEngine.calcularAguinaldo(salario, anos || 1);
         return `Con salario base $${salario.toFixed(2)} y ${anos || 1} año(s) de servicio, el aguinaldo estimado es $${valor.toFixed(2)}. La formula usa dias de salario segun antiguedad: 15 dias (1-3 años), 19 dias (3-10 años) o 21 dias (10+ años).`;
       }
-      return 'El aguinaldo se calcula segun los años de servicio del empleado: 15, 19 o 21 dias de salario segun el tramo de antiguedad. Escribe algo como "aguinaldo de 500 con 4 años" para ver un ejemplo.';
     }
-    if (/vacacion/.test(pregunta)) {
-      const salario = extraerMonto(pregunta);
-      if (salario && typeof FiscalEngine !== 'undefined') {
-        const valor = FiscalEngine.calcularVacaciones(salario);
-        return `Con salario base $${salario.toFixed(2)}, las vacaciones estimadas (incluyendo el 30% adicional de ley) son $${valor.toFixed(2)}.`;
-      }
-      return 'Las vacaciones se calculan sobre 15 dias de salario mas un 30% adicional de ley. Escribe "vacaciones de 500" para ver un ejemplo con un salario especifico.';
+    if (/vacacion/.test(pregunta) && typeof FiscalEngine !== 'undefined') {
+      const valor = FiscalEngine.calcularVacaciones(salario);
+      return `Con salario base $${salario.toFixed(2)}, las vacaciones estimadas (incluyendo el 30% adicional de ley) son $${valor.toFixed(2)}.`;
     }
     if (/indemnizacion/.test(pregunta)) {
-      const salario = extraerMonto(pregunta);
       const anos = extraerAnos(pregunta);
-      if (salario && anos && typeof FiscalEngine !== 'undefined') {
+      if (anos && typeof FiscalEngine !== 'undefined') {
         const valor = FiscalEngine.calcularIndemnizacion(salario, anos);
         return `Con salario base $${salario.toFixed(2)} y ${anos} año(s) de servicio, la indemnizacion estimada es $${valor.toFixed(2)}.`;
       }
-      return 'La indemnizacion se calcula multiplicando el salario base por los años de servicio. Escribe algo como "indemnizacion de 500 con 3 años" para ver un ejemplo.';
     }
-    if (/retencion|isss|afp|isr\b/.test(pregunta)) {
-      const p = FiscalEngine.obtenerParametrosPublicos();
-      return `Para esta demostracion, el motor aplica ISSS laboral ${(p.isssLaboral * 100).toFixed(2)}% (techo $${p.techoIsss.toFixed(2)}), AFP laboral ${(p.afpLaboral * 100).toFixed(2)}% e ISR por tramos sobre la base despues de ISSS y AFP. Verifica los parametros vigentes antes de usarlo en produccion.`;
+    if (/planilla|calcul/.test(pregunta) && typeof FiscalEngine !== 'undefined') {
+      const resultado = FiscalEngine.calcularLiquidacionMensual(salario);
+      return `Ejemplo para salario base $${salario.toFixed(2)}: bruto $${resultado.totales.salarioBruto.toFixed(2)}, deducciones $${resultado.totales.totalDeducciones.toFixed(2)} y neto estimado $${resultado.totales.salarioNeto.toFixed(2)}. Puedes consultar una planilla con horas extra, bonos o ausencias desde el modulo de Planilla.`;
     }
-    if (/valid|dui|regla/.test(pregunta)) {
-      return typeof Validaciones !== 'undefined' ? Validaciones.explicarReglas() : 'Verifica datos obligatorios, DUI y resultados de la planilla antes de procesarla.';
-    }
-    if (/planilla|calcul/.test(pregunta)) {
-      const salario = extraerMonto(pregunta);
-      if (salario && typeof FiscalEngine !== 'undefined') {
-        const resultado = FiscalEngine.calcularLiquidacionMensual(salario);
-        return `Ejemplo para salario base $${salario.toFixed(2)}: bruto $${resultado.totales.salarioBruto.toFixed(2)}, deducciones $${resultado.totales.totalDeducciones.toFixed(2)} y neto estimado $${resultado.totales.salarioNeto.toFixed(2)}. Puedes consultar una planilla con horas extra, bonos o ausencias desde el modulo de Planilla.`;
-      }
-      return 'Para calcular una planilla, selecciona el periodo y empleados, registra horas extra, ausencias, bonos o comisiones y ejecuta el calculo. Si escribes "calcula planilla 500", te muestro una estimacion de prueba.';
-    }
-    const respuestaConocimiento = typeof ConocimientoAtena !== 'undefined' ? ConocimientoAtena.buscar(pregunta) : null;
-    if (respuestaConocimiento) return respuestaConocimiento;
-    return null; // Sin coincidencia local: generarRespuesta() intentará con la IA real.
+    return null; // Habia un monto pero no coincidio con ningun calculo conocido: que responda Gemini.
   }
 
   const RESPUESTA_GENERICA = 'Puedo ayudarte con planillas, empleados, retenciones, validaciones, conceptos basicos de contabilidad y servicios de NEXUS. Recuerda que mis respuestas son orientativas; consulta a un profesional para decisiones legales o contables.';
 
   /**
-   * Punto de entrada real usado por la UI. Primero intenta las reglas
-   * locales (rapidas, deterministas, ideales para calculos). Si ninguna
-   * coincide, intenta con la IA real (Gemini via Apps Script, ver
-   * Code_gs_atena_ia.gs). Si eso tampoco esta disponible (falta configurar
-   * la clave, sin internet, endpoint no agregado aun), cae al mensaje
-   * generico de siempre para que el chat nunca se quede sin responder.
+   * Punto de entrada real usado por la UI. Orden de prioridad:
+   *  1) Reglas locales SOLO para saludo y calculos exactos con monto
+   *     (rapidas, deterministas, no dependen de la IA).
+   *  2) Gemini (IA real, via Apps Script) para todo lo demas: conceptos,
+   *     preguntas abiertas, "como se calcula X", etc.
+   *  3) Si Gemini no esta disponible (sin clave, sin internet, endpoint
+   *     no agregado aun), se usa la base de conocimiento local como
+   *     respaldo, y si tampoco hay coincidencia, el mensaje generico.
    */
   async function generarRespuesta(texto) {
     const local = respuestaLocal(texto);
@@ -97,6 +85,10 @@ const AsistenteVirtual = (() => {
         console.warn('NEXUS Atena: la IA no respondió, usando respaldo local.', e.message);
       }
     }
+
+    const respuestaConocimiento = typeof ConocimientoAtena !== 'undefined' ? ConocimientoAtena.buscar(texto) : null;
+    if (respuestaConocimiento) return respuestaConocimiento;
+
     return RESPUESTA_GENERICA;
   }
 

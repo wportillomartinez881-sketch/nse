@@ -260,17 +260,23 @@ const App = (() => {
     if (!formulario) return;
     formulario.addEventListener('submit', async (evento) => {
       evento.preventDefault();
+      // IMPORTANTE: nombres EXACTOS que exige Code.gs (datos.Nombre_Completo,
+      // datos.DUI, datos.Salario_Base, datos.ID_Empresa). "nombre"/"dui"/
+      // "salario"/"idEmpresa" nunca se convertian automaticamente en esos
+      // nombres (api.js solo genera variantes de mayuscula inicial), por
+      // eso antes el registro de empleados siempre fallaba.
       const datos = {
-        nombre: document.getElementById('empleado-nombre').value.trim(),
-        dui: document.getElementById('empleado-dui').value.trim(),
-        salario: document.getElementById('empleado-salario').value,
-        idEmpresa: Auth.empresaActiva(),
+        Nombre_Completo: document.getElementById('empleado-nombre').value.trim(),
+        DUI: document.getElementById('empleado-dui').value.trim(),
+        Salario_Base: document.getElementById('empleado-salario').value,
+        ID_Empresa: Auth.empresaActiva(),
       };
       try {
         await Api.registrarEmpleado(datos);
         mostrarMensajeForm('empleado-form-mensaje', 'Empleado agregado correctamente.', 'exito');
         formulario.reset();
-        cargadores.empleados();
+        await cargadores.empleados();
+        await poblarSelectsEmpleados();
       } catch (e) {
         mostrarMensajeForm('empleado-form-mensaje', e.message || 'No se pudo agregar el empleado.', 'error');
       }
@@ -282,11 +288,16 @@ const App = (() => {
     if (!formulario) return;
     formulario.addEventListener('submit', async (evento) => {
       evento.preventDefault();
+      // IMPORTANTE: nombres EXACTOS que exige Code.gs (datos.ID_Empleado,
+      // datos.Periodo, datos.Tipo_Novedad, datos.Observacion). Antes se
+      // enviaba "idEmpleado"/"tipo"/"detalle", que nunca se traducian a
+      // esos nombres, asi que el registro de novedades siempre fallaba
+      // con "ID_Empleado es obligatorio".
       const datos = {
-        idEmpleado: document.getElementById('novedad-empleado').value.trim(),
-        tipo: document.getElementById('novedad-tipo').value,
-        detalle: document.getElementById('novedad-detalle').value.trim(),
-        idEmpresa: Auth.empresaActiva(),
+        ID_Empleado: document.getElementById('novedad-empleado').value,
+        Periodo: document.getElementById('novedad-periodo').value.trim(),
+        Tipo_Novedad: document.getElementById('novedad-tipo').value,
+        Observacion: document.getElementById('novedad-detalle').value.trim(),
       };
       try {
         await Api.registrarNovedad(datos);
@@ -299,14 +310,132 @@ const App = (() => {
     });
   }
 
+  // --- Listas desplegables de empleados (Novedades y Calculadora) --------
+  // Guarda tambien el ultimo listado de empleados en memoria para que la
+  // Calculadora pueda leer el salario base sin volver a pedirlo a la API.
+  let empleadosCache = [];
+
+  async function poblarSelectsEmpleados() {
+    const selects = [document.getElementById('novedad-empleado'), document.getElementById('calc-empleado')].filter(Boolean);
+    if (selects.length === 0) return;
+    try {
+      const respuesta = await Api.getEmpleados(filtroEmpresa());
+      empleadosCache = extraerFilas(respuesta);
+      selects.forEach((select) => {
+        const valorPrevio = select.value;
+        select.innerHTML = '<option value="" disabled selected>Selecciona un empleado</option>';
+        empleadosCache.forEach((empleado) => {
+          const id = empleado.ID_Empleado || empleado.Id_Empleado || empleado.ID || '';
+          const nombre = empleado.Nombre_Completo || empleado.Nombre || id;
+          if (!id) return;
+          const opcion = document.createElement('option');
+          opcion.value = id;
+          opcion.textContent = `${id} — ${nombre}`;
+          select.appendChild(opcion);
+        });
+        if (valorPrevio) select.value = valorPrevio;
+      });
+    } catch (e) {
+      console.warn('NEXUS: no se pudo cargar la lista de empleados para los selectores.', e.message);
+    }
+  }
+
+  // --- Calculadora de Novedades (independiente, alimenta a Novedades) ---
+  function inicializarCalculadoraNovedades() {
+    const formulario = document.getElementById('nexus-form-calculadora');
+    if (!formulario) return;
+    const btnRegistrar = document.getElementById('calc-btn-registrar');
+    const contenedorResultado = document.getElementById('calc-resultado');
+    let ultimoCalculo = null;
+
+    function calcular() {
+      const idEmpleado = document.getElementById('calc-empleado').value;
+      const empleado = empleadosCache.find((e) => (e.ID_Empleado || e.Id_Empleado || e.ID) === idEmpleado);
+      const salarioBase = Number(empleado?.Salario_Base || empleado?.Salario || 0);
+      if (!idEmpleado || !salarioBase) {
+        mostrarMensajeForm('calculadora-mensaje', 'Selecciona un empleado con salario base registrado.', 'error');
+        return null;
+      }
+      const opciones = {
+        horasExtraDiurnas: Number(document.getElementById('calc-he-diurnas').value) || 0,
+        horasExtraNocturnas: Number(document.getElementById('calc-he-nocturnas').value) || 0,
+        diasInasistencia: Number(document.getElementById('calc-ausencia').value) || 0,
+        bonos: Number(document.getElementById('calc-bono').value) || 0,
+        comisiones: Number(document.getElementById('calc-comision').value) || 0,
+      };
+      const resultado = FiscalEngine.calcularLiquidacionMensual(salarioBase, opciones);
+
+      // Mismas formulas que usa FiscalEngine internamente, aqui solo para
+      // desglosar cada concepto por separado (una novedad por concepto).
+      const valorDia = salarioBase / 30;
+      const valorHoraOrdinaria = valorDia / 8;
+      const valorHeDiurnas = opciones.horasExtraDiurnas * (valorHoraOrdinaria * 2);
+      const valorHeNocturnas = opciones.horasExtraNocturnas * (valorHoraOrdinaria * 1.25 * 2);
+      const valorAusencia = opciones.diasInasistencia * valorDia;
+
+      return { idEmpleado, salarioBase, opciones, resultado, valorHeDiurnas, valorHeNocturnas, valorAusencia };
+    }
+
+    document.getElementById('calc-btn-calcular').addEventListener('click', () => {
+      mostrarMensajeForm('calculadora-mensaje', '', '');
+      ultimoCalculo = calcular();
+      if (!ultimoCalculo) { btnRegistrar.disabled = true; contenedorResultado.innerHTML = ''; return; }
+      const { opciones, resultado, valorHeDiurnas, valorHeNocturnas, valorAusencia } = ultimoCalculo;
+      const filas = [
+        opciones.horasExtraDiurnas > 0 ? `<tr><td>Horas extra diurnas (${opciones.horasExtraDiurnas}h)</td><td>$${valorHeDiurnas.toFixed(2)}</td></tr>` : '',
+        opciones.horasExtraNocturnas > 0 ? `<tr><td>Horas extra nocturnas (${opciones.horasExtraNocturnas}h)</td><td>$${valorHeNocturnas.toFixed(2)}</td></tr>` : '',
+        opciones.diasInasistencia > 0 ? `<tr><td>Descuento por ausencia (${opciones.diasInasistencia} día/s)</td><td>-$${valorAusencia.toFixed(2)}</td></tr>` : '',
+        opciones.bonos > 0 ? `<tr><td>Bono</td><td>$${opciones.bonos.toFixed(2)}</td></tr>` : '',
+        opciones.comisiones > 0 ? `<tr><td>Comisión</td><td>$${opciones.comisiones.toFixed(2)}</td></tr>` : '',
+      ].filter(Boolean).join('');
+      contenedorResultado.innerHTML = `
+        <table>
+          <thead><tr><th>Concepto</th><th>Valor</th></tr></thead>
+          <tbody>${filas || '<tr><td colspan="2">No hay conceptos con valor distinto de cero.</td></tr>'}</tbody>
+        </table>
+        <p style="margin-top:8px; font-size:0.85rem; color:#64748b;">Salario neto estimado del período con estos conceptos: <strong>$${resultado.totales.salarioNeto.toFixed(2)}</strong></p>`;
+      btnRegistrar.disabled = filas === '';
+    });
+
+    formulario.addEventListener('submit', async (evento) => {
+      evento.preventDefault();
+      if (!ultimoCalculo) return;
+      const periodo = document.getElementById('calc-periodo').value.trim();
+      if (!periodo) { mostrarMensajeForm('calculadora-mensaje', 'Indica el período antes de registrar.', 'error'); return; }
+      const { idEmpleado, opciones, valorHeDiurnas, valorHeNocturnas, valorAusencia } = ultimoCalculo;
+
+      // Una novedad (fila) por cada concepto distinto de cero, tal como
+      // espera la hoja NOVEDADES (una fila = un Tipo_Novedad con su Valor).
+      const items = [];
+      if (opciones.horasExtraDiurnas > 0) items.push({ Tipo_Novedad: 'Horas extra', Cantidad: opciones.horasExtraDiurnas, Valor: Number(valorHeDiurnas.toFixed(2)), Observacion: 'Horas extra diurnas (calculadora)' });
+      if (opciones.horasExtraNocturnas > 0) items.push({ Tipo_Novedad: 'Horas extra', Cantidad: opciones.horasExtraNocturnas, Valor: Number(valorHeNocturnas.toFixed(2)), Observacion: 'Horas extra nocturnas (calculadora)' });
+      if (opciones.diasInasistencia > 0) items.push({ Tipo_Novedad: 'Ausencia', Cantidad: opciones.diasInasistencia, Valor: Number(valorAusencia.toFixed(2)), Observacion: 'Descuento por ausencia (calculadora)' });
+      if (opciones.bonos > 0) items.push({ Tipo_Novedad: 'Bono', Cantidad: 1, Valor: opciones.bonos, Observacion: 'Bono (calculadora)' });
+      if (opciones.comisiones > 0) items.push({ Tipo_Novedad: 'Comision', Cantidad: 1, Valor: opciones.comisiones, Observacion: 'Comisión (calculadora)' });
+
+      try {
+        for (const item of items) {
+          await Api.registrarNovedad({ ID_Empleado: idEmpleado, Periodo: periodo, ...item });
+        }
+        mostrarMensajeForm('calculadora-mensaje', `${items.length} novedad(es) registrada(s) correctamente.`, 'exito');
+        btnRegistrar.disabled = true;
+        cargadores.novedades();
+      } catch (e) {
+        mostrarMensajeForm('calculadora-mensaje', e.message || 'No se pudieron registrar las novedades.', 'error');
+      }
+    });
+  }
+
   function init() {
     inicializarLogin();
     inicializarRegistro();
     inicializarFormularioEmpleado();
     inicializarFormularioNovedad();
+    inicializarCalculadoraNovedades();
     if (Auth.estaAutenticado()) {
       mostrarOverlayLogin(false);
       actualizarBadgeUsuario();
+      poblarSelectsEmpleados();
       navegar('inicio', document.querySelector('[href="#inicio"]'));
     } else {
       mostrarOverlayLogin(true);
