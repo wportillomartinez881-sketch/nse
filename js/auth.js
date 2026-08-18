@@ -1,79 +1,90 @@
-/**
- * NEXUS — Sesión y autenticación
- * -------------------------------------------------------------------------
- * Único lugar que sabe quién es el usuario activo y a qué empresa
- * (ID_Empresa) pertenece. El resto de módulos consulta Auth.empresaActiva()
- * en vez de leer sessionStorage directamente, así la separación
- * multiempresa (sección 22) se cumple desde un solo punto.
- */
-const Auth = (() => {
-  let sesion = null;
+<!-- VENTANA MODAL DE INICIO DE SESIÓN Y REGISTRO -->
+<div id="nexus-login-overlay" class="modal-overlay">
+  <div class="modal-container">
+    
+    <!-- 1. FORMULARIO DE INICIO DE SESIÓN -->
+    <div id="contenedor-login" class="auth-box">
+      <h2>Iniciar Sesión - NEXUS</h2>
+      <form id="nexus-login-form">
+        <div class="form-group">
+          <label for="login-correo">Correo Electrónico:</label>
+          <input type="email" id="login-correo" required placeholder="ejemplo@empresa.com">
+        </div>
+        
+        <div class="form-group">
+          <label for="login-password">Contraseña:</label>
+          <input type="password" id="login-password" required placeholder="••••••••">
+        </div>
 
-  function cargar() {
-    try {
-      const raw = sessionStorage.getItem(NEXUS_CONFIG.SESSION_KEY);
-      sesion = raw ? JSON.parse(raw) : null;
-    } catch (e) {
-      sesion = null;
-    }
-    return sesion;
-  }
+        <button type="submit" class="btn-primary">Ingresar</button>
+      </form>
+      <p class="auth-switch">
+        ¿No tienes cuenta de empresa? 
+        <a href="#" id="link-ir-a-registro">Regístrala aquí</a>
+      </p>
+    </div>
 
-  function guardar(datosSesion) {
-    sesion = datosSesion;
-    sessionStorage.setItem(NEXUS_CONFIG.SESSION_KEY, JSON.stringify(datosSesion));
-  }
+    <!-- 2. FORMULARIO DE REGISTRO DE EMPRESA Y USUARIO -->
+    <div id="contenedor-registro" class="auth-box" style="display: none;">
+      <h2>Registrar Empresa</h2>
+      <form id="nexus-registro-form">
+        
+        <div class="form-group">
+          <label for="reg-razon-social">Razón Social / Nombre Empresa *</label>
+          <input type="text" id="reg-razon-social" required placeholder="NEXUS S.A. de C.V.">
+        </div>
 
-  function cerrarSesion() {
-    sesion = null;
-    sessionStorage.removeItem(NEXUS_CONFIG.SESSION_KEY);
-    Api.invalidarCache();
-  }
+        <div class="form-row">
+          <div class="form-group">
+            <label for="reg-nit">NIT *</label>
+            <input type="text" id="reg-nit" required placeholder="0614-000000-000-0">
+          </div>
+          <div class="form-group">
+            <label for="reg-nrc">NRC *</label>
+            <input type="text" id="reg-nrc" required placeholder="123456-7">
+          </div>
+        </div>
 
-  function estaAutenticado() {
-    return !!(sesion || cargar());
-  }
+        <div class="form-group">
+          <label for="reg-actividad">Actividad Económica *</label>
+          <input type="text" id="reg-actividad" required placeholder="Servicios Contables y Administrativos">
+        </div>
 
-  function usuarioActivo() {
-    return (sesion || cargar())?.usuario ?? null;
-  }
+        <div class="form-group">
+          <label for="reg-direccion">Dirección Completa *</label>
+          <input type="text" id="reg-direccion" required placeholder="San Salvador, El Salvador">
+        </div>
 
-  function empresaActiva() {
-    return (sesion || cargar())?.ID_Empresa ?? null;
-  }
+        <div class="form-row">
+          <div class="form-group">
+            <label for="reg-telefono">Teléfono *</label>
+            <input type="tel" id="reg-telefono" required placeholder="2222-0000">
+          </div>
+          <div class="form-group">
+            <label for="reg-representante">Representante Legal *</label>
+            <input type="text" id="reg-representante" required placeholder="Nombre del Representante">
+          </div>
+        </div>
 
-  function contextoAsistente() {
-    const usuario = usuarioActivo();
-    return {
-      nombre: usuario?.nombre || usuario?.Nombre || usuario?.correo || 'usuario',
-      empresa: empresaActiva(),
-      autenticado: estaAutenticado(),
-    };
-  }
+        <hr class="form-divider">
 
-  /**
-   * Intenta iniciar sesión contra el endpoint confirmado `iniciar_sesion`.
-   * SUPUESTO A VERIFICAR: se asume que la API responde algo del tipo
-   *   { ok: true, usuario: {...}, ID_Empresa: '...' }
-   * o similar. Si el Code.gs real responde con otra forma, ajustar solo
-   * el mapeo dentro de esta función.
-   */
-  async function login(correo, contrasena) {
-    const respuesta = await Api.iniciarSesion({ correo, contrasena });
+        <div class="form-group">
+          <label for="reg-correo">Correo Electrónico Administrador *</label>
+          <input type="email" id="reg-correo" required placeholder="admin@empresa.com">
+        </div>
 
-    if (!respuesta || respuesta.ok === false || respuesta.success === false || respuesta.error) {
-      throw new Api.ApiError(respuesta?.error || respuesta?.mensaje || respuesta?.message || 'Correo o contraseña incorrectos.', 'ERROR_API');
-    }
+        <div class="form-group">
+          <label for="reg-password">Contraseña *</label>
+          <input type="password" id="reg-password" required placeholder="••••••••">
+        </div>
 
-    const datosSesion = {
-      usuario: respuesta.usuario || respuesta.Usuario || { correo },
-      ID_Empresa: respuesta.ID_Empresa || respuesta.usuario?.ID_Empresa || respuesta.Usuario?.ID_Empresa || null,
-      rol: respuesta.rol || respuesta.usuario?.rol || 'usuario',
-      inicioSesion: new Date().toISOString(),
-    };
-    guardar(datosSesion);
-    return datosSesion;
-  }
+        <button type="submit" class="btn-primary">Registrar e Ingresar</button>
+      </form>
+      <p class="auth-switch">
+        ¿Ya tienes cuenta? 
+        <a href="#" id="link-ir-a-login">Inicia sesión aquí</a>
+      </p>
+    </div>
 
-  return { login, cerrarSesion, estaAutenticado, usuarioActivo, empresaActiva, contextoAsistente, cargar };
-})();
+  </div>
+</div>
