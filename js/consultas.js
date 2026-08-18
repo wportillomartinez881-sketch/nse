@@ -1,5 +1,8 @@
+// URL de tu implementación de Google Apps Script NEXUS V5
+const API_URL = "https://script.google.com/macros/s/AKfycbzuqC4RclUYdMhgTXA3iIVdp7WZuF5kwMZDcPv4NmAncVWAvZnNOPu0FajuBK1DkK95/exec";
+
 // ----------------------------------------------------
-// CARGAR AUDITORÍA DESDE LA PESTAÑA AUDITORIA
+// CARGAR AUDITORÍA
 // ----------------------------------------------------
 async function cargarAuditoria() {
   try {
@@ -26,7 +29,7 @@ async function cargarAuditoria() {
 }
 
 // ----------------------------------------------------
-// CARGAR HISTORIAL DESDE LA PESTAÑA HISTORIAL_NEXUS
+// CARGAR HISTORIAL
 // ----------------------------------------------------
 async function cargarHistorial() {
   try {
@@ -51,7 +54,7 @@ async function cargarHistorial() {
 }
 
 // ----------------------------------------------------
-// CARGAR FUNDAMENTO LEGAL SIN LIMITACIONES
+// CARGAR FUNDAMENTO LEGAL
 // ----------------------------------------------------
 async function cargarFundamentoLegal() {
   try {
@@ -75,7 +78,6 @@ async function cargarFundamentoLegal() {
   }
 }
 
-// Cargar consultas automáticamente al cargar el script
 document.addEventListener("DOMContentLoaded", function() {
   cargarAuditoria();
   cargarHistorial();
