@@ -1,3 +1,6 @@
+// URL de tu implementación de Google Apps Script NEXUS V5
+const API_URL = "https://script.google.com/macros/s/AKfycbzuqC4RclUYdMhgTXA3iIVdp7WZuF5kwMZDcPv4NmAncVWAvZnNOPu0FajuBK1DkK95/exec";
+
 // ----------------------------------------------------
 // REGISTRAR EMPLEADO EN GOOGLE SHEETS
 // ----------------------------------------------------
@@ -12,7 +15,7 @@ async function guardarEmpleado(datosEmpleado) {
   try {
     const payload = {
       accion: "registrar_empleado",
-      ID_Empresa: idEmpresa, // Obligatorio para el backend
+      ID_Empresa: idEmpresa,
       Nombre_Completo: datosEmpleado.nombreCompleto,
       DUI: datosEmpleado.dui,
       Cargo: datosEmpleado.cargo,
@@ -29,7 +32,7 @@ async function guardarEmpleado(datosEmpleado) {
 
     if (respuesta.estado === "correcto") {
       alert("Empleado guardado correctamente en Google Sheets.");
-      cargarEmpleados(); // Recargar la tabla con la lista actualizada
+      cargarEmpleados();
     } else {
       alert("Error al registrar empleado: " + respuesta.mensaje);
     }
@@ -49,7 +52,6 @@ async function cargarEmpleados() {
   try {
     const empleados = await fetch(`${API_URL}?accion=empleados`).then(res => res.json());
     
-    // Filtrar sólo los empleados que pertenezcan a la empresa en sesión
     const misEmpleados = Array.isArray(empleados) 
       ? empleados.filter(emp => String(emp.ID_Empresa) === String(idEmpresa))
       : [];
@@ -80,7 +82,6 @@ function mostrarEmpleadosEnTabla(lista) {
   });
 }
 
-// Escuchar formulario de empleados al cargar el archivo
 document.addEventListener("DOMContentLoaded", function() {
   const formEmpleado = document.getElementById("form-empleado");
   if (formEmpleado) {
@@ -99,6 +100,5 @@ document.addEventListener("DOMContentLoaded", function() {
     });
   }
 
-  // Cargar lista de empleados si existe la tabla
   cargarEmpleados();
 });
