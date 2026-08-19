@@ -1,102 +1,26 @@
-// URL de tu implementación de Google Apps Script NEXUS V5
+/**
+ * NEXUS — Autenticación (auth.js)
+ */
 const API_URL = "https://script.google.com/macros/s/AKfycbzuqC4RclUYdMhgTXA3iIVdp7WZuF5kwMZDcPv4NmAncVWAvZnNOPu0FajuBK1DkK95/exec";
 
-// ----------------------------------------------------
-// REGISTRO DE EMPRESA Y USUARIO
-// ----------------------------------------------------
-async function registrarEmpresaYUsuario(datosFormulario) {
-  try {
-    const payload = {
-      accion: "registrar_empresa_usuario",
-      Razon_Social: datosFormulario.razonSocial,
-      NIT: datosFormulario.nit,
-      NRC: datosFormulario.nrc,
-      Actividad_Economica: datosFormulario.actividad,
-      Direccion: datosFormulario.direccion,
-      Telefono: datosFormulario.telefono,
-      Correo: datosFormulario.correo,
-      Representante: datosFormulario.representante,
-      Password: datosFormulario.password
-    };
-
-    const respuesta = await fetch(API_URL, {
-      method: "POST",
-      headers: { "Content-Type": "text/plain;charset=utf-8" },
-      body: JSON.stringify(payload)
-    }).then(res => res.json());
-
-    if (respuesta.estado === "correcto") {
-      // Guardar identificadores en la memoria del navegador
-      localStorage.setItem("ID_Empresa", respuesta.ID_Empresa);
-      localStorage.setItem("ID_Usuario", respuesta.ID_Usuario);
-      alert("Empresa y usuario guardados con éxito en Google Sheets.");
-      
-      // Ocultar modal y recargar aplicación
-      const modal = document.getElementById("nexus-login-overlay");
-      if (modal) modal.style.display = "none";
-      location.reload();
-    } else {
-      alert("Error en el registro: " + respuesta.mensaje);
-    }
-  } catch (error) {
-    console.error("Error al registrar:", error);
-    alert("Ocurrió un error al conectar con Google Sheets.");
-  }
-}
-
-// ----------------------------------------------------
-// INICIO DE SESIÓN
-// ----------------------------------------------------
-async function iniciarSesion(correo, password) {
-  try {
-    const payload = {
-      accion: "iniciar_sesion",
-      Correo: correo,
-      Password: password
-    };
-
-    const respuesta = await fetch(API_URL, {
-      method: "POST",
-      headers: { "Content-Type": "text/plain;charset=utf-8" },
-      body: JSON.stringify(payload)
-    }).then(res => res.json());
-
-    if (respuesta.estado === "correcto") {
-      localStorage.setItem("ID_Empresa", respuesta.usuario.ID_Empresa);
-      localStorage.setItem("ID_Usuario", respuesta.usuario.ID_Usuario);
-      localStorage.setItem("Usuario_Nombre", respuesta.usuario.Nombre);
-      alert("Bienvenido, " + respuesta.usuario.Nombre);
-      
-      const modal = document.getElementById("nexus-login-overlay");
-      if (modal) modal.style.display = "none";
-      location.reload();
-    } else {
-      alert("Error: " + respuesta.mensaje);
-    }
-  } catch (error) {
-    console.error("Error al iniciar sesión:", error);
-    alert("Error de conexión con el servidor.");
-  }
-}
-
-// ----------------------------------------------------
-// EVENTOS DEL DOM
-// ----------------------------------------------------
+// Forzar la apertura del modal siempre que se cargue la página
 document.addEventListener("DOMContentLoaded", function () {
+  const overlayModal = document.getElementById("nexus-login-overlay");
+  
+  // Limpiamos sesión para obligar el login en cada ingreso si así lo requieres
+  localStorage.removeItem("ID_Empresa");
+  localStorage.removeItem("ID_Usuario");
+
+  if (overlayModal) {
+    overlayModal.style.display = "flex"; // Mostrar siempre modal al entrar
+  }
+
+  // Alternar entre Formularios Login / Registro
   const linkIrARegistro = document.getElementById("link-ir-a-registro");
   const linkIrALogin = document.getElementById("link-ir-a-login");
   const contenedorLogin = document.getElementById("contenedor-login");
   const contenedorRegistro = document.getElementById("contenedor-registro");
 
-  // Verificar si hay sesión activa para mostrar u ocultar la ventana modal
-  const idEmpresaActiva = localStorage.getItem("ID_Empresa");
-  const overlayModal = document.getElementById("nexus-login-overlay");
-  
-  if (idEmpresaActiva && overlayModal) {
-    overlayModal.style.display = "none";
-  }
-
-  // Alternar entre Formularios
   if (linkIrARegistro) {
     linkIrARegistro.addEventListener("click", function (e) {
       e.preventDefault();
@@ -113,7 +37,7 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   }
 
-  // Escuchar envío del formulario de Login
+  // Login
   const formLogin = document.getElementById("nexus-login-form");
   if (formLogin) {
     formLogin.addEventListener("submit", function (e) {
@@ -124,25 +48,47 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   }
 
-  // Escuchar envío del formulario de Registro
-  const formRegistro = document.getElementById("nexus-registro-form");
-  if (formRegistro) {
-    formRegistro.addEventListener("submit", function (e) {
-      e.preventDefault();
-
-      const datosFormulario = {
-        razonSocial: document.getElementById("reg-razon-social").value,
-        nit: document.getElementById("reg-nit").value,
-        nrc: document.getElementById("reg-nrc").value,
-        actividad: document.getElementById("reg-actividad").value,
-        direccion: document.getElementById("reg-direccion").value,
-        telefono: document.getElementById("reg-telefono").value,
-        representante: document.getElementById("reg-representante").value,
-        correo: document.getElementById("reg-correo").value,
-        password: document.getElementById("reg-password").value
-      };
-
-      registrarEmpresaYUsuario(datosFormulario);
+  // Cerrar Sesión
+  const btnLogout = document.getElementById("btn-cerrar-sesion");
+  if (btnLogout) {
+    btnLogout.addEventListener("click", function () {
+      localStorage.clear();
+      location.reload();
     });
   }
 });
+
+async function iniciarSesion(correo, password) {
+  try {
+    const payload = {
+      accion: "iniciar_sesion",
+      Correo: correo,
+      Password: password
+    };
+
+    const respuesta = await fetch(API_URL, {
+      method: "POST",
+      headers: { "Content-Type": "text/plain;charset=utf-8" },
+      body: JSON.stringify(payload)
+    }).then(res => res.json());
+
+    if (respuesta.estado === "correcto") {
+      localStorage.setItem("ID_Empresa", respuesta.usuario.ID_Empresa || "EMP01");
+      localStorage.setItem("ID_Usuario", respuesta.usuario.ID_Usuario || "USR01");
+      
+      const userDisplay = document.getElementById("user-display-name");
+      if (userDisplay) userDisplay.textContent = respuesta.usuario.Nombre || correo;
+
+      const modal = document.getElementById("nexus-login-overlay");
+      if (modal) modal.style.display = "none";
+      
+      // Cargar datos de la aplicación completa
+      if (typeof app !== 'undefined' && app.init) app.init();
+    } else {
+      alert("Error de acceso: " + (respuesta.mensaje || "Credenciales inválidas"));
+    }
+  } catch (error) {
+    console.error("Error al iniciar sesión:", error);
+    alert("Error de conexión con Google Sheets.");
+  }
+}
