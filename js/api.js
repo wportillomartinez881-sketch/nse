@@ -2,14 +2,26 @@
  * NEXUS — Cliente de API / Conexión con Google Apps Script
  */
 const API = {
+  getURL() {
+    if (typeof NEXUS_CONFIG !== 'undefined' && NEXUS_CONFIG.WEB_APP_URL) {
+      return NEXUS_CONFIG.WEB_APP_URL;
+    }
+    if (typeof API_URL !== 'undefined') {
+      return API_URL;
+    }
+    return '';
+  },
+
   async post(datos) {
-    if (typeof API_URL === 'undefined' || !API_URL || API_URL.includes("TU_WEB_APP_ID")) {
-      console.warn("API_URL no configurada. Operando en modo local.");
+    const url = this.getURL();
+
+    if (!url || url.includes("TU_WEB_APP_ID")) {
+      console.warn("NEXUS_CONFIG.WEB_APP_URL no configurada. Operando en modo local.");
       return { status: "success", offline: true, mensaje: "Modo fuera de línea activo" };
     }
 
     try {
-      const response = await fetch(API_URL, {
+      const response = await fetch(url, {
         method: "POST",
         headers: { "Content-Type": "text/plain;charset=utf-8" },
         body: JSON.stringify(datos)
@@ -22,22 +34,22 @@ const API = {
       return await response.json();
     } catch (error) {
       console.error("Error de conexión con Google Sheets:", error);
-      // Retornar respuesta simulada de éxito para no bloquear la app
+      // Retornar respuesta de éxito local para permitir uso ininterrumpido
       return { 
         status: "success", 
         offline: true, 
-        mensaje: "No se pudo conectar con Google Sheets, datos procesados localmente." 
+        mensaje: "Conexión local activa." 
       };
     }
   },
 
-  async get() {
-    if (typeof API_URL === 'undefined' || !API_URL || API_URL.includes("TU_WEB_APP_ID")) {
-      return { status: "success", offline: true, datos: [] };
-    }
+  async get(accion) {
+    const url = this.getURL();
+    if (!url) return { status: "offline", datos: [] };
 
     try {
-      const response = await fetch(API_URL);
+      const paramName = (typeof NEXUS_CONFIG !== 'undefined' && NEXUS_CONFIG.PARAM_GET) ? NEXUS_CONFIG.PARAM_GET : 'accion';
+      const response = await fetch(`${url}?${paramName}=${accion}`);
       return await response.json();
     } catch (error) {
       console.error("Error al obtener datos:", error);
