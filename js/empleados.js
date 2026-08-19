@@ -1,104 +1,76 @@
-// URL de tu implementación de Google Apps Script NEXUS V5
-const API_URL = "https://script.google.com/macros/s/AKfycbzuqC4RclUYdMhgTXA3iIVdp7WZuF5kwMZDcPv4NmAncVWAvZnNOPu0FajuBK1DkK95/exec";
+/**
+ * NEXUS — Módulo de Empleados (empleados.js)
+ */
+const Empleados = {
+  init() {
+    const formEmp = document.getElementById('form-crear-empleado') || document.querySelector('.form-empleado');
+    if (formEmp) {
+      formEmp.addEventListener('submit', async (e) => {
+        e.preventDefault(); // Evita recargar la página
 
-// ----------------------------------------------------
-// REGISTRAR EMPLEADO EN GOOGLE SHEETS
-// ----------------------------------------------------
-async function guardarEmpleado(datosEmpleado) {
-  const idEmpresa = localStorage.getItem("ID_Empresa");
+        const msgStatus = document.getElementById('empleado-form-mensaje');
+        if (msgStatus) msgStatus.textContent = 'Guardando en Google Sheets...';
 
-  if (!idEmpresa) {
-    alert("No se encontró una empresa activa. Por favor inicia sesión primero.");
-    return;
-  }
+        const idEmpresa = typeof State !== 'undefined' ? State.getIdEmpresa() : '';
 
-  try {
-    const payload = {
-      accion: "registrar_empleado",
-      ID_Empresa: idEmpresa,
-      Nombre_Completo: datosEmpleado.nombreCompleto,
-      DUI: datosEmpleado.dui,
-      Cargo: datosEmpleado.cargo,
-      Fecha_Ingreso: datosEmpleado.fechaIngreso,
-      Salario_Base: parseFloat(datosEmpleado.salarioBase) || 0,
-      Estado: "Activo"
-    };
+        const datosEmpleado = {
+          idEmpresa: idEmpresa,
+          nombre: (document.getElementById('emp-nombre') || {}).value || '',
+          dui: (document.getElementById('emp-dui') || {}).value || '',
+          cargo: (document.getElementById('emp-cargo') || {}).value || '',
+          salario: parseFloat((document.getElementById('emp-salario') || {}).value || 0)
+        };
 
-    const respuesta = await fetch(API_URL, {
-      method: "POST",
-      headers: { "Content-Type": "text/plain;charset=utf-8" },
-      body: JSON.stringify(payload)
-    }).then(res => res.json());
-
-    if (respuesta.estado === "correcto") {
-      alert("Empleado guardado correctamente en Google Sheets.");
-      cargarEmpleados();
-    } else {
-      alert("Error al registrar empleado: " + respuesta.mensaje);
+        try {
+          await Api.registrarEmpleado(datosEmpleado);
+          if (msgStatus) {
+            msgStatus.textContent = '¡Empleado guardado exitosamente en Google Sheets!';
+            msgStatus.style.color = 'green';
+          }
+          formEmp.reset();
+          this.cargarTabla(); // Recarga la lista desde Sheets
+        } catch (err) {
+          if (msgStatus) {
+            msgStatus.textContent = `Error al guardar: ${err.message}`;
+            msgStatus.style.color = 'red';
+          }
+        }
+      });
     }
-  } catch (error) {
-    console.error("Error en guardarEmpleado:", error);
-    alert("Error de comunicación al guardar el empleado.");
+  },
+
+  async cargarTabla() {
+    const contenedor = document.getElementById('tabla-empleados-container');
+    if (!contenedor) return;
+
+    contenedor.innerHTML = '<p>Cargando lista desde Google Sheets...</p>';
+    const idEmpresa = typeof State !== 'undefined' ? State.getIdEmpresa() : '';
+
+    try {
+      const res = await Api.getEmpleados({ idEmpresa });
+      const lista = Array.isArray(res) ? res : (res.datos || res.data || []);
+
+      if (lista.length === 0) {
+        contenedor.innerHTML = '<p>No hay empleados registrados en Google Sheets.</p>';
+        return;
+      }
+
+      let html = `<table class="nexus-table"><thead><tr><th>ID</th><th>Nombre</th><th>DUI</th><th>Cargo</th><th>Salario</th></tr></thead><tbody>`;
+      lista.forEach(emp => {
+        html += `<tr>
+          <td>${emp.ID_Empleado || emp.id || '-'}</td>
+          <td>${emp.Nombre || emp.nombre || '-'}</td>
+          <td>${emp.DUI || emp.dui || '-'}</td>
+          <td>${emp.Cargo || emp.cargo || '-'}</td>
+          <td>$${parseFloat(emp.Salario || emp.salario || 0).toFixed(2)}</td>
+        </tr>`;
+      });
+      html += '</tbody></table>';
+      contenedor.innerHTML = html;
+    } catch (e) {
+      contenedor.innerHTML = `<p style="color:red;">Error al obtener empleados de Google Sheets.</p>`;
+    }
   }
-}
+};
 
-// ----------------------------------------------------
-// CARGAR LISTA DE EMPLEADOS
-// ----------------------------------------------------
-async function cargarEmpleados() {
-  const idEmpresa = localStorage.getItem("ID_Empresa");
-  if (!idEmpresa) return;
-
-  try {
-    const empleados = await fetch(`${API_URL}?accion=empleados`).then(res => res.json());
-    
-    const misEmpleados = Array.isArray(empleados) 
-      ? empleados.filter(emp => String(emp.ID_Empresa) === String(idEmpresa))
-      : [];
-
-    mostrarEmpleadosEnTabla(misEmpleados);
-  } catch (error) {
-    console.error("Error al cargar empleados:", error);
-  }
-}
-
-function mostrarEmpleadosEnTabla(lista) {
-  const tablaBody = document.getElementById("tabla-empleados-body");
-  if (!tablaBody) return;
-
-  tablaBody.innerHTML = "";
-
-  lista.forEach(emp => {
-    const fila = document.createElement("tr");
-    fila.innerHTML = `
-      <td>${emp.ID_Empleado || ''}</td>
-      <td>${emp.Nombre_Completo || ''}</td>
-      <td>${emp.DUI || ''}</td>
-      <td>${emp.Cargo || ''}</td>
-      <td>$${parseFloat(emp.Salario_Base || 0).toFixed(2)}</td>
-      <td>${emp.Estado || 'Activo'}</td>
-    `;
-    tablaBody.appendChild(fila);
-  });
-}
-
-document.addEventListener("DOMContentLoaded", function() {
-  const formEmpleado = document.getElementById("form-empleado");
-  if (formEmpleado) {
-    formEmpleado.addEventListener("submit", function(e) {
-      e.preventDefault();
-
-      const datosEmpleado = {
-        nombreCompleto: document.getElementById("emp-nombre").value,
-        dui: document.getElementById("emp-dui").value,
-        cargo: document.getElementById("emp-cargo").value,
-        fechaIngreso: document.getElementById("emp-fecha-ingreso").value,
-        salarioBase: document.getElementById("emp-salario").value
-      };
-
-      guardarEmpleado(datosEmpleado);
-    });
-  }
-
-  cargarEmpleados();
-});
+document.addEventListener('DOMContentLoaded', () => Empleados.init());
