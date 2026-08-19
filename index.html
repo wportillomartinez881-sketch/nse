@@ -10,6 +10,8 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- SweetAlert2 -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <!-- EmailJS SDK -->
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
     <style>
         .auth-card {
             backdrop-filter: blur(10px);
@@ -26,13 +28,16 @@
     <!-- CONFIGURACIÓN DE CONEXIÓN A GOOGLE SHEETS -->
     <script>
         const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzuqC4RclUYdMhgTXA3iIVdp7WZuF5kwMZDcPv4NmAncVWAvZnNOPu0FajuBK1DkK95/exec";
+        
+        // Inicializar EmailJS con tu Public Key
+        (function() {
+            emailjs.init("YOUR_PUBLIC_KEY"); // Reemplaza por tu Public Key de EmailJS
+        })();
     </script>
 
-    <!-- ==================== PANTALLA DE AUTENTICACIÓN (LOGIN / REGISTRO) ==================== -->
+    <!-- ==================== PANTALLA DE AUTENTICACIÓN ==================== -->
     <div id="authScreen" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 overflow-y-auto">
         <div class="auth-card w-full max-w-2xl p-8 rounded-2xl shadow-2xl border border-slate-700 my-8">
-            
-            <!-- LOGO / ENCABEZADO -->
             <div class="text-center mb-6">
                 <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-indigo-600 text-white mb-3 shadow-lg shadow-indigo-500/30">
                     <i class="fa-solid fa-chart-line text-2xl"></i>
@@ -41,50 +46,39 @@
                 <p class="text-xs text-indigo-600 font-semibold uppercase tracking-wider">Servicios Empresariales S.A. de C.V.</p>
             </div>
 
-            <!-- FORMULARIO: INICIAR SESIÓN -->
+            <!-- INICIAR SESIÓN -->
             <form id="loginForm" onsubmit="handleLogin(event)" class="space-y-4 max-w-md mx-auto">
                 <h2 class="text-lg font-semibold text-slate-700 text-center mb-2">Iniciar Sesión</h2>
-                
                 <div>
                     <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Correo Electrónico</label>
                     <div class="relative">
-                        <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">
-                            <i class="fa-solid fa-envelope"></i>
-                        </span>
-                        <input type="email" id="loginCorreo" required placeholder="empresa@nexus.com" class="w-full pl-10 pr-4 py-2.5 rounded-lg border border-slate-300 focus:ring-2 focus:ring-indigo-500 text-sm outline-none transition">
+                        <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400"><i class="fa-solid fa-envelope"></i></span>
+                        <input type="email" id="loginCorreo" required placeholder="empresa@nexus.com" class="w-full pl-10 pr-4 py-2.5 rounded-lg border border-slate-300 focus:ring-2 focus:ring-indigo-500 text-sm outline-none">
                     </div>
                 </div>
-
                 <div>
                     <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Contraseña</label>
                     <div class="relative">
-                        <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">
-                            <i class="fa-solid fa-lock"></i>
-                        </span>
-                        <input type="password" id="loginPassword" required placeholder="••••••••" class="w-full pl-10 pr-4 py-2.5 rounded-lg border border-slate-300 focus:ring-2 focus:ring-indigo-500 text-sm outline-none transition">
+                        <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400"><i class="fa-solid fa-lock"></i></span>
+                        <input type="password" id="loginPassword" required placeholder="••••••••" class="w-full pl-10 pr-4 py-2.5 rounded-lg border border-slate-300 focus:ring-2 focus:ring-indigo-500 text-sm outline-none">
                     </div>
                 </div>
-
-                <button type="submit" id="btnLogin" class="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-lg shadow-md hover:shadow-lg transition duration-200 flex items-center justify-center space-x-2">
+                <button type="submit" id="btnLogin" class="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-lg shadow-md transition flex items-center justify-center">
                     <span id="btnLoginText">Ingresar al Sistema</span>
                 </button>
-
                 <div class="pt-4 border-t border-slate-200 text-center">
                     <p class="text-xs text-slate-600">¿No tienes una empresa registrada?</p>
-                    <button type="button" onclick="toggleAuthMode('register')" class="mt-1 text-sm text-indigo-600 hover:text-indigo-800 font-semibold underline">
-                        Registrar Empresa
-                    </button>
+                    <button type="button" onclick="toggleAuthMode('register')" class="mt-1 text-sm text-indigo-600 hover:text-indigo-800 font-semibold underline">Registrar Empresa</button>
                 </div>
             </form>
 
-            <!-- FORMULARIO: REGISTRAR EMPRESA -->
+            <!-- REGISTRAR EMPRESA -->
             <form id="registerForm" onsubmit="handleRegister(event)" class="space-y-4 hidden">
                 <h2 class="text-lg font-semibold text-slate-700 text-center mb-4">Registro de Nueva Empresa</h2>
-
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                         <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">ID Empresa</label>
-                        <input type="text" id="regIdEmpresa" readonly class="w-full px-3 py-2 bg-slate-100 border border-slate-300 text-slate-700 text-sm font-mono font-bold rounded-lg cursor-not-allowed outline-none">
+                        <input type="text" id="regIdEmpresa" readonly class="w-full px-3 py-2 bg-slate-100 border border-slate-300 text-slate-700 text-sm font-mono font-bold rounded-lg outline-none">
                     </div>
                     <div>
                         <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Razón Social</label>
@@ -100,7 +94,7 @@
                     </div>
                     <div class="md:col-span-2">
                         <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Actividad Económica</label>
-                        <input type="text" id="regActividadEconomica" required placeholder="Servicios de Gestión Empresarial" class="w-full px-3 py-2 rounded-lg border border-slate-300 text-sm outline-none focus:ring-2 focus:ring-indigo-500">
+                        <input type="text" id="regActividadEconomica" required placeholder="Servicios Empresariales" class="w-full px-3 py-2 rounded-lg border border-slate-300 text-sm outline-none focus:ring-2 focus:ring-indigo-500">
                     </div>
                     <div class="md:col-span-2">
                         <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Dirección</label>
@@ -116,233 +110,256 @@
                     </div>
                     <div>
                         <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Representante Legal</label>
-                        <input type="text" id="regRepresentante" required placeholder="Nombre del Representante" class="w-full px-3 py-2 rounded-lg border border-slate-300 text-sm outline-none focus:ring-2 focus:ring-indigo-500">
+                        <input type="text" id="regRepresentante" required placeholder="Nombre Representante" class="w-full px-3 py-2 rounded-lg border border-slate-300 text-sm outline-none focus:ring-2 focus:ring-indigo-500">
                     </div>
                     <div>
                         <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Contraseña</label>
                         <input type="password" id="regPassword" required placeholder="••••••••" class="w-full px-3 py-2 rounded-lg border border-slate-300 text-sm outline-none focus:ring-2 focus:ring-indigo-500">
                     </div>
                 </div>
-
-                <button type="submit" id="btnRegister" class="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-medium rounded-lg shadow-md hover:shadow-lg transition duration-200 mt-2 flex items-center justify-center space-x-2">
+                <button type="submit" id="btnRegister" class="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-medium rounded-lg shadow-md transition mt-2 flex items-center justify-center">
                     <span id="btnRegText">Crear Cuenta Empresarial y Guardar</span>
                 </button>
-
                 <div class="pt-3 border-t border-slate-200 text-center">
                     <p class="text-xs text-slate-600">¿Ya tienes una cuenta?</p>
-                    <button type="button" onclick="toggleAuthMode('login')" class="mt-1 text-sm text-indigo-600 hover:text-indigo-800 font-semibold underline">
-                        Volver al Inicio de Sesión
-                    </button>
+                    <button type="button" onclick="toggleAuthMode('login')" class="mt-1 text-sm text-indigo-600 hover:text-indigo-800 font-semibold underline">Volver al Inicio de Sesión</button>
                 </div>
             </form>
-
         </div>
     </div>
 
-    <!-- ==================== PANEL PRINCIPAL COMPLETO (DASHBOARD) ==================== -->
+    <!-- ==================== PANEL PRINCIPAL (DASHBOARD) ==================== -->
     <div id="mainApp" class="hidden flex-1 flex min-h-screen bg-slate-100">
         
-        <!-- BARRA LATERAL DE NAVEGACIÓN -->
+        <!-- BARRA LATERAL -->
         <aside class="w-64 bg-slate-900 text-white flex flex-col justify-between shadow-xl">
             <div class="overflow-y-auto max-h-screen">
-                <!-- Header Lateral -->
                 <div class="p-5 border-b border-slate-800 flex items-center space-x-3">
-                    <div class="w-10 h-10 rounded-lg bg-indigo-600 flex items-center justify-center font-bold text-white shadow-md">
-                        N
-                    </div>
+                    <div class="w-10 h-10 rounded-lg bg-indigo-600 flex items-center justify-center font-bold text-white shadow-md">N</div>
                     <div>
                         <h2 class="font-bold text-sm text-slate-100 tracking-wide">NEXUS APP</h2>
                         <p class="text-xs text-indigo-400 font-mono font-bold" id="dashIdEmpresa">ID: EMP-0000</p>
                     </div>
                 </div>
 
-                <!-- MENÚ CON ORDEN Y NOMBRES EXACTOS -->
+                <!-- MENÚ COMPLETO -->
                 <nav class="p-3 space-y-1 text-sm">
-                    
-                    <button onclick="switchTab('EMPRESA', this)" class="nav-link active w-full flex items-center space-x-3 px-3 py-2.5 text-slate-300 hover:bg-slate-800 hover:text-white rounded-lg transition text-left">
+                    <button onclick="switchTab('EMPRESA', this)" class="nav-link active w-full flex items-center space-x-3 px-3 py-2.5 text-slate-300 hover:bg-slate-800 rounded-lg transition text-left">
                         <i class="fa-solid fa-building w-5"></i> <span>EMPRESA</span>
                     </button>
-
-                    <button onclick="switchTab('EMPLEADOS', this)" class="nav-link w-full flex items-center space-x-3 px-3 py-2.5 text-slate-300 hover:bg-slate-800 hover:text-white rounded-lg transition text-left">
+                    <button onclick="switchTab('EMPLEADOS', this)" class="nav-link w-full flex items-center space-x-3 px-3 py-2.5 text-slate-300 hover:bg-slate-800 rounded-lg transition text-left">
                         <i class="fa-solid fa-users w-5"></i> <span>EMPLEADOS</span>
                     </button>
-
-                    <button onclick="switchTab('NOVEDADES', this)" class="nav-link w-full flex items-center space-x-3 px-3 py-2.5 text-slate-300 hover:bg-slate-800 hover:text-white rounded-lg transition text-left">
+                    <button onclick="switchTab('NOVEDADES', this)" class="nav-link w-full flex items-center space-x-3 px-3 py-2.5 text-slate-300 hover:bg-slate-800 rounded-lg transition text-left">
                         <i class="fa-solid fa-bell w-5"></i> <span>NOVEDADES</span>
                     </button>
-
-                    <button onclick="switchTab('PLANILLA', this)" class="nav-link w-full flex items-center space-x-3 px-3 py-2.5 text-slate-300 hover:bg-slate-800 hover:text-white rounded-lg transition text-left">
+                    <button onclick="switchTab('PLANILLA', this)" class="nav-link w-full flex items-center space-x-3 px-3 py-2.5 text-slate-300 hover:bg-slate-800 rounded-lg transition text-left">
                         <i class="fa-solid fa-calculator w-5"></i> <span>PLANILLA</span>
                     </button>
-
-                    <button onclick="switchTab('DETALLE_PLANILLA', this)" class="nav-link w-full flex items-center space-x-3 px-3 py-2.5 text-slate-300 hover:bg-slate-800 hover:text-white rounded-lg transition text-left">
+                    <button onclick="switchTab('DETALLE_PLANILLA', this)" class="nav-link w-full flex items-center space-x-3 px-3 py-2.5 text-slate-300 hover:bg-slate-800 rounded-lg transition text-left">
                         <i class="fa-solid fa-file-invoice-dollar w-5"></i> <span>DETALLE_PLANILLA</span>
                     </button>
-
-                    <button onclick="switchTab('HISTORIAL_NEXUS', this)" class="nav-link w-full flex items-center space-x-3 px-3 py-2.5 text-slate-300 hover:bg-slate-800 hover:text-white rounded-lg transition text-left">
+                    <button onclick="switchTab('HISTORIAL_NEXUS', this)" class="nav-link w-full flex items-center space-x-3 px-3 py-2.5 text-slate-300 hover:bg-slate-800 rounded-lg transition text-left">
                         <i class="fa-solid fa-clock-rotate-left w-5"></i> <span>HISTORIAL_NEXUS</span>
                     </button>
-
-                    <button onclick="switchTab('PARAMETROS', this)" class="nav-link w-full flex items-center space-x-3 px-3 py-2.5 text-slate-300 hover:bg-slate-800 hover:text-white rounded-lg transition text-left">
+                    <button onclick="switchTab('PARAMETROS', this)" class="nav-link w-full flex items-center space-x-3 px-3 py-2.5 text-slate-300 hover:bg-slate-800 rounded-lg transition text-left">
                         <i class="fa-solid fa-sliders w-5"></i> <span>PARAMETROS</span>
                     </button>
-
-                    <button onclick="switchTab('AUDITORIA', this)" class="nav-link w-full flex items-center space-x-3 px-3 py-2.5 text-slate-300 hover:bg-slate-800 hover:text-white rounded-lg transition text-left">
+                    <button onclick="switchTab('AUDITORIA', this)" class="nav-link w-full flex items-center space-x-3 px-3 py-2.5 text-slate-300 hover:bg-slate-800 rounded-lg transition text-left">
                         <i class="fa-solid fa-shield-halved w-5"></i> <span>AUDITORIA</span>
                     </button>
-
-                    <button onclick="switchTab('FUNDAMENTO_LEGAL', this)" class="nav-link w-full flex items-center space-x-3 px-3 py-2.5 text-slate-300 hover:bg-slate-800 hover:text-white rounded-lg transition text-left">
+                    <button onclick="switchTab('FUNDAMENTO_LEGAL', this)" class="nav-link w-full flex items-center space-x-3 px-3 py-2.5 text-slate-300 hover:bg-slate-800 rounded-lg transition text-left">
                         <i class="fa-solid fa-scale-balanced w-5"></i> <span>FUNDAMENTO_LEGAL</span>
                     </button>
-
-                    <button onclick="switchTab('VALIDACION', this)" class="nav-link w-full flex items-center space-x-3 px-3 py-2.5 text-slate-300 hover:bg-slate-800 hover:text-white rounded-lg transition text-left">
+                    <button onclick="switchTab('VALIDACION', this)" class="nav-link w-full flex items-center space-x-3 px-3 py-2.5 text-slate-300 hover:bg-slate-800 rounded-lg transition text-left">
                         <i class="fa-solid fa-circle-check w-5"></i> <span>VALIDACION</span>
                     </button>
-
-                    <button onclick="switchTab('REPORTE', this)" class="nav-link w-full flex items-center space-x-3 px-3 py-2.5 text-slate-300 hover:bg-slate-800 hover:text-white rounded-lg transition text-left">
+                    <button onclick="switchTab('REPORTE', this)" class="nav-link w-full flex items-center space-x-3 px-3 py-2.5 text-slate-300 hover:bg-slate-800 rounded-lg transition text-left">
                         <i class="fa-solid fa-chart-pie w-5"></i> <span>REPORTE</span>
                     </button>
-
+                    <button onclick="switchTab('CONTACTO_NEXUS', this)" class="nav-link w-full flex items-center space-x-3 px-3 py-2.5 text-indigo-400 hover:bg-slate-800 rounded-lg transition text-left">
+                        <i class="fa-solid fa-envelope-open-text w-5"></i> <span>CONTACTO NEXUS</span>
+                    </button>
                 </nav>
             </div>
 
-            <!-- Footer Lateral -->
             <div class="p-4 border-t border-slate-800">
                 <button onclick="handleLogout()" class="w-full flex items-center justify-center space-x-2 px-4 py-2.5 text-xs font-semibold text-red-400 hover:bg-red-950/40 rounded-lg border border-red-900/50 transition">
-                    <i class="fa-solid fa-right-from-bracket"></i>
-                    <span>Cerrar Sesión</span>
+                    <i class="fa-solid fa-right-from-bracket"></i> <span>Cerrar Sesión</span>
                 </button>
             </div>
         </aside>
 
-        <!-- ÁREA CENTRAL DE CONTENIDO -->
+        <!-- CONTENIDO CENTRAL -->
         <main class="flex-1 flex flex-col min-h-screen overflow-y-auto">
-            
             <header class="bg-white border-b border-slate-200 px-8 py-4 flex items-center justify-between shadow-sm">
                 <div>
                     <h1 class="text-xl font-bold text-slate-800" id="dashRazonSocial">NEXUS Servicios Empresariales, S.A. de C.V.</h1>
                     <p class="text-xs text-slate-500">Panel General de Gestión Empresarial y Control de Planillas</p>
                 </div>
-                <div>
-                    <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800">
-                        <span class="w-2 h-2 mr-1.5 rounded-full bg-emerald-500"></span> Conectado a Google Sheets
-                    </span>
-                </div>
+                <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800">
+                    <span class="w-2 h-2 mr-1.5 rounded-full bg-emerald-500"></span> Google Sheets Conectado
+                </span>
             </header>
 
             <div class="p-8">
-                
                 <!-- 1. EMPRESA -->
                 <div id="tab-EMPRESA" class="tab-content space-y-6">
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                         <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
-                            <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">NIT</p>
+                            <p class="text-xs font-bold text-slate-400 uppercase">NIT</p>
                             <p class="text-sm font-semibold text-slate-800 mt-1" id="dashNIT">0614-000000-000-0</p>
                         </div>
                         <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
-                            <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">NRC</p>
+                            <p class="text-xs font-bold text-slate-400 uppercase">NRC</p>
                             <p class="text-sm font-semibold text-slate-800 mt-1" id="dashNRC">000000-0</p>
                         </div>
                         <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
-                            <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Teléfono</p>
+                            <p class="text-xs font-bold text-slate-400 uppercase">Teléfono</p>
                             <p class="text-sm font-semibold text-slate-800 mt-1" id="dashTelefono">+503 2200-0000</p>
                         </div>
                         <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
-                            <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Correo</p>
+                            <p class="text-xs font-bold text-slate-400 uppercase">Correo</p>
                             <p class="text-sm font-semibold text-slate-800 mt-1" id="dashCorreo">contacto@empresa.com</p>
                         </div>
                     </div>
-
                     <div class="bg-white rounded-xl border border-slate-200 p-6 shadow-sm space-y-4">
                         <h3 class="text-base font-bold text-slate-800 border-b border-slate-100 pb-3">Detalles de la Empresa Registrada</h3>
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                            <div>
-                                <span class="text-xs text-slate-400 block uppercase">Actividad Económica</span>
-                                <span class="font-medium text-slate-700" id="dashActividad">Servicios Empresariales</span>
-                            </div>
-                            <div>
-                                <span class="text-xs text-slate-400 block uppercase">Representante Legal</span>
-                                <span class="font-medium text-slate-700" id="dashRepresentante">Representante Registrado</span>
-                            </div>
-                            <div class="md:col-span-2">
-                                <span class="text-xs text-slate-400 block uppercase">Dirección Física</span>
-                                <span class="font-medium text-slate-700" id="dashDireccion">San Salvador, El Salvador</span>
-                            </div>
+                            <div><span class="text-xs text-slate-400 block uppercase">Actividad Económica</span><span class="font-medium text-slate-700" id="dashActividad">Servicios Empresariales</span></div>
+                            <div><span class="text-xs text-slate-400 block uppercase">Representante Legal</span><span class="font-medium text-slate-700" id="dashRepresentante">Representante Registrado</span></div>
+                            <div class="md:col-span-2"><span class="text-xs text-slate-400 block uppercase">Dirección Física</span><span class="font-medium text-slate-700" id="dashDireccion">San Salvador, El Salvador</span></div>
                         </div>
                     </div>
                 </div>
 
                 <!-- 2. EMPLEADOS -->
-                <div id="tab-EMPLEADOS" class="tab-content hidden bg-white p-6 rounded-xl border border-slate-200">
-                    <h2 class="text-lg font-bold text-slate-800 mb-2"><i class="fa-solid fa-users mr-2"></i>EMPLEADOS</h2>
-                    <p class="text-sm text-slate-600">Módulo de registro, cargos y expedientes de empleados.</p>
+                <div id="tab-EMPLEADOS" class="tab-content hidden bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
+                    <h2 class="text-lg font-bold text-slate-800 mb-4"><i class="fa-solid fa-users mr-2 text-indigo-600"></i>Gestión de Empleados</h2>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-sm text-slate-600">
+                            <thead class="bg-slate-50 text-xs uppercase text-slate-500 font-semibold border-b">
+                                <tr>
+                                    <th class="p-3">Código</th>
+                                    <th class="p-3">Nombre Completo</th>
+                                    <th class="p-3">DUI</th>
+                                    <th class="p-3">Cargo</th>
+                                    <th class="p-3">Salario Base</th>
+                                    <th class="p-3">Estado</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-100">
+                                <tr>
+                                    <td class="p-3 font-mono font-bold">EMP-001</td>
+                                    <td class="p-3 font-medium text-slate-800">Carlos Eduardo Mendoza</td>
+                                    <td class="p-3">01234567-8</td>
+                                    <td class="p-3">Analista Contable</td>
+                                    <td class="p-3">$650.00</td>
+                                    <td class="p-3"><span class="px-2 py-1 text-xs bg-emerald-100 text-emerald-800 rounded-full font-semibold">Activo</span></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
 
                 <!-- 3. NOVEDADES -->
-                <div id="tab-NOVEDADES" class="tab-content hidden bg-white p-6 rounded-xl border border-slate-200">
-                    <h2 class="text-lg font-bold text-slate-800 mb-2"><i class="fa-solid fa-bell mr-2"></i>NOVEDADES</h2>
-                    <p class="text-sm text-slate-600">Registro de permisos, incapacidades y horas extra.</p>
+                <div id="tab-NOVEDADES" class="tab-content hidden bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
+                    <h2 class="text-lg font-bold text-slate-800 mb-4"><i class="fa-solid fa-bell mr-2 text-indigo-600"></i>Registro de Novedades</h2>
+                    <p class="text-sm text-slate-600">Incapacidades, permisos con/sin goce de sueldo y horas extraordinarias.</p>
                 </div>
 
                 <!-- 4. PLANILLA -->
-                <div id="tab-PLANILLA" class="tab-content hidden bg-white p-6 rounded-xl border border-slate-200">
-                    <h2 class="text-lg font-bold text-slate-800 mb-2"><i class="fa-solid fa-calculator mr-2"></i>PLANILLA</h2>
-                    <p class="text-sm text-slate-600">Generación y procesamiento principal de planilla salarial.</p>
+                <div id="tab-PLANILLA" class="tab-content hidden bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
+                    <h2 class="text-lg font-bold text-slate-800 mb-4"><i class="fa-solid fa-calculator mr-2 text-indigo-600"></i>Cálculo de Planilla Salarial</h2>
+                    <p class="text-sm text-slate-600">Procesamiento automático de descuentos (ISSS, AFP, ISR).</p>
                 </div>
 
                 <!-- 5. DETALLE_PLANILLA -->
-                <div id="tab-DETALLE_PLANILLA" class="tab-content hidden bg-white p-6 rounded-xl border border-slate-200">
-                    <h2 class="text-lg font-bold text-slate-800 mb-2"><i class="fa-solid fa-file-invoice-dollar mr-2"></i>DETALLE_PLANILLA</h2>
-                    <p class="text-sm text-slate-600">Desglose individualizado de boletas y deducciones por empleado.</p>
+                <div id="tab-DETALLE_PLANILLA" class="tab-content hidden bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
+                    <h2 class="text-lg font-bold text-slate-800 mb-4"><i class="fa-solid fa-file-invoice-dollar mr-2 text-indigo-600"></i>Detalle de Boletas de Pago</h2>
+                    <p class="text-sm text-slate-600">Desglose individualizado por empleado para emisión de comprobantes.</p>
                 </div>
 
                 <!-- 6. HISTORIAL_NEXUS -->
-                <div id="tab-HISTORIAL_NEXUS" class="tab-content hidden bg-white p-6 rounded-xl border border-slate-200">
-                    <h2 class="text-lg font-bold text-slate-800 mb-2"><i class="fa-solid fa-clock-rotate-left mr-2"></i>HISTORIAL_NEXUS</h2>
-                    <p class="text-sm text-slate-600">Registro histórico de planillas cerradas y procesadas.</p>
+                <div id="tab-HISTORIAL_NEXUS" class="tab-content hidden bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
+                    <h2 class="text-lg font-bold text-slate-800 mb-4"><i class="fa-solid fa-clock-rotate-left mr-2 text-indigo-600"></i>Historial Registrado</h2>
+                    <p class="text-sm text-slate-600">Archivo de periodos fiscales y planillas cerradas.</p>
                 </div>
 
                 <!-- 7. PARAMETROS -->
-                <div id="tab-PARAMETROS" class="tab-content hidden bg-white p-6 rounded-xl border border-slate-200">
-                    <h2 class="text-lg font-bold text-slate-800 mb-2"><i class="fa-solid fa-sliders mr-2"></i>PARAMETROS</h2>
-                    <p class="text-sm text-slate-600">Configuración de porcentajes ISSS, AFP, tramos de ISR y techos.</p>
+                <div id="tab-PARAMETROS" class="tab-content hidden bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
+                    <h2 class="text-lg font-bold text-slate-800 mb-4"><i class="fa-solid fa-sliders mr-2 text-indigo-600"></i>Parámetros Legales y Descuentos</h2>
+                    <ul class="text-sm space-y-2 text-slate-700">
+                        <li><b>ISSS Laboral:</b> 3.00% (Techo de $1,000.00 / Máx. $30.00)</li>
+                        <li><b>AFP Laboral:</b> 7.25%</li>
+                        <li><b>ISSS Patronal:</b> 7.50%</li>
+                        <li><b>AFP Patronal:</b> 8.75%</li>
+                    </ul>
                 </div>
 
                 <!-- 8. AUDITORIA -->
-                <div id="tab-AUDITORIA" class="tab-content hidden bg-white p-6 rounded-xl border border-slate-200">
-                    <h2 class="text-lg font-bold text-slate-800 mb-2"><i class="fa-solid fa-shield-halved mr-2"></i>AUDITORIA</h2>
-                    <p class="text-sm text-slate-600">Bitácora de seguridad y registro de cambios en el sistema.</p>
+                <div id="tab-AUDITORIA" class="tab-content hidden bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
+                    <h2 class="text-lg font-bold text-slate-800 mb-4"><i class="fa-solid fa-shield-halved mr-2 text-indigo-600"></i>Bitácora de Auditoría</h2>
+                    <p class="text-sm text-slate-600">Registro de accesos, modificaciones y transacciones del usuario.</p>
                 </div>
 
                 <!-- 9. FUNDAMENTO_LEGAL -->
-                <div id="tab-FUNDAMENTO_LEGAL" class="tab-content hidden bg-white p-6 rounded-xl border border-slate-200">
-                    <h2 class="text-lg font-bold text-slate-800 mb-2"><i class="fa-solid fa-scale-balanced mr-2"></i>FUNDAMENTO_LEGAL</h2>
-                    <p class="text-sm text-slate-600">Base legal sustentada en el Código de Trabajo de El Salvador.</p>
+                <div id="tab-FUNDAMENTO_LEGAL" class="tab-content hidden bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
+                    <h2 class="text-lg font-bold text-slate-800 mb-4"><i class="fa-solid fa-scale-balanced mr-2 text-indigo-600"></i>Marco Legal Vigente</h2>
+                    <p class="text-sm text-slate-600">Basado en el Código de Trabajo y Ley del Seguro Social de El Salvador.</p>
                 </div>
 
                 <!-- 10. VALIDACION -->
-                <div id="tab-VALIDACION" class="tab-content hidden bg-white p-6 rounded-xl border border-slate-200">
-                    <h2 class="text-lg font-bold text-slate-800 mb-2"><i class="fa-solid fa-circle-check mr-2"></i>VALIDACION</h2>
-                    <p class="text-sm text-slate-600">Verificación de consistencia numérica y cálculo automático de saldos.</p>
+                <div id="tab-VALIDACION" class="tab-content hidden bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
+                    <h2 class="text-lg font-bold text-slate-800 mb-4"><i class="fa-solid fa-circle-check mr-2 text-indigo-600"></i>Validación del Sistema</h2>
+                    <p class="text-sm text-slate-600">Verificación de saldos, sumas y cuadre contable automático.</p>
                 </div>
 
                 <!-- 11. REPORTE -->
-                <div id="tab-REPORTE" class="tab-content hidden bg-white p-6 rounded-xl border border-slate-200">
-                    <h2 class="text-lg font-bold text-slate-800 mb-2"><i class="fa-solid fa-chart-pie mr-2"></i>REPORTE</h2>
-                    <p class="text-sm text-slate-600">Resúmenes ejecutivos e informes imprimibles.</p>
+                <div id="tab-REPORTE" class="tab-content hidden bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
+                    <h2 class="text-lg font-bold text-slate-800 mb-4"><i class="fa-solid fa-chart-pie mr-2 text-indigo-600"></i>Informes Ejecutivos</h2>
+                    <p class="text-sm text-slate-600">Generación de resúmenes consolidados para contabilidad y gerencia.</p>
+                </div>
+
+                <!-- 12. MÓDULO DE CONTACTO NEXUS (EMAILJS) -->
+                <div id="tab-CONTACTO_NEXUS" class="tab-content hidden bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
+                    <h2 class="text-lg font-bold text-slate-800 mb-2"><i class="fa-solid fa-envelope-open-text mr-2 text-indigo-600"></i>Contacto Directo con NEXUS</h2>
+                    <p class="text-sm text-slate-600 mb-6">Envía una consulta o soporte técnico por correo electrónico a la administración de NEXUS.</p>
+
+                    <form id="nexusContactForm" onsubmit="sendNexusEmail(event)" class="max-w-xl space-y-4">
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Nombre Completo / Empresa</label>
+                            <input type="text" id="contactName" required class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-indigo-500">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Correo de Respuesta</label>
+                            <input type="email" id="contactEmail" required class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-indigo-500">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Asunto</label>
+                            <input type="text" id="contactSubject" required class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-indigo-500">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Mensaje</label>
+                            <textarea id="contactMessage" rows="4" required class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-indigo-500"></textarea>
+                        </div>
+                        <button type="submit" id="btnSendContact" class="px-6 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-lg text-sm transition">
+                            Enviar Correo Electrónico
+                        </button>
+                    </form>
                 </div>
 
             </div>
         </main>
     </div>
 
-    <!-- ==================== ASISTENTE VIRTUAL ATENEA ==================== -->
+    <!-- ==================== CHATBOT VIRTUAL ATENEA ==================== -->
     <div class="fixed bottom-6 right-6 z-40">
         <button onclick="toggleAtenea()" class="w-14 h-14 bg-indigo-600 hover:bg-indigo-700 text-white rounded-full shadow-2xl flex items-center justify-center text-xl transition transform hover:scale-105">
             <i class="fa-solid fa-robot"></i>
         </button>
 
-        <div id="ateneaModal" class="hidden absolute bottom-16 right-0 w-80 bg-white rounded-2xl shadow-2xl border border-slate-200 p-4 space-y-3">
+        <div id="ateneaModal" class="hidden absolute bottom-16 right-0 w-80 sm:w-96 bg-white rounded-2xl shadow-2xl border border-slate-200 p-4 space-y-3">
             <div class="flex items-center justify-between border-b pb-2">
                 <div class="flex items-center space-x-2">
                     <span class="w-3 h-3 bg-emerald-500 rounded-full"></span>
@@ -350,12 +367,23 @@
                 </div>
                 <button onclick="toggleAtenea()" class="text-slate-400 hover:text-slate-600 text-sm"><i class="fa-solid fa-xmark"></i></button>
             </div>
-            <div class="text-xs text-slate-600 bg-slate-50 p-3 rounded-lg border border-slate-100">
-                ¡Hola! Soy Atenea, tu asistente para la gestión de NEXUS. ¿En qué puedo colaborarte?
+
+            <!-- HISTORIAL DE MENSAJES -->
+            <div id="chatHistory" class="h-60 overflow-y-auto space-y-2 text-xs p-2 bg-slate-50 rounded-lg border border-slate-100">
+                <div class="bg-indigo-100 text-indigo-900 p-2.5 rounded-lg max-w-[85%]">
+                    ¡Hola! Soy Atenea. ¿En qué puedo ayudarte hoy sobre la plataforma NEXUS?
+                </div>
             </div>
-            <div class="flex space-x-2">
-                <input type="text" placeholder="Escribe tu consulta..." class="flex-1 px-3 py-1.5 border border-slate-300 rounded-lg text-xs outline-none focus:ring-1 focus:ring-indigo-500">
-                <button class="bg-indigo-600 text-white px-3 py-1.5 rounded-lg text-xs font-semibold hover:bg-indigo-700">Enviar</button>
+
+            <!-- ENTRADA Y BOTONES DE ACCIÓN -->
+            <div class="flex space-x-2 items-center">
+                <button type="button" onclick="startVoiceRecognition()" class="p-2 bg-slate-200 hover:bg-slate-300 text-slate-700 rounded-lg text-xs" title="Hablar por micrófono">
+                    <i class="fa-solid fa-microphone"></i>
+                </button>
+                <input type="text" id="ateneaInput" placeholder="Escribe tu consulta..." onkeypress="if(event.key==='Enter') sendAteneaMessage()" class="flex-1 px-3 py-2 border border-slate-300 rounded-lg text-xs outline-none focus:ring-1 focus:ring-indigo-500">
+                <button onclick="sendAteneaMessage()" class="bg-indigo-600 text-white px-3 py-2 rounded-lg text-xs font-semibold hover:bg-indigo-700 transition">
+                    Enviar
+                </button>
             </div>
         </div>
     </div>
@@ -409,7 +437,6 @@
 
         async function handleLogin(event) {
             event.preventDefault();
-
             const correo = document.getElementById('loginCorreo').value;
             const password = document.getElementById('loginPassword').value;
             const btn = document.getElementById('btnLogin');
@@ -423,25 +450,17 @@
                     method: "POST",
                     body: JSON.stringify({ action: "login", correo: correo, password: password })
                 });
-
                 const result = await response.json();
 
                 if (result.status === "success") {
                     setDashboardData(result.data);
                     showDashboard();
-                    Swal.fire({
-                        icon: 'success',
-                        title: '¡Bienvenido!',
-                        text: 'Inicio de sesión exitoso',
-                        timer: 1500,
-                        showConfirmButton: false
-                    });
+                    Swal.fire({ icon: 'success', title: '¡Bienvenido!', text: 'Inicio de sesión exitoso', timer: 1500, showConfirmButton: false });
                 } else {
                     Swal.fire("Error de acceso", result.message || "Credenciales incorrectas", "error");
                 }
             } catch (e) {
-                console.error("Error al iniciar sesión:", e);
-                Swal.fire("Error de conexión", "No se pudo conectar con el servidor de Google Sheets.", "error");
+                Swal.fire("Error de conexión", "No se pudo conectar con Google Sheets.", "error");
             } finally {
                 btn.disabled = false;
                 btnText.innerText = "Ingresar al Sistema";
@@ -450,7 +469,6 @@
 
         async function handleRegister(event) {
             event.preventDefault();
-
             const btn = document.getElementById('btnRegister');
             const btnText = document.getElementById('btnRegText');
 
@@ -476,25 +494,18 @@
                     method: "POST",
                     body: JSON.stringify(payload)
                 });
-
                 const result = await response.json();
 
                 if (result.status === "success") {
                     setDashboardData(payload);
                     showDashboard();
-                    Swal.fire({
-                        icon: 'success',
-                        title: '¡Registro Completado!',
-                        text: 'Los datos se han registrado correctamente en Google Sheets.',
-                        confirmButtonColor: '#4f46e5'
-                    });
+                    Swal.fire({ icon: 'success', title: '¡Registro Completado!', text: 'Empresa registrada con éxito.', confirmButtonColor: '#4f46e5' });
                     document.getElementById('registerForm').reset();
                 } else {
-                    Swal.fire("Error al registrar", result.message || "Ocurrió un error al guardar.", "error");
+                    Swal.fire("Error al registrar", result.message || "Error al guardar.", "error");
                 }
             } catch (e) {
-                console.error("Error al sincronizar con Google Sheets:", e);
-                Swal.fire("Error de conexión", "No se pudo sincronizar la información con Google Sheets.", "error");
+                Swal.fire("Error de conexión", "No se pudo sincronizar la información.", "error");
             } finally {
                 btn.disabled = false;
                 btnText.innerText = "Crear Cuenta Empresarial y Guardar";
@@ -510,6 +521,115 @@
             document.getElementById('mainApp').classList.add('hidden');
             document.getElementById('authScreen').classList.remove('hidden');
             document.getElementById('loginForm').reset();
+        }
+
+        // --- ENVIAR CORREO MEDIANTE EMAILJS ---
+        function sendNexusEmail(event) {
+            event.preventDefault();
+            const btn = document.getElementById('btnSendContact');
+            btn.innerText = "Enviando...";
+            btn.disabled = true;
+
+            const serviceID = "YOUR_SERVICE_ID"; // Reemplaza por tu Service ID de EmailJS
+            const templateID = "YOUR_TEMPLATE_ID"; // Reemplaza por tu Template ID de EmailJS
+
+            const params = {
+                from_name: document.getElementById('contactName').value,
+                reply_to: document.getElementById('contactEmail').value,
+                subject: document.getElementById('contactSubject').value,
+                message: document.getElementById('contactMessage').value
+            };
+
+            emailjs.send(serviceID, templateID, params)
+                .then(() => {
+                    Swal.fire("¡Correo Enviado!", "Tu mensaje ha sido enviado correctamente a NEXUS.", "success");
+                    document.getElementById('nexusContactForm').reset();
+                })
+                .catch((err) => {
+                    Swal.fire("Error", "Ocurrió un error al enviar el correo.", "error");
+                })
+                .finally(() => {
+                    btn.innerText = "Enviar Correo Electrónico";
+                    btn.disabled = false;
+                });
+        }
+
+        // --- CHATBOT ATENEA & VOZ ---
+        function sendAteneaMessage() {
+            const input = document.getElementById('ateneaInput');
+            const text = input.value.trim();
+            if (!text) return;
+
+            appendChatMessage(text, 'user');
+            input.value = '';
+
+            setTimeout(() => {
+                const response = getAteneaBotResponse(text);
+                appendChatMessage(response, 'bot');
+                speakText(response);
+            }, 600);
+        }
+
+        function appendChatMessage(text, sender) {
+            const history = document.getElementById('chatHistory');
+            const msgDiv = document.createElement('div');
+            
+            if (sender === 'user') {
+                msgDiv.className = "bg-indigo-600 text-white p-2.5 rounded-lg max-w-[85%] ml-auto text-right";
+            } else {
+                msgDiv.className = "bg-slate-200 text-slate-800 p-2.5 rounded-lg max-w-[85%]";
+            }
+            
+            msgDiv.innerText = text;
+            history.appendChild(msgDiv);
+            history.scrollTop = history.scrollHeight;
+        }
+
+        function getAteneaBotResponse(query) {
+            const q = query.toLowerCase();
+            if (q.includes('planilla') || q.includes('calcular')) {
+                return "Para gestionar o consultar la planilla salarial, dirígete al módulo PLANILLA en el menú lateral.";
+            } else if (q.includes('empleado') || q.includes('registro')) {
+                return "En el módulo EMPLEADOS puedes revisar el listado completo de trabajadores y sus cargos.";
+            } else if (q.includes('isss') || q.includes('afp') || q.includes('descuento')) {
+                return "Los descuentos aplicados son ISSS (3.00% laboral) y AFP (7.25% laboral), configurados en PARAMETROS.";
+            } else if (q.includes('contacto') || q.includes('correo') || q.includes('nexus')) {
+                return "Puedes enviar un correo a la administración ingresando a la pestaña CONTACTO NEXUS.";
+            } else {
+                return "Recibí tu consulta. Puedo ayudarte con temas relativos a empleados, planillas, parámetros o contacto.";
+            }
+        }
+
+        function speakText(text) {
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel();
+                const utterance = new SpeechSynthesisUtterance(text);
+                utterance.lang = 'es-ES';
+                window.speechSynthesis.speak(utterance);
+            }
+        }
+
+        function startVoiceRecognition() {
+            if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+                Swal.fire("Sin Soporte", "Tu navegador no soporta el reconocimiento por voz.", "info");
+                return;
+            }
+
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            const recognition = new SpeechRecognition();
+            recognition.lang = 'es-ES';
+
+            recognition.onstart = function() {
+                Swal.fire({ title: 'Escuchando...', text: 'Habla ahora', timer: 3000, showConfirmButton: false });
+            };
+
+            recognition.onresult = function(event) {
+                const transcript = event.results[0][0].transcript;
+                document.getElementById('ateneaInput').value = transcript;
+                sendAteneaMessage();
+            };
+
+            recognition.start();
         }
     </script>
 </body>
