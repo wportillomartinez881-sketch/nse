@@ -1,287 +1,172 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>NEXUS Servicios Empresariales S.A. de C.V.</title>
-  <link rel="stylesheet" href="styles.css">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NEXUS - Servicios Empresariales</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .auth-card {
+            backdrop-filter: blur(10px);
+            background: rgba(255, 255, 255, 0.95);
+        }
+    </style>
 </head>
-<body>
+<body class="bg-slate-900 text-slate-800 font-sans min-h-screen flex flex-col">
 
-  <!-- PANTALLA DE AUTENTICACIÓN -->
-  <div id="auth-container" class="auth-wrapper">
-    <div class="auth-card">
-      <div class="auth-header">
-        <i class="fa-solid fa-chart-line logo-icon"></i>
-        <h2>NEXUS</h2>
-        <p>Servicios Empresariales S.A. de C.V.</p>
-      </div>
-
-      <!-- Pestañas de Login / Registro -->
-      <div class="auth-tabs">
-        <button id="tab-login" class="tab-btn active" onclick="mostrarTab('login')">Iniciar Sesión</button>
-        <button id="tab-register" class="tab-btn" onclick="mostrarTab('register')">Registrar Empresa</button>
-      </div>
-
-      <!-- Formulario Login -->
-      <form id="form-login" class="auth-form" onsubmit="ejecutarLogin(event)">
-        <div class="form-group">
-          <label><i class="fa-solid fa-envelope"></i> Correo Electrónico</label>
-          <input type="email" id="login-email" placeholder="usuario@empresa.com" required>
-        </div>
-        <div class="form-group">
-          <label><i class="fa-solid fa-lock"></i> Contraseña</label>
-          <input type="password" id="login-pass" placeholder="••••••••" required>
-        </div>
-        <button type="submit" class="btn-primary btn-block">
-          <i class="fa-solid fa-right-to-bracket"></i> Ingresar al Sistema
-        </button>
-      </form>
-
-      <!-- Formulario Registro Empresa + Usuario -->
-      <form id="form-register" class="auth-form hidden" onsubmit="ejecutarRegistro(event)">
-        <div class="form-group">
-          <label><i class="fa-solid fa-building"></i> Razón Social</label>
-          <input type="text" id="reg-razon" placeholder="Ej: Mi Empresa S.A. de C.V." required>
-        </div>
-        <div class="form-group">
-          <label><i class="fa-solid fa-id-card"></i> NIT Empresa</label>
-          <input type="text" id="reg-nit" placeholder="0614-000000-000-0" required>
-        </div>
-        <div class="form-group">
-          <label><i class="fa-solid fa-user"></i> Nombre del Administrador</label>
-          <input type="text" id="reg-nombre" placeholder="Nombre Completo" required>
-        </div>
-        <div class="form-group">
-          <label><i class="fa-solid fa-envelope"></i> Correo del Administrador</label>
-          <input type="email" id="reg-email" placeholder="admin@empresa.com" required>
-        </div>
-        <div class="form-group">
-          <label><i class="fa-solid fa-lock"></i> Contraseña</label>
-          <input type="password" id="reg-pass" placeholder="••••••••" required>
-        </div>
-        <button type="submit" class="btn-primary btn-block">
-          <i class="fa-solid fa-user-plus"></i> Crear Cuenta y Empresa
-        </button>
-      </form>
-
-      <div id="auth-mensaje" class="mensaje-status hidden"></div>
-    </div>
-  </div>
-
-  <!-- PANEL PRINCIPAL (DASHBOARD) -->
-  <div id="app-container" class="app-layout hidden">
-    
-    <!-- Sidebar / Menú Lateral -->
-    <aside class="sidebar">
-      <div class="sidebar-brand">
-        <i class="fa-solid fa-chart-line"></i>
-        <span>NEXUS</span>
-      </div>
-      <div class="user-info-box">
-        <p class="user-name" id="display-user-name">Usuario</p>
-        <span class="user-role" id="display-user-role">Administrador</span>
-      </div>
-      <nav class="sidebar-menu">
-        <button class="nav-item active" onclick="navegarA('modulo-dashboard')">
-          <i class="fa-solid fa-house"></i> Inicio
-        </button>
-        <button class="nav-item" onclick="navegarA('modulo-empleados')">
-          <i class="fa-solid fa-users"></i> Empleados
-        </button>
-        <button class="nav-item" onclick="navegarA('modulo-novedades')">
-          <i class="fa-solid fa-file-circle-exclamation"></i> Novedades
-        </button>
-        <button class="nav-item" onclick="navegarA('modulo-planillas')">
-          <i class="fa-solid fa-calculator"></i> Planillas
-        </button>
-        <button class="nav-item" onclick="navegarA('modulo-auditoria')">
-          <i class="fa-solid fa-shield-halved"></i> Auditoría
-        </button>
-      </nav>
-      <div class="sidebar-footer">
-        <button class="btn-logout" onclick="cerrarSesion()">
-          <i class="fa-solid fa-power-off"></i> Cerrar Sesión
-        </button>
-      </div>
-    </aside>
-
-    <!-- Contenido Principal -->
-    <main class="main-content">
-      
-      <!-- Topbar -->
-      <header class="topbar">
-        <h1 id="page-title">Panel Principal</h1>
-        <div class="empresa-badge" id="display-empresa-id">EMP-000</div>
-      </header>
-
-      <!-- MÓDULO DASHBOARD -->
-      <section id="modulo-dashboard" class="modulo-content">
-        <div class="cards-grid">
-          <div class="card-kpi">
-            <i class="fa-solid fa-users kpi-icon"></i>
-            <div>
-              <h3 id="kpi-empleados">0</h3>
-              <p>Empleados Activos</p>
+    <!-- PANTALLA DE AUTENTICACIÓN (LOGIN / REGISTRO) -->
+    <div id="authScreen" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 overflow-y-auto">
+        <div class="auth-card w-full max-w-md p-8 rounded-2xl shadow-2xl border border-slate-700 my-8">
+            
+            <!-- LOGO / ENCABEZADO -->
+            <div class="text-center mb-6">
+                <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-indigo-600 text-white mb-3 shadow-lg shadow-indigo-500/30">
+                    <i class="fa-solid fa-chart-line text-2xl"></i>
+                </div>
+                <h1 class="text-2xl font-bold text-slate-900 tracking-wide">NEXUS</h1>
+                <p class="text-xs text-indigo-600 font-semibold uppercase tracking-wider">Servicios Empresariales S.A. de C.V.</p>
             </div>
-          </div>
-          <div class="card-kpi">
-            <i class="fa-solid fa-receipt kpi-icon"></i>
-            <div>
-              <h3 id="kpi-novedades">0</h3>
-              <p>Novedades Registradas</p>
-            </div>
-          </div>
-          <div class="card-kpi">
-            <i class="fa-solid fa-check-double kpi-icon"></i>
-            <div>
-              <h3>V 5.1</h3>
-              <p>Estado de API Nexus</p>
-            </div>
-          </div>
-        </div>
-      </section>
 
-      <!-- MÓDULO EMPLEADOS -->
-      <section id="modulo-empleados" class="modulo-content hidden">
-        <div class="section-header">
-          <h2>Gestión de Empleados</h2>
-          <button class="btn-primary" onclick="abrirModalEmpleado()">
-            <i class="fa-solid fa-plus"></i> Nuevo Empleado
-          </button>
-        </div>
-        <div class="table-responsive">
-          <table class="data-table">
-            <thead>
-              <tr>
-                <th>ID</th>
-                <th>Nombre Completo</th>
-                <th>DUI</th>
-                <th>Cargo</th>
-                <th>Salario Base</th>
-                <th>Estado</th>
-              </tr>
-            </thead>
-            <tbody id="tabla-empleados-body">
-              <tr><td colspan="6" class="text-center">Cargando empleados...</td></tr>
-            </tbody>
-          </table>
-        </div>
-      </section>
+            <!-- FORMULARIO: INICIAR SESIÓN -->
+            <form id="loginForm" onsubmit="handleLogin(event)" class="space-y-4">
+                <h2 class="text-lg font-semibold text-slate-700 text-center mb-2">Iniciar Sesión</h2>
+                
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Correo Electrónico</label>
+                    <div class="relative">
+                        <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">
+                            <i class="fa-solid fa-envelope"></i>
+                        </span>
+                        <input type="email" required placeholder="empresa@nexus.com" class="w-full pl-10 pr-4 py-2.5 rounded-lg border border-slate-300 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm outline-none transition">
+                    </div>
+                </div>
 
-      <!-- MÓDULO NOVEDADES -->
-      <section id="modulo-novedades" class="modulo-content hidden">
-        <div class="section-header">
-          <h2>Registro de Novedades</h2>
-          <button class="btn-primary" onclick="abrirModalNovedad()">
-            <i class="fa-solid fa-plus"></i> Registrar Novedad
-          </button>
-        </div>
-        <div class="table-responsive">
-          <table class="data-table">
-            <thead>
-              <tr>
-                <th>ID Novedad</th>
-                <th>ID Empleado</th>
-                <th>Periodo</th>
-                <th>Tipo</th>
-                <th>Cantidad</th>
-                <th>Valor ($)</th>
-                <th>Estado</th>
-              </tr>
-            </thead>
-            <tbody id="tabla-novedades-body">
-              <tr><td colspan="7" class="text-center">Cargando novedades...</td></tr>
-            </tbody>
-          </table>
-        </div>
-      </section>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Contraseña</label>
+                    <div class="relative">
+                        <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">
+                            <i class="fa-solid fa-lock"></i>
+                        </span>
+                        <input type="password" required placeholder="••••••••" class="w-full pl-10 pr-4 py-2.5 rounded-lg border border-slate-300 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm outline-none transition">
+                    </div>
+                </div>
 
-      <!-- MÓDULO PLANILLAS -->
-      <section id="modulo-planillas" class="modulo-content hidden">
-        <div class="section-header">
-          <h2>Procesamiento de Planilla</h2>
-        </div>
-        <p>Seleccione los parámetros para consultar o procesar los cálculos salariales.</p>
-      </section>
+                <button type="submit" class="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-lg shadow-md hover:shadow-lg transition duration-200">
+                    Ingresar al Sistema
+                </button>
 
-      <!-- MÓDULO AUDITORÍA -->
-      <section id="modulo-auditoria" class="modulo-content hidden">
-        <div class="section-header">
-          <h2>Bitácora de Auditoría</h2>
-        </div>
-        <div class="table-responsive">
-          <table class="data-table">
-            <thead>
-              <tr>
-                <th>ID Auditoría</th>
-                <th>Fecha / Hora</th>
-                <th>Acción</th>
-                <th>Usuario</th>
-                <th>Registro Afectado</th>
-                <th>Resultado</th>
-              </tr>
-            </thead>
-            <tbody id="tabla-auditoria-body">
-              <tr><td colspan="6" class="text-center">Cargando registros de auditoría...</td></tr>
-            </tbody>
-          </table>
-        </div>
-      </section>
+                <div class="pt-4 border-t border-slate-200 text-center">
+                    <p class="text-xs text-slate-600">¿No tienes una empresa registrada?</p>
+                    <button type="button" onclick="toggleAuthMode('register')" class="mt-1 text-sm text-indigo-600 hover:text-indigo-800 font-semibold underline">
+                        Registrar Empresa
+                    </button>
+                </div>
+            </form>
 
-    </main>
-  </div>
+            <!-- FORMULARIO: REGISTRAR EMPRESA -->
+            <form id="registerForm" onsubmit="handleRegister(event)" class="space-y-4 hidden">
+                <h2 class="text-lg font-semibold text-slate-700 text-center mb-2">Registrar Nueva Empresa</h2>
 
-  <!-- MODAL REGISTRO EMPLEADO -->
-  <div id="modal-empleado" class="modal-backdrop hidden">
-    <div class="modal-card">
-      <div class="modal-header">
-        <h3>Registrar Nuevo Empleado</h3>
-        <button class="btn-close" onclick="cerrarModalEmpleado()">&times;</button>
-      </div>
-      <form onsubmit="guardarEmpleado(event)">
-        <div class="form-group">
-          <label>Nombre Completo</label>
-          <input type="text" id="emp-nombre" required>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Nombre de la Empresa</label>
+                    <input type="text" required placeholder="Ej. Mi Empresa S.A. de C.V." class="w-full px-4 py-2.5 rounded-lg border border-slate-300 focus:ring-2 focus:ring-indigo-500 text-sm outline-none">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Correo del Administrador</label>
+                    <input type="email" required placeholder="admin@empresa.com" class="w-full px-4 py-2.5 rounded-lg border border-slate-300 focus:ring-2 focus:ring-indigo-500 text-sm outline-none">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Contraseña</label>
+                    <input type="password" required placeholder="••••••••" class="w-full px-4 py-2.5 rounded-lg border border-slate-300 focus:ring-2 focus:ring-indigo-500 text-sm outline-none">
+                </div>
+
+                <button type="submit" class="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-medium rounded-lg shadow-md hover:shadow-lg transition duration-200">
+                    Crear Cuenta y Acceder
+                </button>
+
+                <div class="pt-4 border-t border-slate-200 text-center">
+                    <p class="text-xs text-slate-600">¿Ya tienes una cuenta?</p>
+                    <button type="button" onclick="toggleAuthMode('login')" class="mt-1 text-sm text-indigo-600 hover:text-indigo-800 font-semibold underline">
+                        Volver al Inicio de Sesión
+                    </button>
+                </div>
+            </form>
+
         </div>
-        <div class="form-group">
-          <label>DUI</label>
-          <input type="text" id="emp-dui" placeholder="00000000-0" required>
-        </div>
-        <div class="form-group">
-          <label>Cargo</label>
-          <input type="text" id="emp-cargo" required>
-        </div>
-        <div class="form-group">
-          <label>Salario Base ($)</label>
-          <input type="number" step="0.01" id="emp-salario" required>
-        </div>
-        <button type="submit" class="btn-primary btn-block">Guardar Empleado</button>
-      </form>
     </div>
-  </div>
 
-  <!-- WIDGET ASISTENTE ATENA -->
-  <div id="atena-widget" class="atena-container">
-    <button id="atena-toggle" class="atena-btn" onclick="toggleAtena()">
-      <i class="fa-solid fa-robot"></i>
-    </button>
-    <div id="atena-box" class="atena-chat-box hidden">
-      <div class="atena-chat-header">
-        <span><i class="fa-solid fa-robot"></i> Atena - Asistente NEXUS</span>
-        <button onclick="toggleAtena()">&times;</button>
-      </div>
-      <div id="atena-messages" class="atena-messages">
-        <div class="msg atena-msg">¡Hola! Soy Atena. ¿In qué puedo ayudarte hoy con tus consultas o cálculos?</div>
-      </div>
-      <div class="atena-input-area">
-        <input type="text" id="atena-input" placeholder="Escribe tu consulta..." onkeypress="evaluarAtenaTecla(event)">
-        <button onclick="enviarMensajeAtena()"><i class="fa-solid fa-paper-plane"></i></button>
-      </div>
+    <!-- PANEL PRINCIPAL (DASHBOARD - OCULTO INICIALMENTE) -->
+    <div id="mainApp" class="hidden flex-1 flex flex-col min-h-screen bg-slate-100">
+        <!-- BARRA SUPERIOR DE NAVEGACIÓN -->
+        <header class="bg-white border-b border-slate-200 px-6 py-4 flex items-center justify-between shadow-sm">
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 rounded-lg bg-indigo-600 text-white flex items-center justify-center font-bold">
+                    N
+                </div>
+                <div>
+                    <h2 class="text-base font-bold text-slate-800">NEXUS Servicios Empresariales</h2>
+                    <p class="text-xs text-slate-500" id="userCompanyDisplay">Panel General</p>
+                </div>
+            </div>
+            <button onclick="handleLogout()" class="px-4 py-2 text-xs font-medium text-slate-600 hover:text-red-600 hover:bg-red-50 rounded-lg border border-slate-200 transition">
+                <i class="fa-solid fa-right-from-bracket mr-1"></i> Cerrar Sesión
+            </button>
+        </header>
+
+        <!-- CONTENIDO DEL PANEL -->
+        <main class="flex-1 p-6 max-w-7xl mx-auto w-full">
+            <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200 mb-6">
+                <h3 class="text-lg font-bold text-slate-800 mb-2">Bienvenido al Sistema</h3>
+                <p class="text-sm text-slate-600">Has ingresado correctamente al panel de administración empresarial.</p>
+            </div>
+        </main>
     </div>
-  </div>
 
-  <script src="app.js"></script>
+    <!-- LÓGICA JAVASCRIPT -->
+    <script>
+        // Alternar entre el formulario de Login y Registro
+        function toggleAuthMode(mode) {
+            const loginForm = document.getElementById('loginForm');
+            const registerForm = document.getElementById('registerForm');
+
+            if (mode === 'register') {
+                loginForm.classList.add('hidden');
+                registerForm.classList.remove('hidden');
+            } else {
+                registerForm.classList.add('hidden');
+                loginForm.classList.remove('hidden');
+            }
+        }
+
+        // Simulación de Inicio de Sesión
+        function handleLogin(event) {
+            event.preventDefault();
+            enterApp('Empresa Registrada');
+        }
+
+        // Simulación de Registro de Empresa
+        function handleRegister(event) {
+            event.preventDefault();
+            enterApp('Nueva Empresa S.A.');
+        }
+
+        // Función para ingresar a la aplicación
+        function enterApp(companyName) {
+            document.getElementById('authScreen').classList.add('hidden');
+            document.getElementById('mainApp').classList.remove('hidden');
+            document.getElementById('userCompanyDisplay').innerText = companyName;
+        }
+
+        // Función para cerrar sesión
+        function handleLogout() {
+            document.getElementById('mainApp').classList.add('hidden');
+            document.getElementById('authScreen').classList.remove('hidden');
+        }
+    </script>
 </body>
 </html>
