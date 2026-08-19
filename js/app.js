@@ -4,7 +4,7 @@
  */
 
 function idEmpresaActiva() {
-    const usuario = Auth.usuarioActual();
+    const usuario = typeof Auth !== 'undefined' ? Auth.usuarioActual() : null;
     return usuario ? (usuario.ID_Empresa || usuario.id_empresa || '') : '';
 }
 
@@ -13,22 +13,29 @@ function filtroEmpresa() {
 }
 
 function mostrarSeccion(idSeccion, elementoNav) {
-    document.querySelectorAll('.app-section').forEach(sec => sec.classList.remove('active'));
-    document.querySelectorAll('.nav-link').forEach(link => link.classList.remove('active'));
+    document.querySelectorAll('.tab-content, .app-section').forEach(sec => sec.classList.remove('active'));
+    document.querySelectorAll('.sidebar-nav a, .nav-link').forEach(link => link.classList.remove('active'));
 
     const objetivo = document.getElementById(idSeccion);
     if (objetivo) objetivo.classList.add('active');
     if (elementoNav) elementoNav.classList.add('active');
+
+    // Actualizar título superior
+    const pageTitle = document.getElementById('page-title');
+    if (pageTitle && elementoNav) {
+        pageTitle.textContent = elementoNav.textContent.trim();
+    }
 
     cargarDatosSeccion(idSeccion);
 }
 
 async function cargarDatosSeccion(idSeccion) {
     const empId = idEmpresaActiva();
-    if (!empId) return;
+    if (!empId && idSeccion !== 'inicio') return;
 
     switch (idSeccion) {
         case 'inicio':
+        case 'tab-dashboard':
             const user = Auth.usuarioActual();
             const dashNombre = document.getElementById('dash-empresa-nombre');
             if (dashNombre && user) dashNombre.textContent = user.Nombre_Empresa || user.empresa || 'NEXUS';
@@ -75,6 +82,7 @@ async function cargarDatosSeccion(idSeccion) {
 // 1. Empresa
 async function cargarSeccionEmpresa() {
     const contenedor = document.getElementById('empresa-view');
+    if (!contenedor) return;
     contenedor.innerHTML = '<p>Cargando datos de la empresa...</p>';
     try {
         const usuario = Auth.usuarioActual();
@@ -98,6 +106,7 @@ async function cargarSeccionEmpresa() {
 // 2. Empleados
 async function cargarSeccionEmpleados() {
     const contenedor = document.getElementById('empleados-view');
+    if (!contenedor) return;
     contenedor.innerHTML = '<p>Cargando lista de empleados...</p>';
     try {
         const respuesta = await Api.getEmpleados(filtroEmpresa());
@@ -141,6 +150,7 @@ async function cargarSeccionEmpleados() {
 async function cargarSeccionNovedades() {
     await actualizarSelectEmpleados('novedad-empleado');
     const contenedor = document.getElementById('novedades-view');
+    if (!contenedor) return;
     contenedor.innerHTML = '<p>Cargando novedades...</p>';
     
     try {
@@ -210,6 +220,7 @@ async function cargarSelectoresCalculadora() {
 // 5. Planillas
 async function cargarSeccionPlanillas() {
     const contenedor = document.getElementById('planillas-view');
+    if (!contenedor) return;
     contenedor.innerHTML = '<p>Cargando planillas...</p>';
 
     try {
@@ -279,6 +290,7 @@ async function cargarSeccionDetallePlanilla() {
 
 async function renderizarDetallePlanilla(idPlanilla) {
     const contenedor = document.getElementById('detalle-view');
+    if (!contenedor) return;
     if (!idPlanilla) {
         contenedor.innerHTML = '<p>Seleccione una planilla para ver el detalle.</p>';
         return;
@@ -336,6 +348,7 @@ async function renderizarDetallePlanilla(idPlanilla) {
 // 7. Reportes
 async function cargarSeccionReportes() {
     const contenedor = document.getElementById('reportes-view');
+    if (!contenedor) return;
     contenedor.innerHTML = '<p>Cargando reportes contables...</p>';
     try {
         const respuesta = await Api.getReportes(filtroEmpresa());
@@ -382,6 +395,7 @@ async function cargarSeccionReportes() {
 // 8. Historial
 async function cargarSeccionHistorial() {
     const contenedor = document.getElementById('historial-view');
+    if (!contenedor) return;
     contenedor.innerHTML = '<p>Cargando historial...</p>';
     try {
         const respuesta = await Api.getHistorial(filtroEmpresa());
@@ -428,6 +442,7 @@ async function cargarSeccionHistorial() {
 // 9. Auditoría
 async function cargarSeccionAuditoria() {
     const contenedor = document.getElementById('auditoria-view');
+    if (!contenedor) return;
     contenedor.innerHTML = '<p>Cargando bitácora de auditoría...</p>';
     try {
         const respuesta = await Api.getAuditoria(filtroEmpresa());
@@ -474,6 +489,40 @@ async function cargarSeccionAuditoria() {
 // INICIALIZACIÓN Y EVENT LISTENERS
 document.addEventListener('DOMContentLoaded', () => {
 
+    // NAVEGACIÓN COMPATIBLE CON MENÚ LATERAL Y BARRAS VIEJAS
+    const todosLosEnlaces = document.querySelectorAll('.sidebar-nav a, .nav-link');
+    todosLosEnlaces.forEach(link => {
+        link.addEventListener('click', (e) => {
+            e.preventDefault();
+            const target = link.getAttribute('data-tab') || link.getAttribute('onclick')?.match(/'([^']+)'/)?.[1];
+            if (target) {
+                mostrarSeccion(target, link);
+            }
+        });
+    });
+
+    // CONTROL DE MODAL DE LOGIN Y REGISTRO
+    const linkIrARegistro = document.getElementById('link-ir-a-registro');
+    const linkIrALogin = document.getElementById('link-ir-a-login');
+    const contenedorLogin = document.getElementById('contenedor-login');
+    const contenedorRegistro = document.getElementById('contenedor-registro');
+
+    if (linkIrARegistro) {
+        linkIrARegistro.addEventListener('click', (e) => {
+            e.preventDefault();
+            if (contenedorLogin) contenedorLogin.style.display = 'none';
+            if (contenedorRegistro) contenedorRegistro.style.display = 'block';
+        });
+    }
+
+    if (linkIrALogin) {
+        linkIrALogin.addEventListener('click', (e) => {
+            e.preventDefault();
+            if (contenedorRegistro) contenedorRegistro.style.display = 'none';
+            if (contenedorLogin) contenedorLogin.style.display = 'block';
+        });
+    }
+
     // Comprobar Sesión
     if (typeof Auth !== 'undefined') {
         Auth.init();
@@ -488,7 +537,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const btnSalir = document.getElementById('btn-cerrar-sesion');
     if (btnSalir) {
         btnSalir.addEventListener('click', () => {
-            Auth.cerrarSesion();
+            if (typeof Auth !== 'undefined') {
+                Auth.cerrarSesion();
+            }
             location.reload();
         });
     }
@@ -499,8 +550,10 @@ document.addEventListener('DOMContentLoaded', () => {
         formEmp.addEventListener('submit', async (e) => {
             e.preventDefault();
             const msg = document.getElementById('empleado-form-mensaje');
-            msg.textContent = 'Guardando empleado...';
-            msg.className = 'nexus-form-mensaje';
+            if (msg) {
+                msg.textContent = 'Guardando empleado...';
+                msg.className = 'nexus-form-mensaje';
+            }
 
             const nuevo = {
                 ID_Empresa: idEmpresaActiva(),
@@ -512,17 +565,23 @@ document.addEventListener('DOMContentLoaded', () => {
             try {
                 const res = await Api.registrarEmpleado(nuevo);
                 if (res && res.exito !== false) {
-                    msg.textContent = 'Empleado registrado exitosamente.';
-                    msg.className = 'nexus-form-mensaje exito';
+                    if (msg) {
+                        msg.textContent = 'Empleado registrado exitosamente.';
+                        msg.className = 'nexus-form-mensaje exito';
+                    }
                     formEmp.reset();
                     cargarSeccionEmpleados();
                 } else {
-                    msg.textContent = res.mensaje || 'No se pudo guardar el empleado.';
-                    msg.className = 'nexus-form-mensaje error';
+                    if (msg) {
+                        msg.textContent = res.mensaje || 'No se pudo guardar el empleado.';
+                        msg.className = 'nexus-form-mensaje error';
+                    }
                 }
             } catch (err) {
-                msg.textContent = 'Error de red al guardar el empleado.';
-                msg.className = 'nexus-form-mensaje error';
+                if (msg) {
+                    msg.textContent = 'Error de red al guardar el empleado.';
+                    msg.className = 'nexus-form-mensaje error';
+                }
             }
         });
     }
@@ -533,7 +592,7 @@ document.addEventListener('DOMContentLoaded', () => {
         formNov.addEventListener('submit', async (e) => {
             e.preventDefault();
             const msg = document.getElementById('novedad-form-mensaje');
-            msg.textContent = 'Registrando novedad...';
+            if (msg) msg.textContent = 'Registrando novedad...';
 
             const novedad = {
                 ID_Empresa: idEmpresaActiva(),
@@ -545,17 +604,23 @@ document.addEventListener('DOMContentLoaded', () => {
             try {
                 const res = await Api.registrarNovedad(novedad);
                 if (res && res.exito !== false) {
-                    msg.textContent = 'Novedad agregada correctamente.';
-                    msg.className = 'nexus-form-mensaje exito';
+                    if (msg) {
+                        msg.textContent = 'Novedad agregada correctamente.';
+                        msg.className = 'nexus-form-mensaje exito';
+                    }
                     formNov.reset();
                     cargarSeccionNovedades();
                 } else {
-                    msg.textContent = res.mensaje || 'Error al guardar novedad.';
-                    msg.className = 'nexus-form-mensaje error';
+                    if (msg) {
+                        msg.textContent = res.mensaje || 'Error al guardar novedad.';
+                        msg.className = 'nexus-form-mensaje error';
+                    }
                 }
             } catch (err) {
-                msg.textContent = 'Error de red al registrar la novedad.';
-                msg.className = 'nexus-form-mensaje error';
+                if (msg) {
+                    msg.textContent = 'Error de red al registrar la novedad.';
+                    msg.className = 'nexus-form-mensaje error';
+                }
             }
         });
     }
@@ -568,8 +633,10 @@ document.addEventListener('DOMContentLoaded', () => {
             const msg = document.getElementById('calc-form-mensaje');
 
             if (!empId) {
-                msg.textContent = 'Por favor seleccione un colaborador.';
-                msg.className = 'nexus-form-mensaje error';
+                if (msg) {
+                    msg.textContent = 'Por favor seleccione un colaborador.';
+                    msg.className = 'nexus-form-mensaje error';
+                }
                 return;
             }
 
@@ -578,8 +645,10 @@ document.addEventListener('DOMContentLoaded', () => {
             const bonos = parseFloat(document.getElementById('calc-bonos').value) || 0;
             const comisiones = parseFloat(document.getElementById('calc-comisiones').value) || 0;
 
-            msg.textContent = 'Procesando registro de novedades múltiples...';
-            msg.className = 'nexus-form-mensaje';
+            if (msg) {
+                msg.textContent = 'Procesando registro de novedades múltiples...';
+                msg.className = 'nexus-form-mensaje';
+            }
 
             const peticiones = [];
             const empEmpresa = idEmpresaActiva();
@@ -590,19 +659,25 @@ document.addEventListener('DOMContentLoaded', () => {
             if (comisiones > 0) peticiones.push(Api.registrarNovedad({ ID_Empresa: empEmpresa, ID_Empleado: empId, tipo: 'Comisión', detalle: `$${comisiones.toFixed(2)}` }));
 
             if (peticiones.length === 0) {
-                msg.textContent = 'Ingrese al menos un monto en los campos.';
-                msg.className = 'nexus-form-mensaje error';
+                if (msg) {
+                    msg.textContent = 'Ingrese al menos un monto en los campos.';
+                    msg.className = 'nexus-form-mensaje error';
+                }
                 return;
             }
 
             try {
                 await Promise.all(peticiones);
-                msg.textContent = 'Novedades registradas con éxito.';
-                msg.className = 'nexus-form-mensaje exito';
+                if (msg) {
+                    msg.textContent = 'Novedades registradas con éxito.';
+                    msg.className = 'nexus-form-mensaje exito';
+                }
                 document.getElementById('nexus-form-calculadora').reset();
             } catch (e) {
-                msg.textContent = 'Ocurrió un error al registrar las novedades.';
-                msg.className = 'nexus-form-mensaje error';
+                if (msg) {
+                    msg.textContent = 'Ocurrió un error al registrar las novedades.';
+                    msg.className = 'nexus-form-mensaje error';
+                }
             }
         });
     }
@@ -614,7 +689,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!confirm('¿Desea generar la planilla para la empresa actual con el período presente?')) return;
             
             const cont = document.getElementById('planillas-view');
-            cont.innerHTML = '<p>Generando planilla y calculando aportes legales...</p>';
+            if (cont) cont.innerHTML = '<p>Generando planilla y calculando aportes legales...</p>';
 
             try {
                 const res = await Api.generarPlanilla({ ID_Empresa: idEmpresaActiva(), Periodo: new Date().toISOString().slice(0, 7) });
@@ -641,5 +716,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // Carga inicial
-    mostrarSeccion('inicio', document.querySelector('.nav-link.active'));
+    const primerEnlace = document.querySelector('.sidebar-nav a.active') || document.querySelector('.sidebar-nav a');
+    const inicioTab = primerEnlace ? primerEnlace.getAttribute('data-tab') : 'tab-dashboard';
+    mostrarSeccion(inicioTab, primerEnlace);
 });
