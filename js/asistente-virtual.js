@@ -1,107 +1,111 @@
 /**
- * js/asistente-virtual.js
- * Asistente Virtual "Atena" impulsado por IA Gemini
+ * NEXUS — Asistente Virtual Atena (asistente-virtual.js)
  */
+const AsistenteVirtual = {
+  reconocimiento: null,
+  sintesis: window.speechSynthesis,
 
-(function () {
-  'use strict';
+  init() {
+    const btnEnviar = document.getElementById('atena-btn-send') || document.querySelector('.atena-send-btn');
+    const inputTexto = document.getElementById('atena-input') || document.querySelector('.atena-input');
+    const btnMic = document.getElementById('atena-btn-mic') || document.querySelector('.atena-mic-btn');
+    const formAtena = document.getElementById('atena-form') || document.querySelector('.atena-form');
 
-  function initAtena() {
-    const toggleBtn = document.getElementById('nexus-chat-toggle');
-    const panel = document.getElementById('nexus-chat-panel');
-    const closeBtn = document.getElementById('nexus-chat-close');
-    const form = document.getElementById('nexus-chat-form');
-    const input = document.getElementById('nexus-chat-input');
-    const messages = document.getElementById('nexus-chat-messages');
-
-    if (!toggleBtn || !panel || !form || !input || !messages) return;
-
-    toggleBtn.addEventListener('click', () => {
-      const hidden = panel.hasAttribute('hidden');
-      if (hidden) {
-        panel.removeAttribute('hidden');
-        toggleBtn.setAttribute('aria-expanded', 'true');
-        input.focus();
-        if (messages.children.length === 0) {
-          agregarMensajeBot('¡Hola! Soy Atena, tu asistente virtual de NEXUS. ¿En qué te puedo ayudar hoy?');
-        }
-      } else {
-        panel.setAttribute('hidden', '');
-        toggleBtn.setAttribute('aria-expanded', 'false');
-      }
-    });
-
-    if (closeBtn) {
-      closeBtn.addEventListener('click', () => {
-        panel.setAttribute('hidden', '');
-        toggleBtn.setAttribute('aria-expanded', 'false');
+    // 1. Evitar que el formulario recargue o cambie de pestaña
+    if (formAtena) {
+      formAtena.addEventListener('submit', (e) => {
+        e.preventDefault();
+        this.enviarMensaje();
       });
     }
 
-    form.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const texto = input.value.trim();
-      if (!texto) return;
+    if (btnEnviar) {
+      btnEnviar.addEventListener('click', (e) => {
+        e.preventDefault();
+        this.enviarMensaje();
+      });
+    }
 
-      agregarMensajeUsuario(texto);
-      input.value = '';
-
-      const indicandoPensando = agregarMensajePensando();
-
-      try {
-        // Petición directa a Gemini a través de la API
-        const res = await Api.preguntarIA({ pregunta: texto });
-        indicandoPensando.remove();
-
-        if (res && res.respuesta) {
-          agregarMensajeBot(res.respuesta);
-        } else if (res && res.mensaje) {
-          agregarMensajeBot(res.mensaje);
-        } else {
-          throw new Error('Respuesta vacía del servidor.');
+    if (inputTexto) {
+      inputTexto.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          this.enviarMensaje();
         }
-      } catch (err) {
-        indicandoPensando.remove();
-        // Fallback local en caso de error de red
-        if (typeof ConocimientoAtena !== 'undefined' && ConocimientoAtena.buscar) {
-          const respLocal = ConocimientoAtena.buscar(texto);
-          agregarMensajeBot(respLocal || 'Lo siento, no pude conectarme con el servicio de IA de Gemini.');
-        } else {
-          agregarMensajeBot('Ocurrió un error al procesar tu solicitud con la IA.');
-        }
+      });
+    }
+
+    // 2. Configurar Reconocimiento de Voz (Micrófono)
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (SpeechRecognition) {
+      this.reconocimiento = new SpeechRecognition();
+      this.reconocimiento.lang = 'es-SV';
+      this.reconocimiento.continuous = false;
+
+      this.reconocimiento.onresult = (e) => {
+        const textoDetectado = e.results[0][0].transcript;
+        if (inputTexto) inputTexto.value = textoDetectado;
+        if (btnMic) btnMic.classList.remove('escuchando');
+        this.enviarMensaje();
+      };
+
+      this.reconocimiento.onerror = () => {
+        if (btnMic) btnMic.classList.remove('escuchando');
+      };
+
+      if (btnMic) {
+        btnMic.addEventListener('click', (e) => {
+          e.preventDefault();
+          btnMic.classList.add('escuchando');
+          this.reconocimiento.start();
+        });
       }
-    });
-  }
+    }
+  },
 
-  function agregarMensajeUsuario(texto) {
-    const msg = document.createElement('div');
-    msg.className = 'nexus-chat__mensaje nexus-chat__mensaje--usuario';
-    msg.textContent = texto;
-    document.getElementById('nexus-chat-messages').appendChild(msg);
-    hacerScrollAbajo();
-  }
+  async enviarMensaje() {
+    const input = document.getElementById('atena-input') || document.querySelector('.atena-input');
+    const contenedorChat = document.getElementById('atena-chat-box') || document.querySelector('.atena-chat-messages');
+    if (!input || !input.value.trim()) return;
 
-  function agregarMensajeBot(texto) {
-    const msg = document.createElement('div');
-    msg.className = 'nexus-chat__mensaje nexus-chat__mensaje--bot';
-    msg.textContent = texto;
-    document.getElementById('nexus-chat-messages').appendChild(msg);
-    hacerScrollAbajo();
-  }
+    const mensaje = input.value.trim();
+    input.value = '';
 
-  function agregarMensajePensando() {
-    const msg = document.createElement('div');
-    msg.className = 'nexus-chat__mensaje nexus-chat__mensaje--bot nexus-chat__mensaje--pensando';
-    msg.textContent = 'Atena está pensando...';
-    document.getElementById('nexus-chat-messages').appendChild(msg);
-    hacerScrollAbajo();
-    return msg;
-  }
+    this.agregarBurbuja(contenedorChat, mensaje, 'usuario');
 
-  function hacerScrollAbajo() {
-    const msgs = document.getElementById('nexus-chat-messages');
-    if (msgs) msgs.scrollTop = msgs.scrollHeight;
-  }
+    try {
+      // Petición al backend vía api.js
+      const res = await Api.preguntarIA({
+        pregunta: mensaje,
+        idEmpresa: typeof State !== 'undefined' ? State.getIdEmpresa() : ''
+      });
 
-  document.addEventListener('DOMContentLoaded', initAtena);
-})();
+      const respuestaAtena = res.respuesta || res.data || "Solicitud procesada correctamente.";
+      this.agregarBurbuja(contenedorChat, respuestaAtena, 'atena');
+      this.hablar(respuestaAtena);
+
+    } catch (error) {
+      this.agregarBurbuja(contenedorChat, "Error al conectar con Atena. Revisa tu conexión.", 'atena');
+    }
+  },
+
+  agregarBurbuja(chatBox, texto, tipo) {
+    if (!chatBox) return;
+    const div = document.createElement('div');
+    div.className = `atena-bubble ${tipo}`;
+    div.innerHTML = `<strong>${tipo === 'usuario' ? 'Tú' : 'Atena'}:</strong> ${texto}`;
+    chatBox.appendChild(div);
+    chatBox.scrollTop = chatBox.scrollHeight;
+  },
+
+  hablar(texto) {
+    if (this.sintesis) {
+      this.sintesis.cancel();
+      const voz = new SpeechSynthesisUtterance(texto);
+      voz.lang = 'es-ES';
+      this.sintesis.speak(voz);
+    }
+  }
+};
+
+document.addEventListener('DOMContentLoaded', () => AsistenteVirtual.init());
