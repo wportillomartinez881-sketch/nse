@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>NEXUS - Servicios Empresariales S.A. de C.V.</title>
   <link rel="stylesheet" href="css/estilos.css">
-  <!-- FontAwesome o iconos para la interfaz si los utilizas -->
+  <!-- FontAwesome e Iconos -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
@@ -13,28 +13,37 @@
   <!-- CONTENEDOR PRINCIPAL DE LA APLICACIÓN -->
   <div id="app-container" class="layout-grid">
 
-    <!-- BARRA LATERAL (SIDEBAR DE NAVEGACIÓN) -->
+    <!-- BARRA LATERAL (SIDEBAR DE NAVEGACIÓN COMPLETA) -->
     <aside class="sidebar">
       <div class="sidebar-header">
-        <h2>NEXUS</h2>
-        <span class="subtitle">Servicios Empresariales</span>
+        <div class="logo">
+          <i class="fa-solid fa-cube logo-icon"></i>
+          <h2>NEXUS</h2>
+        </div>
+        <span class="subtitle">Servicios Empresariales S.A. de C.V.</span>
       </div>
-      
+
       <nav class="sidebar-nav">
-        <ul>
-          <li><a href="#" data-tab="tab-dashboard" class="nav-link active"><i class="fa-solid fa-chart-pie"></i> Panel Principal</a></li>
-          <li><a href="#" data-tab="tab-empleados" class="nav-link"><i class="fa-solid fa-users"></i> Planilla y Empleados</a></li>
-          <li><a href="#" data-tab="tab-fiscal" class="nav-link"><i class="fa-solid fa-calculator"></i> Motor Fiscal y Retenciones</a></li>
-          <li><a href="#" data-tab="tab-historial" class="nav-link"><i class="fa-solid fa-clock-rotate-left"></i> Historial NEXUS</a></li>
-          <li><a href="#" data-tab="tab-auditoria" class="nav-link"><i class="fa-solid fa-shield-halved"></i> Registro de Auditoría</a></li>
-          <li><a href="#" data-tab="tab-fundamento" class="nav-link"><i class="fa-solid fa-book-bookmark"></i> Base Legal y Normativa</a></li>
-          <li><a href="#" data-tab="tab-atena" class="nav-link highlight-atena"><i class="fa-solid fa-robot"></i> Asistente Atena IA</a></li>
-        </ul>
+        <div class="nav-section-title">GENERAL</div>
+        <a href="#" data-tab="tab-dashboard" class="nav-link active"><i class="fa-solid fa-house"></i> Inicio / Dashboard</a>
+        <a href="#" data-tab="tab-empresa" class="nav-link"><i class="fa-solid fa-building"></i> Empresa</a>
+        <a href="#" data-tab="tab-empleados" class="nav-link"><i class="fa-solid fa-users"></i> Empleados</a>
+        <a href="#" data-tab="tab-novedades" class="nav-link"><i class="fa-solid fa-bell"></i> Novedades</a>
+
+        <div class="nav-section-title">GESTIÓN CONTABLE</div>
+        <a href="#" data-tab="tab-planillas" class="nav-link"><i class="fa-solid fa-money-check-dollar"></i> Planillas</a>
+        <a href="#" data-tab="tab-fiscal" class="nav-link"><i class="fa-solid fa-calculator"></i> Motor Fiscal y Retenciones</a>
+
+        <div class="nav-section-title">CONSULTAS Y AUDITORÍA</div>
+        <a href="#" data-tab="tab-historial" class="nav-link"><i class="fa-solid fa-clock-rotate-left"></i> Historial NEXUS</a>
+        <a href="#" data-tab="tab-auditoria" class="nav-link"><i class="fa-solid fa-shield-halved"></i> Auditoría</a>
+        <a href="#" data-tab="tab-fundamento" class="nav-link"><i class="fa-solid fa-book-bookmark"></i> Base Legal y Normativa</a>
+        <a href="#" data-tab="tab-atena" class="nav-link highlight-atena"><i class="fa-solid fa-robot"></i> Asistente Atena IA</a>
       </nav>
 
       <div class="sidebar-footer">
         <div id="usuario-info-card">
-          <span id="user-display-name">Cargando usuario...</span>
+          <span id="user-display-name">Cargando...</span>
           <button id="btn-cerrar-sesion" class="btn-logout"><i class="fa-solid fa-right-from-bracket"></i> Salir</button>
         </div>
       </div>
@@ -68,6 +77,14 @@
             <h3>Última Auditoría</h3>
             <p class="kpi-subtext" id="kpi-ultima-auditoria">Sin registros</p>
           </div>
+        </div>
+      </section>
+
+      <!-- VISTA NUEVA: EMPRESA -->
+      <section id="tab-empresa" class="tab-content">
+        <div class="card-panel">
+          <h2>Perfil de la Empresa</h2>
+          <p>Información corporativa registrada en el sistema fiscal.</p>
         </div>
       </section>
 
@@ -122,12 +139,27 @@
         </div>
       </section>
 
+      <!-- VISTA NUEVA: NOVEDADES -->
+      <section id="tab-novedades" class="tab-content">
+        <div class="card-panel">
+          <h2>Novedades y Notificaciones</h2>
+          <p>Registro de actualizaciones operativas e incidencias.</p>
+        </div>
+      </section>
+
+      <!-- VISTA NUEVA: PLANILLAS -->
+      <section id="tab-planillas" class="tab-content">
+        <div class="card-panel">
+          <h2>Gestión de Planillas</h2>
+          <p>Generación y procesamiento mensual de nóminas.</p>
+        </div>
+      </section>
+
       <!-- VISTA 3: MOTOR FISCAL Y CÁLCULOS -->
       <section id="tab-fiscal" class="tab-content">
         <div class="card-panel">
           <h2>Calculadora de Deducciones y Planilla (El Salvador)</h2>
           <div id="fiscal-engine-container">
-            <!-- Interfaz generada o controlada por fiscal-engine.js -->
             <form id="form-calculo-fiscal" class="form-grid">
               <div class="input-group">
                 <label for="calc-salario">Salario Bruto ($):</label>
@@ -289,7 +321,7 @@
     </div>
   </div>
 
-  <!-- ENLACES A TODOS LOS ARCHIVOS JS DE TU REPOSITORIO EN ORDEN DE DEPENDENCIA -->
+  <!-- SCRIPTS Y CONEXIONES JS -->
   <script src="js/config.js"></script>
   <script src="js/state.js"></script>
   <script src="js/validaciones.js"></script>
