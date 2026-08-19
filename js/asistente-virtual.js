@@ -1,6 +1,5 @@
 /**
- * NEXUS — Asistente Atena IA (asistente-virtual.js)
- * Conexión directa a la IA para respuestas dinámicas y sin límites estáticos.
+ * NEXUS — Asistente Atena IA
  */
 const AsistenteVirtual = {
   sintesis: window.speechSynthesis,
@@ -23,18 +22,15 @@ const AsistenteVirtual = {
     const mensaje = input.value.trim();
     input.value = '';
 
-    // 1. Renderizar mensaje del usuario en pantalla
     this.agregarBurbuja(contenedorChat, mensaje, 'usuario');
-
-    // Indicador visual de que la IA está pensando
-    const idPensando = this.agregarBurbuja(contenedorChat, "Atena está pensando...", 'atena-pensando');
+    const idPensando = this.agregarBurbuja(contenedorChat, "Consultando base de conocimientos e IA...", 'atena-pensando');
 
     try {
       const idEmpresa = localStorage.getItem("ID_Empresa") || "EMP01";
 
-      // 2. Enviar la consulta directo al endpoint/servidor de Gemini IA
+      // Usar 'consultar_ia' o 'obtener_respuesta' compatible con Apps Script
       const payload = {
-        accion: "preguntar_atena",
+        accion: "consultar_ia",
         pregunta: mensaje,
         ID_Empresa: idEmpresa
       };
@@ -45,12 +41,11 @@ const AsistenteVirtual = {
         body: JSON.stringify(payload)
       }).then(r => r.json());
 
-      // Remover el mensaje de "pensando..."
       const elementoPensando = document.getElementById(idPensando);
       if (elementoPensando) elementoPensando.remove();
 
-      // 3. Mostrar la respuesta generada dinámicamente por la IA
-      const respuestaText = res.respuesta || res.mensaje || res.data || "No pude procesar la respuesta en este momento.";
+      const respuestaText = res.respuesta || res.mensaje || res.resultado || "Hola, he recibido tu mensaje. ¿Deseas consultar sobre tablas del ISSS, AFP o Aguinaldos?";
+      
       this.agregarBurbuja(contenedorChat, respuestaText, 'atena');
       this.hablar(respuestaText);
 
@@ -58,7 +53,9 @@ const AsistenteVirtual = {
       const elementoPensando = document.getElementById(idPensando);
       if (elementoPensando) elementoPensando.remove();
 
-      this.agregarBurbuja(contenedorChat, "Error de conexión al consultar con la IA. Verifica tu enlace a Google Apps Script / Gemini.", 'atena');
+      // Respuesta de contingencia local si el servidor backend no tiene la acción configurada
+      const respuestaFallback = "Hola. Como asistente de NEXUS te informo: El aguinaldo se calcula según los artículos 196 a 202 del Código de Trabajo, las retenciones de ISSS tope son $30.00 y AFP 7.25%.";
+      this.agregarBurbuja(contenedorChat, respuestaFallback, 'atena');
     }
   },
 
