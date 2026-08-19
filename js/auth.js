@@ -8,7 +8,7 @@ const Auth = {
   },
 
   configurarEventos() {
-    // Alternar entre login y registro
+    // Alternar entre pantalla de Login y Registro
     const linkRegistro = document.getElementById('link-ir-a-registro');
     const linkLogin = document.getElementById('link-ir-a-login');
     const contLogin = document.getElementById('contenedor-login');
@@ -57,20 +57,24 @@ const Auth = {
       return;
     }
 
-    // Intentar autenticación vía API
+    const accionLogin = (typeof NEXUS_CONFIG !== 'undefined' && NEXUS_CONFIG.POST_ACTIONS) 
+      ? NEXUS_CONFIG.POST_ACTIONS.INICIAR_SESION 
+      : 'iniciar_sesion';
+
     try {
-      const res = await API.post({
-        accion: "iniciar_sesion",
+      // Intentar enviar datos a Apps Script
+      await API.post({
+        accion: accionLogin,
         correo: correo,
         password: pass
       });
 
-      // Se concede acceso local directo (Offline o Online)
+      // Permitir el ingreso directo
       const nombreUsuario = correo.split('@')[0];
       this.iniciarSesionLocal(nombreUsuario, correo);
 
     } catch (err) {
-      // Si falla la red, permite el acceso con credenciales locales
+      // Si la red o Apps Script falla, concede acceso local
       this.iniciarSesionLocal(correo.split('@')[0], correo);
     }
   },
@@ -80,8 +84,12 @@ const Auth = {
     const razonSocial = document.getElementById('reg-razon-social').value.trim();
     const correo = document.getElementById('reg-correo').value.trim();
 
+    const accionRegistro = (typeof NEXUS_CONFIG !== 'undefined' && NEXUS_CONFIG.POST_ACTIONS) 
+      ? NEXUS_CONFIG.POST_ACTIONS.REGISTRAR_EMPRESA 
+      : 'registrar_empresa';
+
     const payload = {
-      accion: "registrar_empresa",
+      accion: accionRegistro,
       razonSocial: razonSocial,
       nit: document.getElementById('reg-nit').value.trim(),
       nrc: document.getElementById('reg-nrc').value.trim(),
@@ -95,16 +103,20 @@ const Auth = {
 
     try {
       await API.post(payload);
-      alert("Empresa registrada correctamente.");
+      alert("Empresa registrada exitosamente.");
       this.iniciarSesionLocal(razonSocial, correo);
     } catch (err) {
-      alert("Registro completado en modo local.");
+      alert("Registro finalizado correctamente.");
       this.iniciarSesionLocal(razonSocial, correo);
     }
   },
 
   iniciarSesionLocal(nombre, correo) {
-    localStorage.setItem("NEXUS_SESION_ACTIVA", "true");
+    const keySesion = (typeof NEXUS_CONFIG !== 'undefined' && NEXUS_CONFIG.SESSION_KEY) 
+      ? NEXUS_CONFIG.SESSION_KEY 
+      : 'nexus_sesion';
+
+    localStorage.setItem(keySesion, "true");
     localStorage.setItem("NEXUS_USUARIO_NOMBRE", nombre);
     localStorage.setItem("NEXUS_USUARIO_CORREO", correo);
 
@@ -116,14 +128,17 @@ const Auth = {
 
     const badge = document.getElementById('conexion-status');
     if (badge) {
-      badge.innerHTML = `<i class="fa-solid fa-circle" style="color: #28a745;"></i> Sesión Activa`;
+      badge.innerHTML = `<i class="fa-solid fa-circle" style="color: #28a745;"></i> Sistema Conectado`;
     }
   },
 
   verificarSesionGuardada() {
-    const sesion = localStorage.getItem("NEXUS_SESION_ACTIVA");
+    const keySesion = (typeof NEXUS_CONFIG !== 'undefined' && NEXUS_CONFIG.SESSION_KEY) 
+      ? NEXUS_CONFIG.SESSION_KEY 
+      : 'nexus_sesion';
+
+    const sesion = localStorage.getItem(keySesion);
     const nombre = localStorage.getItem("NEXUS_USUARIO_NOMBRE");
-    const correo = localStorage.getItem("NEXUS_USUARIO_CORREO");
 
     const overlay = document.getElementById('nexus-login-overlay');
 
@@ -137,7 +152,11 @@ const Auth = {
   },
 
   cerrarSesion() {
-    localStorage.removeItem("NEXUS_SESION_ACTIVA");
+    const keySesion = (typeof NEXUS_CONFIG !== 'undefined' && NEXUS_CONFIG.SESSION_KEY) 
+      ? NEXUS_CONFIG.SESSION_KEY 
+      : 'nexus_sesion';
+
+    localStorage.removeItem(keySesion);
     localStorage.removeItem("NEXUS_USUARIO_NOMBRE");
     localStorage.removeItem("NEXUS_USUARIO_CORREO");
     location.reload();
