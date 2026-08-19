@@ -1,6 +1,6 @@
 /* Configuracion de NEXUS: reemplaza solo la URL por tu Web App de Apps Script. */
 const NEXUS_CONFIG = {
-  WEB_APP_URL: 'https://script.google.com/macros/s/AKfycbzuqC4RclUYdMhgTXA3iIVdp7WZuF5kwMZDcPv4NmAncVWAvZnNOPu0FajuBK1DkK95/exec',
+  WEB_APP_URL: 'https://script.google.com/macros/s/AKfycbzoCo98Z-eYWrQfNZOGzUByhF9Y1Bcb1QqMh0akVPgwYUdWC8xIg5ZqmWGCzaD0T5SB/exec',
   // CRITICO: tu doGet (Code.gs) lee e.parameter.accion, NO "recurso". Por
   // eso antes ninguna pantalla encontraba datos: el GET nunca coincidia
   // con ningun caso del mapa "acciones" de tu backend.
