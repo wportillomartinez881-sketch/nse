@@ -11,7 +11,7 @@ const AsistenteVirtual = {
     const btnMic = document.getElementById('atena-btn-mic') || document.querySelector('.atena-mic-btn');
     const formAtena = document.getElementById('atena-form') || document.querySelector('.atena-form');
 
-    // 1. Evitar que el formulario recargue o cambie de pestaña
+    // Evita que el formulario recargue la página o cambie de pestaña
     if (formAtena) {
       formAtena.addEventListener('submit', (e) => {
         e.preventDefault();
@@ -35,7 +35,7 @@ const AsistenteVirtual = {
       });
     }
 
-    // 2. Configurar Reconocimiento de Voz (Micrófono)
+    // Configuración del Micrófono (Reconocimiento de voz)
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (SpeechRecognition) {
       this.reconocimiento = new SpeechRecognition();
@@ -74,10 +74,10 @@ const AsistenteVirtual = {
     this.agregarBurbuja(contenedorChat, mensaje, 'usuario');
 
     try {
-      // Petición al backend vía api.js
+      const idEmpresa = localStorage.getItem("ID_Empresa") || '';
       const res = await Api.preguntarIA({
         pregunta: mensaje,
-        idEmpresa: typeof State !== 'undefined' ? State.getIdEmpresa() : ''
+        idEmpresa: idEmpresa
       });
 
       const respuestaAtena = res.respuesta || res.data || "Solicitud procesada correctamente.";
