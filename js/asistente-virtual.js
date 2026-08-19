@@ -2,25 +2,15 @@
  * NEXUS — Asistente Virtual Atena (asistente-virtual.js)
  */
 const AsistenteVirtual = {
-  reconocimiento: null,
   sintesis: window.speechSynthesis,
 
   init() {
-    const btnEnviar = document.getElementById('atena-btn-send') || document.querySelector('.atena-send-btn');
-    const inputTexto = document.getElementById('atena-input') || document.querySelector('.atena-input');
-    const btnMic = document.getElementById('atena-btn-mic') || document.querySelector('.atena-mic-btn');
-    const formAtena = document.getElementById('atena-form') || document.querySelector('.atena-form');
+    const formAtena = document.getElementById('form-chat-atena');
+    const inputTexto = document.getElementById('input-atena-mensaje');
 
-    // Evita que el formulario recargue la página o cambie de pestaña
+    // Evitar que el formulario recargue la página o cambie de pestaña
     if (formAtena) {
       formAtena.addEventListener('submit', (e) => {
-        e.preventDefault();
-        this.enviarMensaje();
-      });
-    }
-
-    if (btnEnviar) {
-      btnEnviar.addEventListener('click', (e) => {
         e.preventDefault();
         this.enviarMensaje();
       });
@@ -34,65 +24,41 @@ const AsistenteVirtual = {
         }
       });
     }
-
-    // Configuración del Micrófono (Reconocimiento de voz)
-    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-    if (SpeechRecognition) {
-      this.reconocimiento = new SpeechRecognition();
-      this.reconocimiento.lang = 'es-SV';
-      this.reconocimiento.continuous = false;
-
-      this.reconocimiento.onresult = (e) => {
-        const textoDetectado = e.results[0][0].transcript;
-        if (inputTexto) inputTexto.value = textoDetectado;
-        if (btnMic) btnMic.classList.remove('escuchando');
-        this.enviarMensaje();
-      };
-
-      this.reconocimiento.onerror = () => {
-        if (btnMic) btnMic.classList.remove('escuchando');
-      };
-
-      if (btnMic) {
-        btnMic.addEventListener('click', (e) => {
-          e.preventDefault();
-          btnMic.classList.add('escuchando');
-          this.reconocimiento.start();
-        });
-      }
-    }
   },
 
   async enviarMensaje() {
-    const input = document.getElementById('atena-input') || document.querySelector('.atena-input');
-    const contenedorChat = document.getElementById('atena-chat-box') || document.querySelector('.atena-chat-messages');
+    const input = document.getElementById('input-atena-mensaje');
+    const contenedorChat = document.getElementById('chat-atena-mensajes');
     if (!input || !input.value.trim()) return;
 
     const mensaje = input.value.trim();
     input.value = '';
 
+    // Agregar mensaje del usuario al chat
     this.agregarBurbuja(contenedorChat, mensaje, 'usuario');
 
     try {
       const idEmpresa = localStorage.getItem("ID_Empresa") || '';
+      
+      // Consultar a la IA
       const res = await Api.preguntarIA({
         pregunta: mensaje,
         idEmpresa: idEmpresa
       });
 
-      const respuestaAtena = res.respuesta || res.data || "Solicitud procesada correctamente.";
+      const respuestaAtena = res.respuesta || res.data || "He procesado tu consulta.";
       this.agregarBurbuja(contenedorChat, respuestaAtena, 'atena');
       this.hablar(respuestaAtena);
 
     } catch (error) {
-      this.agregarBurbuja(contenedorChat, "Error al conectar con Atena. Revisa tu conexión.", 'atena');
+      this.agregarBurbuja(contenedorChat, "Error al comunicar con Atena. Revisa la conexión.", 'atena');
     }
   },
 
   agregarBurbuja(chatBox, texto, tipo) {
     if (!chatBox) return;
     const div = document.createElement('div');
-    div.className = `atena-bubble ${tipo}`;
+    div.className = `msg ${tipo === 'usuario' ? 'user-msg' : 'bot-msg'}`;
     div.innerHTML = `<strong>${tipo === 'usuario' ? 'Tú' : 'Atena'}:</strong> ${texto}`;
     chatBox.appendChild(div);
     chatBox.scrollTop = chatBox.scrollHeight;
