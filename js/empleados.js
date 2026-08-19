@@ -6,12 +6,16 @@ const Empleados = {
     const formEmp = document.getElementById('form-crear-empleado') || document.querySelector('.form-empleado');
     if (formEmp) {
       formEmp.addEventListener('submit', async (e) => {
-        e.preventDefault(); // Evita recargar la página
+        e.preventDefault(); // Evita que la página se recargue o regrese al inicio
 
         const msgStatus = document.getElementById('empleado-form-mensaje');
-        if (msgStatus) msgStatus.textContent = 'Guardando en Google Sheets...';
+        if (msgStatus) {
+          msgStatus.textContent = 'Guardando en Google Sheets...';
+          msgStatus.style.color = '#3b82f6';
+        }
 
-        const idEmpresa = typeof State !== 'undefined' ? State.getIdEmpresa() : '';
+        // Recupera el ID_Empresa que tu auth.js guardó en localStorage
+        const idEmpresa = localStorage.getItem("ID_Empresa") || '';
 
         const datosEmpleado = {
           idEmpresa: idEmpresa,
@@ -25,14 +29,14 @@ const Empleados = {
           await Api.registrarEmpleado(datosEmpleado);
           if (msgStatus) {
             msgStatus.textContent = '¡Empleado guardado exitosamente en Google Sheets!';
-            msgStatus.style.color = 'green';
+            msgStatus.style.color = '#10b981';
           }
           formEmp.reset();
-          this.cargarTabla(); // Recarga la lista desde Sheets
+          this.cargarTabla(); // Refresca la tabla
         } catch (err) {
           if (msgStatus) {
             msgStatus.textContent = `Error al guardar: ${err.message}`;
-            msgStatus.style.color = 'red';
+            msgStatus.style.color = '#ef4444';
           }
         }
       });
@@ -44,7 +48,7 @@ const Empleados = {
     if (!contenedor) return;
 
     contenedor.innerHTML = '<p>Cargando lista desde Google Sheets...</p>';
-    const idEmpresa = typeof State !== 'undefined' ? State.getIdEmpresa() : '';
+    const idEmpresa = localStorage.getItem("ID_Empresa") || '';
 
     try {
       const res = await Api.getEmpleados({ idEmpresa });
@@ -68,7 +72,7 @@ const Empleados = {
       html += '</tbody></table>';
       contenedor.innerHTML = html;
     } catch (e) {
-      contenedor.innerHTML = `<p style="color:red;">Error al obtener empleados de Google Sheets.</p>`;
+      contenedor.innerHTML = `<p style="color:#ef4444;">Error al obtener empleados de Google Sheets.</p>`;
     }
   }
 };
