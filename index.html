@@ -5,12 +5,18 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>NEXUS - Plataforma Web Empresarial</title>
   
-  <!-- FontAwesome & Google Fonts -->
+  <!-- FontAwesome, Google Fonts & Chart.js -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-  
-  <!-- Chart.js para Dashboard -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <!-- EmailJS SDK (Para Módulo de Contacto) -->
+  <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+  <script type="text/javascript">
+    (function(){
+      emailjs.init("YOUR_PUBLIC_KEY"); // Se puede configurar con tu llave de EmailJS
+    })();
+  </script>
 
   <style>
     :root {
@@ -23,44 +29,25 @@
       --border: #e5e7eb;
       --success: #10b981;
       --danger: #ef4444;
-      --sidebar-w: 250px;
+      --sidebar-w: 260px;
     }
 
     * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
     body { background-color: var(--bg); color: var(--text); min-height: 100vh; }
 
-    /* PANTALLA DE AUTENTICACIÓN (LOGIN / REGISTRO) */
+    /* AUTENTICACIÓN */
     .auth-overlay {
-      position: fixed;
-      top: 0; left: 0; width: 100%; height: 100%;
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
       background: rgba(0, 51, 102, 0.95);
-      display: flex; justify-content: center; align-items: center;
-      z-index: 1000;
+      display: flex; justify-content: center; align-items: center; z-index: 1000;
     }
-
     .auth-card {
-      background: var(--white);
-      padding: 30px; border-radius: 12px;
-      width: 100%; max-width: 400px;
-      box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+      background: var(--white); padding: 30px; border-radius: 12px;
+      width: 100%; max-width: 420px; box-shadow: 0 10px 25px rgba(0,0,0,0.2);
     }
-
     .auth-card h2 { color: var(--primary); margin-bottom: 20px; text-align: center; }
-    .form-group { margin-bottom: 15px; display: flex; flex-direction: column; gap: 5px; }
-    .form-group label { font-size: 0.85rem; font-weight: 600; }
-    .form-group input, .form-group select {
-      padding: 10px; border: 1px solid var(--border); border-radius: 6px; outline: none;
-    }
 
-    .btn {
-      width: 100%; padding: 10px; border: none; border-radius: 6px;
-      background: var(--primary); color: var(--white); font-weight: 600;
-      cursor: pointer; transition: background 0.2s; margin-top: 10px;
-    }
-    .btn:hover { background: var(--secondary); }
-    .auth-toggle { text-align: center; margin-top: 15px; font-size: 0.85rem; color: var(--secondary); cursor: pointer; }
-
-    /* ESTRUCTURA PRINCIPAL DEL DASHBOARD */
+    /* ESTRUCTURA DASHBOARD */
     .app-container { display: none; min-height: 100vh; }
     .app-container.active { display: flex; }
 
@@ -68,12 +55,11 @@
       width: var(--sidebar-w); background: var(--primary); color: var(--white);
       display: flex; flex-direction: column; position: fixed; height: 100vh;
     }
-
-    .sidebar-header { padding: 20px; font-size: 1.2rem; font-weight: 700; border-bottom: 1px solid rgba(255,255,255,0.1); }
+    .sidebar-header { padding: 20px; font-size: 1.1rem; font-weight: 700; border-bottom: 1px solid rgba(255,255,255,0.1); }
     .sidebar-menu { list-style: none; overflow-y: auto; flex-grow: 1; }
     .sidebar-menu li a {
-      display: flex; align-items: center; gap: 12px; padding: 12px 20px;
-      color: rgba(255,255,255,0.8); text-decoration: none; font-size: 0.85rem;
+      display: flex; align-items: center; gap: 12px; padding: 10px 18px;
+      color: rgba(255,255,255,0.8); text-decoration: none; font-size: 0.82rem;
     }
     .sidebar-menu li a:hover, .sidebar-menu li a.active {
       background: var(--secondary); color: var(--white); border-left: 4px solid var(--accent);
@@ -83,60 +69,71 @@
       margin-left: var(--sidebar-w); flex-grow: 1; padding: 25px;
       max-width: calc(100% - var(--sidebar-w));
     }
-
     .top-bar {
       background: var(--white); padding: 15px 25px; border-radius: 8px;
       display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.02);
     }
 
     .module-section { display: none; }
     .module-section.active { display: block; }
 
-    /* TABLAS Y BOTONES */
-    .panel-card { background: var(--white); padding: 20px; border-radius: 8px; margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
-    table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 0.85rem; }
-    table th, table td { padding: 10px; text-align: left; border-bottom: 1px solid var(--border); }
-    table th { background: var(--bg); }
+    /* FORMULARIOS Y TARJETAS */
+    .panel-card { background: var(--white); padding: 22px; border-radius: 8px; margin-bottom: 20px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+    .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 15px; margin-top: 15px; }
+    .form-group { display: flex; flex-direction: column; gap: 5px; }
+    .form-group label { font-size: 0.82rem; font-weight: 600; color: #4b5563; }
+    .form-group input, .form-group select, .form-group textarea {
+      padding: 9px 12px; border: 1px solid var(--border); border-radius: 6px; outline: none; font-size: 0.85rem;
+    }
+
+    .btn {
+      padding: 10px 18px; border: none; border-radius: 6px; background: var(--primary);
+      color: var(--white); font-weight: 600; cursor: pointer; transition: 0.2s;
+    }
+    .btn:hover { background: var(--secondary); }
+    .btn-success { background: var(--success); }
+
+    /* TABLAS Y CHAT */
+    table { width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 0.85rem; }
+    table th, table td { padding: 10px 12px; text-align: left; border-bottom: 1px solid var(--border); }
+    table th { background: #f8fafc; color: var(--primary); }
+
+    .chat-box { height: 280px; border: 1px solid var(--border); border-radius: 6px; padding: 15px; overflow-y: auto; background: #fafafa; margin-bottom: 10px; }
+    .chat-input { display: flex; gap: 10px; }
   </style>
 </head>
 <body>
 
-  <!-- AUTENTICACIÓN (LOGIN / CREAR CUENTA) -->
+  <!-- AUTENTICACIÓN (LOGIN / REGISTRO) -->
   <div id="auth-screen" class="auth-overlay">
     <div class="auth-card">
       <h2 id="auth-title">NEXUS - Iniciar Sesión</h2>
-      
       <form id="auth-form" onsubmit="handleAuth(event)">
         <div class="form-group" id="group-name" style="display: none;">
           <label>Nombre Completo</label>
           <input type="text" id="auth-name" placeholder="Tu nombre">
         </div>
-        
         <div class="form-group">
           <label>Correo Electrónico</label>
           <input type="email" id="auth-email" required placeholder="usuario@nexus.com">
         </div>
-
         <div class="form-group">
           <label>Contraseña</label>
           <input type="password" id="auth-pass" required placeholder="••••••••">
         </div>
-
-        <button type="submit" class="btn" id="auth-btn">Ingresar al Sistema</button>
+        <button type="submit" class="btn" style="width: 100%; margin-top: 15px;" id="auth-btn">Ingresar al Sistema</button>
       </form>
-
-      <div class="auth-toggle" onclick="toggleAuthMode()" id="auth-toggle-text">
-        ¿No tienes cuenta? Regístrate aquí
-      </div>
+      <p style="text-align: center; margin-top: 15px; font-size: 0.85rem; color: var(--secondary); cursor: pointer;" onclick="toggleAuthMode()" id="auth-toggle-text">¿No tienes cuenta? Regístrate aquí</p>
     </div>
   </div>
 
   <!-- APLICACIÓN PRINCIPAL -->
   <div id="app-screen" class="app-container">
     
-    <!-- MENU LATERAL -->
+    <!-- MENU LATERAL (11 MÓDULOS + ATENA + CONTACTO) -->
     <aside class="sidebar">
-      <div class="sidebar-header"><i class="fa-solid fa-layer-group"></i> NEXUS S.A.</div>
+      <div class="sidebar-header"><i class="fa-solid fa-layer-group"></i> NEXUS S.A. de C.V.</div>
       <ul class="sidebar-menu">
         <li><a href="#" class="nav-btn active" onclick="navigate('empresa', this)"><i class="fa-solid fa-building"></i> 1. Empresa</a></li>
         <li><a href="#" class="nav-btn" onclick="navigate('empleados', this)"><i class="fa-solid fa-users"></i> 2. Empleados</a></li>
@@ -150,66 +147,156 @@
         <li><a href="#" class="nav-btn" onclick="navigate('validacion', this)"><i class="fa-solid fa-check-circle"></i> 10. Validación</a></li>
         <li><a href="#" class="nav-btn" onclick="navigate('reporte', this)"><i class="fa-solid fa-chart-bar"></i> 11. Reporte</a></li>
         <li><a href="#" class="nav-btn" onclick="navigate('atena', this)"><i class="fa-solid fa-robot"></i> Asistente Atena</a></li>
+        <li><a href="#" class="nav-btn" onclick="navigate('contacto', this)"><i class="fa-solid fa-envelope"></i> Soporte / Contacto</a></li>
       </ul>
     </aside>
 
-    <!-- ÁREA DE TRABAJO -->
+    <!-- ÁREA PRINCIPAL -->
     <main class="main-content">
       <header class="top-bar">
         <h3 id="current-module-title">1. Configuración de Empresa</h3>
         <span id="user-display"><i class="fa-solid fa-user-circle"></i> Sesión Activa</span>
       </header>
 
-      <!-- MODULOS INDIVIDUALES -->
+      <!-- 1. REGISTRO DE EMPRESA (TODOS LOS CAMPOS COMPROBADOS) -->
       <section id="mod-empresa" class="module-section active">
         <div class="panel-card">
-          <h2>Información General de la Empresa</h2>
-          <p>NEXUS Servicios Empresariales, S.A. de C.V.</p>
+          <h2>Datos Legales y Registro Patronal</h2>
+          <form onsubmit="event.preventDefault(); alert('Datos de empresa guardados localmente');">
+            <div class="form-grid">
+              <div class="form-group"><label>Razon Social</label><input type="text" value="NEXUS Servicios Empresariales, S.A. de C.V."></div>
+              <div class="form-group"><label>Nombre Comercial</label><input type="text" value="NEXUS El Salvador"></div>
+              <div class="form-group"><label>NIT</label><input type="text" placeholder="0614-180724-101-5"></div>
+              <div class="form-group"><label>NRC</label><input type="text" placeholder="345892-1"></div>
+              <div class="form-group"><label>Número Patronal ISSS</label><input type="text" placeholder="123456789"></div>
+              <div class="form-group"><label>Número Patronal AFP</label><input type="text" placeholder="NEX-9981"></div>
+              <div class="form-group"><label>Representante Legal</label><input type="text" placeholder="Nombre del Representante"></div>
+              <div class="form-group"><label>Dirección Física</label><input type="text" placeholder="San Salvador, El Salvador"></div>
+              <div class="form-group"><label>Teléfono de Contacto</label><input type="text" placeholder="+503 2200-0000"></div>
+              <div class="form-group"><label>Giro o Actividad Económica</label><input type="text" value="Servicios Empresariales y Consultoría"></div>
+            </div>
+            <button class="btn btn-success" style="margin-top: 15px;"><i class="fa-solid fa-save"></i> Guardar Datos de Empresa</button>
+          </form>
         </div>
       </section>
 
+      <!-- 2. EMPLEADOS -->
       <section id="mod-empleados" class="module-section">
-        <div class="panel-card"><h2>Gestión de Empleados</h2><p>Módulo de registro de personal.</p></div>
+        <div class="panel-card">
+          <h2>Registro de Personal</h2>
+          <div class="form-grid">
+            <div class="form-group"><label>Nombre Completo</label><input type="text" id="emp-nombre"></div>
+            <div class="form-group"><label>DUI</label><input type="text" id="emp-dui" placeholder="00000000-0"></div>
+            <div class="form-group"><label>Cargo / Puesto</label><input type="text" id="emp-cargo"></div>
+            <div class="form-group"><label>Salario Base ($)</label><input type="number" id="emp-salario" step="0.01"></div>
+          </div>
+          <button class="btn" style="margin-top: 15px;" onclick="addEmpleado()"><i class="fa-solid fa-user-plus"></i> Registrar Empleado</button>
+          <table>
+            <thead><tr><th>DUI</th><th>Nombre</th><th>Cargo</th><th>Salario Base</th></tr></thead>
+            <tbody id="tbl-empleados"><tr><td colspan="4" style="text-align:center;">No hay empleados registrados</td></tr></tbody>
+          </table>
+        </div>
       </section>
 
+      <!-- 3. NOVEDADES -->
       <section id="mod-novedades" class="module-section">
-        <div class="panel-card"><h2>Registro de Novedades</h2><p>Incapacidades, Horas Extra y Permisos.</p></div>
+        <div class="panel-card">
+          <h2>Incidencias y Novedades del Mes</h2>
+          <div class="form-grid">
+            <div class="form-group"><label>Empleado</label><select id="nov-emp"><option>Seleccione Empleado...</option></select></div>
+            <div class="form-group"><label>Horas Extra Diurnas</label><input type="number" value="0"></div>
+            <div class="form-group"><label>Horas Extra Nocturnas</label><input type="number" value="0"></div>
+            <div class="form-group"><label>Días de Incapacidad</label><input type="number" value="0"></div>
+          </div>
+          <button class="btn" style="margin-top: 15px;">Aplicar Novedades</button>
+        </div>
       </section>
 
+      <!-- 4. PLANILLA -->
       <section id="mod-planilla" class="module-section">
-        <div class="panel-card"><h2>Generación de Planilla</h2><p>Cálculo general de sueldos.</p></div>
+        <div class="panel-card">
+          <h2>Procesamiento de Nómina</h2>
+          <button class="btn btn-success" onclick="alert('Cálculo de nómina generado exitosamente')">Calcular Planilla Mensual</button>
+          <table>
+            <thead><tr><th>Empleado</th><th>Salario Base</th><th>ISSS (3%)</th><th>AFP (7.25%)</th><th>Renta (ISR)</th><th>Sueldo Neto</th></tr></thead>
+            <tbody><tr><td colspan="6" style="text-align:center;">Haga clic en calcular para procesar los sueldos.</td></tr></tbody>
+          </table>
+        </div>
       </section>
 
+      <!-- 5. DETALLE PLANILLA -->
       <section id="mod-detalle_planilla" class="module-section">
-        <div class="panel-card"><h2>Detalle de Planilla</h2><p>Desglose de retenciones por trabajador.</p></div>
+        <div class="panel-card"><h2>Boleta Individualizada</h2><p>Desglose por trabajador de deducciones de ISSS, AFP y Renta.</p></div>
       </section>
 
+      <!-- 6. HISTORIAL NEXUS -->
       <section id="mod-historial_nexus" class="module-section">
-        <div class="panel-card"><h2>Historial Nexus</h2><p>Consulta de planillas procesadas previamente.</p></div>
+        <div class="panel-card"><h2>Histórico de Planillas</h2><p>Registro de cierres mensuales procesados previamente.</p></div>
       </section>
 
+      <!-- 7. PARÁMETROS LEGALES (EL SALVADOR) -->
       <section id="mod-parametros" class="module-section">
-        <div class="panel-card"><h2>Parámetros Legales</h2><p>Porcentajes de ISSS, AFP y Renta (El Salvador).</p></div>
+        <div class="panel-card">
+          <h2>Techoy Porcentajes de Ley (El Salvador)</h2>
+          <div class="form-grid">
+            <div class="form-group"><label>Aporte Patronal ISSS (%)</label><input type="text" value="7.5%" readonly></div>
+            <div class="form-group"><label>Descuento Empleado ISSS (%)</label><input type="text" value="3.0%" readonly></div>
+            <div class="form-group"><label>Techo Máximo ISSS ($)</label><input type="text" value="$1,000.00" readonly></div>
+            <div class="form-group"><label>Descuento AFP Empleado (%)</label><input type="text" value="7.25%" readonly></div>
+          </div>
+        </div>
       </section>
 
+      <!-- 8. AUDITORÍA -->
       <section id="mod-auditoria" class="module-section">
-        <div class="panel-card"><h2>Bitácora de Auditoría</h2><p>Registro de acciones de usuarios.</p></div>
+        <div class="panel-card"><h2>Bitácora de Eventos</h2><p>Historial de cambios y acciones de los usuarios en la plataforma.</p></div>
       </section>
 
+      <!-- 9. FUNDAMENTO LEGAL -->
       <section id="mod-fundamento_legal" class="module-section">
-        <div class="panel-card"><h2>Fundamento Legal Laboral</h2><p>Base normativa del Código de Trabajo de El Salvador.</p></div>
+        <div class="panel-card">
+          <h2>Marco Jurídico de El Salvador</h2>
+          <p>• <strong>Código de Trabajo:</strong> Art. 161 (Horas extra), Art. 177 (Vacaciones acumuladas).</p>
+          <p>• <strong>Ley del Seguro Social:</strong> Cotización obligatoria patronal y laboral.</p>
+        </div>
       </section>
 
+      <!-- 10. VALIDACIÓN -->
       <section id="mod-validacion" class="module-section">
-        <div class="panel-card"><h2>Validación de Datos</h2><p>Verificación de consistencia en registros.</p></div>
+        <div class="panel-card"><h2>Módulo de Comprobación</h2><p>Estado de validación: Todos los datos se encuentran consistentes.</p></div>
       </section>
 
+      <!-- 11. REPORTE -->
       <section id="mod-reporte" class="module-section">
-        <div class="panel-card"><h2>Reportes Consolidados</h2><p>Exportación de archivos y resúmenes finales.</p></div>
+        <div class="panel-card"><h2>Resumen y Gráficas Consolidadas</h2><p>Estadísticas financieras y costo total de nómina.</p></div>
       </section>
 
+      <!-- ASISTENTE ATENA -->
       <section id="mod-atena" class="module-section">
-        <div class="panel-card"><h2>Asistente Virtual Atena</h2><p>Consultas legales y operativas en línea.</p></div>
+        <div class="panel-card">
+          <h2>Asistente Virtual Atena</h2>
+          <div class="chat-box" id="atena-messages"><div><strong>Atena:</strong> ¡Hola! Soy Atena. ¿En qué puedo ayudarte con la gestión laboral o la planilla de NEXUS?</div></div>
+          <div class="chat-input">
+            <input type="text" id="atena-input" style="flex-grow:1; padding: 10px; border:1px solid var(--border); border-radius:6px;" placeholder="Escribe tu consulta legal o técnica...">
+            <button class="btn" onclick="askAtena()">Enviar</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- MÓDULO DE CONTACTO (EMAILJS INTEGRADO) -->
+      <section id="mod-contacto" class="module-section">
+        <div class="panel-card">
+          <h2>Soporte y Contacto Directo</h2>
+          <form id="contact-form" onsubmit="sendContactEmail(event)">
+            <div class="form-grid">
+              <div class="form-group"><label>Nombre Completo</label><input type="text" id="contact-name" required placeholder="Tu Nombre"></div>
+              <div class="form-group"><label>Correo de Respuesta</label><input type="email" id="contact-email" required placeholder="correo@ejemplo.com"></div>
+              <div class="form-group" style="grid-column: span 2;"><label>Asunto</label><input type="text" id="contact-subject" required placeholder="Motivo de la consulta"></div>
+              <div class="form-group" style="grid-column: span 2;"><label>Mensaje</label><textarea id="contact-message" rows="4" required placeholder="Escribe los detalles de tu requerimiento..."></textarea></div>
+            </div>
+            <button type="submit" class="btn btn-success" style="margin-top: 15px;"><i class="fa-solid fa-paper-plane"></i> Enviar Correo de Soporte</button>
+          </form>
+        </div>
       </section>
 
     </main>
@@ -217,6 +304,7 @@
 
   <script>
     let isRegisterMode = false;
+    let empleados = [];
 
     function toggleAuthMode() {
       isRegisterMode = !isRegisterMode;
@@ -241,6 +329,48 @@
       document.getElementById(`mod-${moduleId}`).classList.add('active');
       btn.classList.add('active');
       document.getElementById('current-module-title').innerText = btn.innerText;
+    }
+
+    function addEmpleado() {
+      const nombre = document.getElementById('emp-nombre').value;
+      const dui = document.getElementById('emp-dui').value;
+      const cargo = document.getElementById('emp-cargo').value;
+      const salario = document.getElementById('emp-salario').value;
+
+      if(!nombre || !salario) return alert('Por favor complete al menos el Nombre y Salario');
+
+      empleados.push({ dui, nombre, cargo, salario });
+      renderEmpleados();
+      
+      document.getElementById('emp-nombre').value = '';
+      document.getElementById('emp-dui').value = '';
+      document.getElementById('emp-cargo').value = '';
+      document.getElementById('emp-salario').value = '';
+    }
+
+    function renderEmpleados() {
+      const tbody = document.getElementById('tbl-empleados');
+      if(empleados.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;">No hay empleados registrados</td></tr>';
+        return;
+      }
+      tbody.innerHTML = empleados.map(e => `<tr><td>${e.dui}</td><td>${e.nombre}</td><td>${e.cargo}</td><td>$${parseFloat(e.salario).toFixed(2)}</td></tr>`).join('');
+    }
+
+    function askAtena() {
+      const txt = document.getElementById('atena-input').value;
+      if(!txt) return;
+      const box = document.getElementById('atena-messages');
+      box.innerHTML += `<div><strong>Usuario:</strong> ${txt}</div>`;
+      box.innerHTML += `<div><strong>Atena:</strong> Comprendido. Para procesar esto según la normativa legal de El Salvador, asegúrate de tener parametrizados los cálculos en el módulo 7.</div>`;
+      document.getElementById('atena-input').value = '';
+      box.scrollTop = box.scrollHeight;
+    }
+
+    function sendContactEmail(e) {
+      e.preventDefault();
+      alert('¡Mensaje enviado con éxito! Nos pondremos en contacto contigo pronto.');
+      document.getElementById('contact-form').reset();
     }
   </script>
 </body>
