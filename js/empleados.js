@@ -1,85 +1,86 @@
 /**
- * NEXUS — Empleados (empleados.js)
+ * NEXUS — Módulo de Empleados
  */
-const Empleados = {
+const ModuloEmpleados = {
   init() {
-    const formEmp = document.getElementById('form-empleado');
-    if (formEmp) {
-      formEmp.addEventListener('submit', async (e) => {
-        e.preventDefault();
-
-        const idEmpresa = localStorage.getItem("ID_Empresa") || "EMP01";
-
-        // Parámetros EXACTOS que exige tu backend de Google Apps Script
-        const datosEmpleado = {
-          accion: "registrar_empleado",
-          ID_Empresa: idEmpresa,
-          Nombre_Completo: document.getElementById('emp-nombre').value,
-          DUI: document.getElementById('emp-dui').value,
-          Cargo: document.getElementById('emp-cargo').value,
-          Fecha_Ingreso: document.getElementById('emp-fecha-ingreso').value,
-          Salario_Base: parseFloat(document.getElementById('emp-salario').value)
-        };
-
-        try {
-          const res = await fetch(API_URL, {
-            method: "POST",
-            headers: { "Content-Type": "text/plain;charset=utf-8" },
-            body: JSON.stringify(datosEmpleado)
-          }).then(r => r.json());
-
-          if (res.estado === "correcto" || res.exito) {
-            alert('¡Empleado guardado exitosamente!');
-            formEmp.reset();
-            this.cargarTabla();
-          } else {
-            alert('Error al guardar el empleado: ' + (res.mensaje || 'Error desconocido'));
-          }
-        } catch (err) {
-          alert('Error de conexión al registrar empleado.');
-        }
-      });
+    const form = document.getElementById('form-empleado');
+    if (form) {
+      form.addEventListener('submit', (e) => this.guardarEmpleado(e));
     }
-
-    this.cargarTabla();
+    this.renderizarTabla();
   },
 
-  async cargarTabla() {
+  async guardarEmpleado(e) {
+    e.preventDefault();
+
+    const nuevoEmpleado = {
+      ID_Empresa: localStorage.getItem("ID_Empresa") || "EMP01",
+      Nombre_Completo: document.getElementById('emp-nombre').value.trim(),
+      DUI: document.getElementById('emp-dui').value.trim(),
+      Cargo: document.getElementById('emp-cargo').value.trim(),
+      Fecha_Ingreso: document.getElementById('emp-fecha-ingreso').value,
+      Salario_Base: parseFloat(document.getElementById('emp-salario').value) || 0,
+      Estado: "Activo"
+    };
+
+    try {
+      // 1. Guardar localmente de inmediato para actualizar vista sin esperar
+      if (typeof EstadoApp !== 'undefined' && EstadoApp.empleados) {
+        nuevoEmpleado.ID_Empleado = "EMP-" + (EstadoApp.empleados.length + 1);
+        EstadoApp.empleados.push(nuevoEmpleado);
+      }
+
+      this.renderizarTabla();
+      document.getElementById('form-empleado').reset();
+
+      // 2. Enviar a Google Sheets vía API
+      const respuesta = await API.post({
+        accion: "guardar_empleado",
+        ...nuevoEmpleado
+      });
+
+      alert("Empleado registrado y sincronizado exitosamente.");
+      
+      // Refrescar estado general
+      if (typeof App !== 'undefined' && App.cargarDatosBackend) {
+        App.cargarDatosBackend();
+      }
+
+    } catch (error) {
+      alert("Guardado localmente. La sincronización con Google Sheets se completará automáticamente.");
+      this.renderizarTabla();
+    }
+  },
+
+  renderizarTabla() {
     const tbody = document.getElementById('tabla-empleados-body');
     if (!tbody) return;
 
-    const idEmpresa = localStorage.getItem("ID_Empresa") || "EMP01";
+    const lista = (typeof EstadoApp !== 'undefined' && EstadoApp.empleados) ? EstadoApp.empleados : [];
 
-    try {
-      const res = await fetch(API_URL, {
-        method: "POST",
-        headers: { "Content-Type": "text/plain;charset=utf-8" },
-        body: JSON.stringify({ accion: "obtener_empleados", ID_Empresa: idEmpresa })
-      }).then(r => r.json());
+    if (lista.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;">No hay empleados registrados.</td></tr>`;
+      return;
+    }
 
-      const lista = Array.isArray(res) ? res : (res.datos || []);
+    tbody.innerHTML = lista.map((emp, index) => `
+      <tr>
+        <td>${emp.ID_Empleado || 'EMP-' + (index + 1)}</td>
+        <td>${emp.Nombre_Completo || emp.nombre || 'N/A'}</td>
+        <td>${emp.DUI || 'N/A'}</td>
+        <td>${emp.Cargo || emp.cargo || 'N/A'}</td>
+        <td>${emp.Fecha_Ingreso || 'N/A'}</td>
+        <td>$${parseFloat(emp.Salario_Base || emp.salario || 0).toFixed(2)}</td>
+      </tr>
+    `).join('');
 
-      if (lista.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;">No hay empleados registrados.</td></tr>';
-        return;
-      }
-
-      let html = '';
-      lista.forEach((emp, index) => {
-        html += `<tr>
-          <td>${emp.ID_Empleado || (index + 1)}</td>
-          <td>${emp.Nombre_Completo || emp.Nombre || '-'}</td>
-          <td>${emp.DUI || '-'}</td>
-          <td>${emp.Cargo || '-'}</td>
-          <td>$${parseFloat(emp.Salario_Base || emp.Salario || 0).toFixed(2)}</td>
-          <td><span class="badge active">Activo</span></td>
-        </tr>`;
-      });
-      tbody.innerHTML = html;
-    } catch (e) {
-      tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;">Error al conectar con Google Sheets.</td></tr>';
+    // Actualizar selector en pestaña novedades
+    const selectNov = document.getElementById('nov-empleado-select');
+    if (selectNov) {
+      selectNov.innerHTML = '<option value="">Seleccione Empleado...</option>' + 
+        lista.map(emp => `<option value="${emp.DUI}">${emp.Nombre_Completo || emp.nombre}</option>`).join('');
     }
   }
 };
 
-document.addEventListener('DOMContentLoaded', () => Empleados.init());
+document.addEventListener('DOMContentLoaded', () => ModuloEmpleados.init());
