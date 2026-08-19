@@ -19,6 +19,7 @@
         <li><a href="#seccion-historial">Historial</a></li>
         <li><a href="#seccion-auditoria">Auditoría</a></li>
         <li><a href="#seccion-fundamento">Fundamento Legal</a></li>
+        <li><a href="#seccion-atena" class="btn-atena-nav">🤖 Asistente Atena</a></li>
       </ul>
     </nav>
   </header>
@@ -26,7 +27,7 @@
   <!-- CONTENIDO PRINCIPAL -->
   <main class="contenedor-principal">
 
-    <!-- SECCIÓN 1: FORMULARIO Y TABLA DE EMPLEADOS -->
+    <!-- MÓDULO 1: EMPLEADOS -->
     <section id="seccion-empleados" class="modulo-card">
       <h2>Gestión de Empleados</h2>
       
@@ -76,14 +77,12 @@
               <th>Estado</th>
             </tr>
           </thead>
-          <tbody id="tabla-empleados-body">
-            <!-- Los empleados cargados desde Google Sheets aparecerán aquí -->
-          </tbody>
+          <tbody id="tabla-empleados-body"></tbody>
         </table>
       </div>
     </section>
 
-    <!-- SECCIÓN 2: HISTORIAL DE NEXUS -->
+    <!-- MÓDULO 2: HISTORIAL -->
     <section id="seccion-historial" class="modulo-card">
       <h2>Historial de Movimientos</h2>
       <div class="tabla-contenedor">
@@ -96,14 +95,12 @@
               <th>Detalle</th>
             </tr>
           </thead>
-          <tbody id="tabla-historial-body">
-            <!-- Los registros del historial aparecerán aquí -->
-          </tbody>
+          <tbody id="tabla-historial-body"></tbody>
         </table>
       </div>
     </section>
 
-    <!-- SECCIÓN 3: AUDITORÍA -->
+    <!-- MÓDULO 3: AUDITORÍA -->
     <section id="seccion-auditoria" class="modulo-card">
       <h2>Registro de Auditoría</h2>
       <div class="tabla-contenedor">
@@ -118,18 +115,30 @@
               <th>Resultado</th>
             </tr>
           </thead>
-          <tbody id="tabla-auditoria-body">
-            <!-- Los registros de auditoría aparecerán aquí -->
-          </tbody>
+          <tbody id="tabla-auditoria-body"></tbody>
         </table>
       </div>
     </section>
 
-    <!-- SECCIÓN 4: FUNDAMENTO LEGAL -->
+    <!-- MÓDULO 4: FUNDAMENTO LEGAL -->
     <section id="seccion-fundamento" class="modulo-card">
       <h2>Fundamento Legal</h2>
-      <div id="contenedor-fundamento-legal" class="grid-cards">
-        <!-- Las fichas legales cargadas desde Google Sheets aparecerán aquí -->
+      <div id="contenedor-fundamento-legal" class="grid-cards"></div>
+    </section>
+
+    <!-- MÓDULO 5: ASISTENTE VIRTUAL ATENA IA -->
+    <section id="seccion-atena" class="modulo-card">
+      <h2>🤖 Atena - Asistente Virtual IA</h2>
+      <div class="chat-atena-container">
+        <div id="chat-atena-mensajes" class="chat-box">
+          <div class="mensaje-bot">
+            <strong>Atena:</strong> ¡Hola! Soy Atena, tu asistente virtual contable y legal de NEXUS. ¿En qué te puedo ayudar hoy?
+          </div>
+        </div>
+        <form id="form-chat-atena" class="chat-input-area">
+          <input type="text" id="input-atena-mensaje" placeholder="Hazle una consulta fiscal o legal a Atena..." required>
+          <button type="submit" class="btn-primary">Enviar</button>
+        </form>
       </div>
     </section>
 
@@ -139,7 +148,7 @@
   <div id="nexus-login-overlay" class="modal-overlay">
     <div class="modal-container">
       
-      <!-- FORMULARIO 1: INICIO DE SESIÓN -->
+      <!-- INICIO DE SESIÓN -->
       <div id="contenedor-login" class="auth-box">
         <h2>Iniciar Sesión - NEXUS</h2>
         <form id="nexus-login-form">
@@ -161,7 +170,7 @@
         </p>
       </div>
 
-      <!-- FORMULARIO 2: REGISTRO DE EMPRESA Y USUARIO -->
+      <!-- REGISTRO -->
       <div id="contenedor-registro" class="auth-box" style="display: none;">
         <h2>Registrar Empresa</h2>
         <form id="nexus-registro-form">
@@ -226,9 +235,18 @@
     </div>
   </div>
 
-  <!-- ENLACES A LOS SCRIPTS EN ORDEN -->
+  <!-- ENLACE DE TODOS TUS ARCHIVOS JS DE LA CARPETA JS -->
+  <script src="js/config.js"></script>
+  <script src="js/state.js"></script>
+  <script src="js/validaciones.js"></script>
+  <script src="js/api.js"></script>
   <script src="js/auth.js"></script>
   <script src="js/empleados.js"></script>
   <script src="js/consultas.js"></script>
+  <script src="js/fiscal-engine.js"></script>
+  <script src="js/conocimiento-atena.js"></script>
+  <script src="js/asistente-virtual.js"></script>
+  <script src="js/app.js"></script>
+
 </body>
 </html>
