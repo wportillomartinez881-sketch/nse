@@ -25,8 +25,7 @@
 
     <!-- CONFIGURACIÓN DE CONEXIÓN A GOOGLE SHEETS -->
     <script>
-        // REEMPLAZA CON TU URL DE DESPLIEGUE EN GOOGLE APPS SCRIPT
-        const GOOGLE_SCRIPT_URL = "URL_DE_TU_GOOGLE_APPS_SCRIPT";
+        const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzuqC4RclUYdMhgTXA3iIVdp7WZuF5kwMZDcPv4NmAncVWAvZnNOPu0FajuBK1DkK95/exec";
     </script>
 
     <!-- ==================== PANTALLA DE AUTENTICACIÓN (LOGIN / REGISTRO) ==================== -->
@@ -381,7 +380,6 @@
             }
         }
 
-        // CAMBIO DE PESTAÑAS BASADO EN LOS NOMBRES EXACTOS
         function switchTab(pageName, element) {
             document.querySelectorAll('.tab-content').forEach(tab => tab.classList.add('hidden'));
             document.querySelectorAll('.nav-link').forEach(btn => btn.classList.remove('active'));
@@ -411,11 +409,6 @@
 
         async function handleLogin(event) {
             event.preventDefault();
-
-            if (!GOOGLE_SCRIPT_URL || GOOGLE_SCRIPT_URL === "URL_DE_TU_GOOGLE_APPS_SCRIPT") {
-                Swal.fire("Configuración requerida", "Por favor configura la variable GOOGLE_SCRIPT_URL en el código HTML.", "warning");
-                return;
-            }
 
             const correo = document.getElementById('loginCorreo').value;
             const password = document.getElementById('loginPassword').value;
@@ -457,11 +450,6 @@
 
         async function handleRegister(event) {
             event.preventDefault();
-
-            if (!GOOGLE_SCRIPT_URL || GOOGLE_SCRIPT_URL === "URL_DE_TU_GOOGLE_APPS_SCRIPT") {
-                Swal.fire("Configuración requerida", "Por favor configura la variable GOOGLE_SCRIPT_URL con la URL de tu despliegue.", "warning");
-                return;
-            }
 
             const btn = document.getElementById('btnRegister');
             const btnText = document.getElementById('btnRegText');
