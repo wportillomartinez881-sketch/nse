@@ -7,13 +7,14 @@
   <link rel="stylesheet" href="css/estilos.css">
   <!-- FontAwesome e Iconos -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Chart.js para las gráficas del Dashboard -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
 
-  <!-- CONTENEDOR PRINCIPAL DE LA APLICACIÓN -->
   <div id="app-container" class="layout-grid">
 
-    <!-- BARRA LATERAL (SIDEBAR DE NAVEGACIÓN COMPLETA) -->
+    <!-- BARRA LATERAL (SIDEBAR) -->
     <aside class="sidebar">
       <div class="sidebar-header">
         <div class="logo">
@@ -25,20 +26,23 @@
 
       <nav class="sidebar-nav">
         <div class="nav-section-title">GENERAL</div>
-        <a href="#" data-tab="tab-dashboard" class="nav-link active"><i class="fa-solid fa-house"></i> Inicio / Dashboard</a>
+        <a href="#" data-tab="tab-dashboard" class="nav-link active"><i class="fa-solid fa-chart-pie"></i> Inicio / Dashboard</a>
         <a href="#" data-tab="tab-empresa" class="nav-link"><i class="fa-solid fa-building"></i> Empresa</a>
         <a href="#" data-tab="tab-empleados" class="nav-link"><i class="fa-solid fa-users"></i> Empleados</a>
         <a href="#" data-tab="tab-novedades" class="nav-link"><i class="fa-solid fa-bell"></i> Novedades</a>
 
         <div class="nav-section-title">GESTIÓN CONTABLE</div>
         <a href="#" data-tab="tab-planillas" class="nav-link"><i class="fa-solid fa-money-check-dollar"></i> Planillas</a>
-        <a href="#" data-tab="tab-fiscal" class="nav-link"><i class="fa-solid fa-calculator"></i> Motor Fiscal y Retenciones</a>
+        <a href="#" data-tab="tab-fiscal" class="nav-link"><i class="fa-solid fa-calculator"></i> Motor Fiscal y Prestaciones</a>
 
         <div class="nav-section-title">CONSULTAS Y AUDITORÍA</div>
         <a href="#" data-tab="tab-historial" class="nav-link"><i class="fa-solid fa-clock-rotate-left"></i> Historial NEXUS</a>
         <a href="#" data-tab="tab-auditoria" class="nav-link"><i class="fa-solid fa-shield-halved"></i> Auditoría</a>
         <a href="#" data-tab="tab-fundamento" class="nav-link"><i class="fa-solid fa-book-bookmark"></i> Base Legal y Normativa</a>
         <a href="#" data-tab="tab-atena" class="nav-link highlight-atena"><i class="fa-solid fa-robot"></i> Asistente Atena IA</a>
+
+        <div class="nav-section-title">SOPORTE</div>
+        <a href="https://wportillomartinez881-sketch.github.io/correo/" target="_blank" class="nav-link"><i class="fa-solid fa-envelope"></i> Contacto y Soporte Directo</a>
       </nav>
 
       <div class="sidebar-footer">
@@ -49,10 +53,9 @@
       </div>
     </aside>
 
-    <!-- ÁREA DE CONTENIDO DE LOS MÓDULOS -->
+    <!-- ÁREA PRINCIPAL -->
     <main class="main-content">
 
-      <!-- HEADER SUPERIOR -->
       <header class="top-header">
         <div class="header-title">
           <h1 id="page-title">Panel de Control General</h1>
@@ -62,7 +65,7 @@
         </div>
       </header>
 
-      <!-- VISTA 1: DASHBOARD / RESUMEN -->
+      <!-- VISTA 1: DASHBOARD CON GRÁFICAS -->
       <section id="tab-dashboard" class="tab-content active">
         <div class="cards-grid">
           <div class="kpi-card">
@@ -70,25 +73,43 @@
             <p class="kpi-value" id="kpi-total-empleados">0</p>
           </div>
           <div class="kpi-card">
-            <h3>Monto Planilla</h3>
+            <h3>Monto Planilla Estimado</h3>
             <p class="kpi-value" id="kpi-monto-planilla">$0.00</p>
           </div>
           <div class="kpi-card">
-            <h3>Última Auditoría</h3>
-            <p class="kpi-subtext" id="kpi-ultima-auditoria">Sin registros</p>
+            <h3>Estado del Sistema</h3>
+            <p class="kpi-subtext" id="kpi-ultima-auditoria">Operativo / Sincronizado</p>
+          </div>
+        </div>
+
+        <div class="cards-grid" style="margin-top: 20px; grid-template-columns: 1fr 1fr;">
+          <div class="card-panel">
+            <h3>Distribución de Costos de Nómina</h3>
+            <canvas id="chartGraficaPlanilla" style="max-height: 250px;"></canvas>
+          </div>
+          <div class="card-panel">
+            <h3>Evolución de Empleados Registrados</h3>
+            <canvas id="chartGraficaEmpleados" style="max-height: 250px;"></canvas>
           </div>
         </div>
       </section>
 
-      <!-- VISTA NUEVA: EMPRESA -->
+      <!-- VISTA EMPRESA -->
       <section id="tab-empresa" class="tab-content">
         <div class="card-panel">
-          <h2>Perfil de la Empresa</h2>
-          <p>Información corporativa registrada en el sistema fiscal.</p>
+          <h2>Perfil Corporativo - NEXUS S.A. de C.V.</h2>
+          <div class="form-grid" style="margin-top: 15px;">
+            <div class="input-group"><strong>Razón Social:</strong> NEXUS Servicios Empresariales S.A. de C.V.</div>
+            <div class="input-group"><strong>NIT:</strong> 0614-280324-102-8</div>
+            <div class="input-group"><strong>NRC:</strong> 298451-0</div>
+            <div class="input-group"><strong>Giro Económico:</strong> Servicios Contables, Fiscales y de Nómina</div>
+            <div class="input-group"><strong>Dirección:</strong> San Salvador, El Salvador</div>
+            <div class="input-group"><strong>Representante Legal:</strong> Dirección General NEXUS</div>
+          </div>
         </div>
       </section>
 
-      <!-- VISTA 2: GESTIÓN DE EMPLEADOS -->
+      <!-- VISTA EMPLEADOS -->
       <section id="tab-empleados" class="tab-content">
         <div class="card-panel">
           <h2>Registro de Empleados</h2>
@@ -129,8 +150,8 @@
                   <th>Nombre</th>
                   <th>DUI</th>
                   <th>Cargo</th>
+                  <th>Fecha Ingreso</th>
                   <th>Salario Base</th>
-                  <th>Estado</th>
                 </tr>
               </thead>
               <tbody id="tabla-empleados-body"></tbody>
@@ -139,34 +160,78 @@
         </div>
       </section>
 
-      <!-- VISTA NUEVA: NOVEDADES -->
+      <!-- VISTA NOVEDADES -->
       <section id="tab-novedades" class="tab-content">
         <div class="card-panel">
-          <h2>Novedades y Notificaciones</h2>
-          <p>Registro de actualizaciones operativas e incidencias.</p>
+          <h2>Registro de Novedades e Incidencias</h2>
+          <form id="form-novedad" class="form-grid">
+            <div class="input-group">
+              <label>Empleado:</label>
+              <select id="nov-empleado-select" required><option value="">Seleccione Empleado...</option></select>
+            </div>
+            <div class="input-group">
+              <label>Tipo de Novedad:</label>
+              <select id="nov-tipo">
+                <option value="Incapacidad">Incapacidad Medicalizada</option>
+                <option value="Horas Extra">Horas Extraordinarias</option>
+                <option value="Permiso">Permiso con/sin Goce</option>
+                <option value="Bono">Bonificación Especial</option>
+              </select>
+            </div>
+            <div class="input-group">
+              <label>Monto / Horas:</label>
+              <input type="number" id="nov-monto" step="0.01" placeholder="0.00">
+            </div>
+            <div class="input-group btn-container">
+              <button type="button" class="btn-action" onclick="alert('Novedad registrada temporalmente en el periodo activo.')">Registrar Novedad</button>
+            </div>
+          </form>
         </div>
       </section>
 
-      <!-- VISTA NUEVA: PLANILLAS -->
+      <!-- VISTA PLANILLAS -->
       <section id="tab-planillas" class="tab-content">
         <div class="card-panel">
-          <h2>Gestión de Planillas</h2>
-          <p>Generación y procesamiento mensual de nóminas.</p>
+          <h2>Generación y Procesamiento de Planillas</h2>
+          <div style="margin-bottom: 15px;">
+            <button class="btn-action" id="btn-generar-planilla"><i class="fa-solid fa-gears"></i> Procesar Planilla Mensual</button>
+          </div>
+          <div class="table-responsive">
+            <table>
+              <thead>
+                <tr>
+                  <th>Empleado</th>
+                  <th>Salario Base</th>
+                  <th>ISSS (3%)</th>
+                  <th>AFP (7.25%)</th>
+                  <th>Renta</th>
+                  <th>Salario Neto</th>
+                </tr>
+              </thead>
+              <tbody id="tabla-planilla-body">
+                <tr><td colspan="6" style="text-align:center;">Presione "Procesar Planilla Mensual" para calcular.</td></tr>
+              </tbody>
+            </table>
+          </div>
         </div>
       </section>
 
-      <!-- VISTA 3: MOTOR FISCAL Y CÁLCULOS -->
+      <!-- VISTA MOTOR FISCAL Y PRESTACIONES COMPLETO -->
       <section id="tab-fiscal" class="tab-content">
         <div class="card-panel">
-          <h2>Calculadora de Deducciones y Planilla (El Salvador)</h2>
+          <h2>Calculadora de Deducciones, Vacaciones y Aguinaldo (El Salvador)</h2>
           <div id="fiscal-engine-container">
             <form id="form-calculo-fiscal" class="form-grid">
               <div class="input-group">
-                <label for="calc-salario">Salario Bruto ($):</label>
+                <label for="calc-salario">Salario Mensual Bruto ($):</label>
                 <input type="number" step="0.01" id="calc-salario" placeholder="365.00">
               </div>
+              <div class="input-group">
+                <label for="calc-antiguedad">Antigüedad en Años:</label>
+                <input type="number" step="1" id="calc-antiguedad" placeholder="2" value="1">
+              </div>
               <div class="input-group btn-container">
-                <button type="button" id="btn-calcular-deducciones" class="btn-action">Calcular ISSS, AFP y Renta</button>
+                <button type="button" id="btn-calcular-deducciones" class="btn-action">Calcular Deducciones y Prestaciones</button>
               </div>
             </form>
             <div id="resultado-calculo-fiscal" class="results-box" style="margin-top: 15px;"></div>
@@ -174,7 +239,7 @@
         </div>
       </section>
 
-      <!-- VISTA 4: HISTORIAL -->
+      <!-- VISTA HISTORIAL -->
       <section id="tab-historial" class="tab-content">
         <div class="card-panel">
           <h2>Historial de Operaciones NEXUS</h2>
@@ -194,7 +259,7 @@
         </div>
       </section>
 
-      <!-- VISTA 5: REGISTRO DE AUDITORÍA -->
+      <!-- VISTA AUDITORÍA -->
       <section id="tab-auditoria" class="tab-content">
         <div class="card-panel">
           <h2>Bitácora de Auditoría del Sistema</h2>
@@ -216,15 +281,15 @@
         </div>
       </section>
 
-      <!-- VISTA 6: BASE LEGAL Y NORMATIVA -->
+      <!-- VISTA BASE LEGAL Y NORMATIVA EXTENDIDA -->
       <section id="tab-fundamento" class="tab-content">
         <div class="card-panel">
-          <h2>Marco Legal y Articulado Contable/Laboral</h2>
+          <h2>Marco Legal y Articulado Contable/Laboral (El Salvador)</h2>
           <div id="contenedor-fundamento-legal" class="legal-cards-grid"></div>
         </div>
       </section>
 
-      <!-- VISTA 7: ASISTENTE ATENA IA -->
+      <!-- VISTA ATENA IA -->
       <section id="tab-atena" class="tab-content">
         <div class="card-panel atena-panel">
           <h2><i class="fa-solid fa-robot"></i> Atena - Asistente Consultor IA</h2>
@@ -247,11 +312,9 @@
     </main>
   </div>
 
-  <!-- VENTANA MODAL DE INICIO DE SESIÓN / REGISTRO -->
+  <!-- MODAL LOGIN / REGISTRO -->
   <div id="nexus-login-overlay" class="modal-overlay">
     <div class="modal-card">
-      
-      <!-- FORMULARIO LOGIN -->
       <div id="contenedor-login" class="auth-wrapper">
         <h2>Ingreso a NEXUS</h2>
         <form id="nexus-login-form">
@@ -268,7 +331,6 @@
         <p class="auth-toggle">¿No registraron su empresa? <a href="#" id="link-ir-a-registro">Registrar nueva empresa</a></p>
       </div>
 
-      <!-- FORMULARIO REGISTRO -->
       <div id="contenedor-registro" class="auth-wrapper" style="display: none;">
         <h2>Registro de Empresa en NEXUS</h2>
         <form id="nexus-registro-form">
@@ -317,11 +379,9 @@
         </form>
         <p class="auth-toggle">¿Ya poseen cuenta? <a href="#" id="link-ir-a-login">Volver al inicio de sesión</a></p>
       </div>
-
     </div>
   </div>
 
-  <!-- SCRIPTS Y CONEXIONES JS -->
   <script src="js/config.js"></script>
   <script src="js/state.js"></script>
   <script src="js/validaciones.js"></script>
