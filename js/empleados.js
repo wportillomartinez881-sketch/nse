@@ -3,18 +3,11 @@
  */
 const Empleados = {
   init() {
-    const formEmp = document.getElementById('form-crear-empleado') || document.querySelector('.form-empleado');
+    const formEmp = document.getElementById('form-empleado');
     if (formEmp) {
       formEmp.addEventListener('submit', async (e) => {
-        e.preventDefault(); // Evita que la página se recargue o regrese al inicio
+        e.preventDefault(); // Detiene recargas de la app
 
-        const msgStatus = document.getElementById('empleado-form-mensaje');
-        if (msgStatus) {
-          msgStatus.textContent = 'Guardando en Google Sheets...';
-          msgStatus.style.color = '#3b82f6';
-        }
-
-        // Recupera el ID_Empresa que tu auth.js guardó en localStorage
         const idEmpresa = localStorage.getItem("ID_Empresa") || '';
 
         const datosEmpleado = {
@@ -22,32 +15,29 @@ const Empleados = {
           nombre: (document.getElementById('emp-nombre') || {}).value || '',
           dui: (document.getElementById('emp-dui') || {}).value || '',
           cargo: (document.getElementById('emp-cargo') || {}).value || '',
+          fechaIngreso: (document.getElementById('emp-fecha-ingreso') || {}).value || '',
           salario: parseFloat((document.getElementById('emp-salario') || {}).value || 0)
         };
 
         try {
           await Api.registrarEmpleado(datosEmpleado);
-          if (msgStatus) {
-            msgStatus.textContent = '¡Empleado guardado exitosamente en Google Sheets!';
-            msgStatus.style.color = '#10b981';
-          }
+          alert('¡Empleado guardado exitosamente en Google Sheets!');
           formEmp.reset();
-          this.cargarTabla(); // Refresca la tabla
+          this.cargarTabla();
         } catch (err) {
-          if (msgStatus) {
-            msgStatus.textContent = `Error al guardar: ${err.message}`;
-            msgStatus.style.color = '#ef4444';
-          }
+          alert('Error al guardar el empleado: ' + err.message);
         }
       });
     }
+
+    // Cargar la lista al iniciar
+    this.cargarTabla();
   },
 
   async cargarTabla() {
-    const contenedor = document.getElementById('tabla-empleados-container');
-    if (!contenedor) return;
+    const tbody = document.getElementById('tabla-empleados-body');
+    if (!tbody) return;
 
-    contenedor.innerHTML = '<p>Cargando lista desde Google Sheets...</p>';
     const idEmpresa = localStorage.getItem("ID_Empresa") || '';
 
     try {
@@ -55,24 +45,24 @@ const Empleados = {
       const lista = Array.isArray(res) ? res : (res.datos || res.data || []);
 
       if (lista.length === 0) {
-        contenedor.innerHTML = '<p>No hay empleados registrados en Google Sheets.</p>';
+        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;">No hay empleados registrados.</td></tr>';
         return;
       }
 
-      let html = `<table class="nexus-table"><thead><tr><th>ID</th><th>Nombre</th><th>DUI</th><th>Cargo</th><th>Salario</th></tr></thead><tbody>`;
-      lista.forEach(emp => {
+      let html = '';
+      lista.forEach((emp, index) => {
         html += `<tr>
-          <td>${emp.ID_Empleado || emp.id || '-'}</td>
+          <td>${emp.ID_Empleado || (index + 1)}</td>
           <td>${emp.Nombre || emp.nombre || '-'}</td>
           <td>${emp.DUI || emp.dui || '-'}</td>
           <td>${emp.Cargo || emp.cargo || '-'}</td>
           <td>$${parseFloat(emp.Salario || emp.salario || 0).toFixed(2)}</td>
+          <td><span class="badge active">Activo</span></td>
         </tr>`;
       });
-      html += '</tbody></table>';
-      contenedor.innerHTML = html;
+      tbody.innerHTML = html;
     } catch (e) {
-      contenedor.innerHTML = `<p style="color:#ef4444;">Error al obtener empleados de Google Sheets.</p>`;
+      tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; color:red;">Error al cargar la tabla de Google Sheets.</td></tr>';
     }
   }
 };
