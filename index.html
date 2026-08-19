@@ -3,239 +3,293 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>NEXUS - Servicios Empresariales</title>
+  <title>NEXUS - Servicios Empresariales S.A. de C.V.</title>
   <link rel="stylesheet" href="css/estilos.css">
+  <!-- FontAwesome o iconos para la interfaz si los utilizas -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
 
-  <!-- BARRA DE NAVEGACIÓN PRINCIPAL -->
-  <header class="navbar">
-    <div class="logo">
-      <h1>NEXUS</h1>
-    </div>
-    <nav>
-      <ul>
-        <li><a href="#seccion-empleados">Empleados</a></li>
-        <li><a href="#seccion-historial">Historial</a></li>
-        <li><a href="#seccion-auditoria">Auditoría</a></li>
-        <li><a href="#seccion-fundamento">Fundamento Legal</a></li>
-        <li><a href="#seccion-atena" class="btn-atena-nav">🤖 Asistente Atena</a></li>
-      </ul>
-    </nav>
-  </header>
+  <!-- CONTENEDOR PRINCIPAL DE LA APLICACIÓN -->
+  <div id="app-container" class="layout-grid">
 
-  <!-- CONTENIDO PRINCIPAL -->
-  <main class="contenedor-principal">
-
-    <!-- MÓDULO 1: EMPLEADOS -->
-    <section id="seccion-empleados" class="modulo-card">
-      <h2>Gestión de Empleados</h2>
+    <!-- BARRA LATERAL (SIDEBAR DE NAVEGACIÓN) -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <h2>NEXUS</h2>
+        <span class="subtitle">Servicios Empresariales</span>
+      </div>
       
-      <form id="form-empleado" class="grid-form">
-        <div class="form-group">
-          <label for="emp-nombre">Nombre Completo *</label>
-          <input type="text" id="emp-nombre" required placeholder="Juan Pérez">
+      <nav class="sidebar-nav">
+        <ul>
+          <li><a href="#" data-tab="tab-dashboard" class="nav-link active"><i class="fa-solid fa-chart-pie"></i> Panel Principal</a></li>
+          <li><a href="#" data-tab="tab-empleados" class="nav-link"><i class="fa-solid fa-users"></i> Planilla y Empleados</a></li>
+          <li><a href="#" data-tab="tab-fiscal" class="nav-link"><i class="fa-solid fa-calculator"></i> Motor Fiscal y Retenciones</a></li>
+          <li><a href="#" data-tab="tab-historial" class="nav-link"><i class="fa-solid fa-clock-rotate-left"></i> Historial NEXUS</a></li>
+          <li><a href="#" data-tab="tab-auditoria" class="nav-link"><i class="fa-solid fa-shield-halved"></i> Registro de Auditoría</a></li>
+          <li><a href="#" data-tab="tab-fundamento" class="nav-link"><i class="fa-solid fa-book-bookmark"></i> Base Legal y Normativa</a></li>
+          <li><a href="#" data-tab="tab-atena" class="nav-link highlight-atena"><i class="fa-solid fa-robot"></i> Asistente Atena IA</a></li>
+        </ul>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div id="usuario-info-card">
+          <span id="user-display-name">Cargando usuario...</span>
+          <button id="btn-cerrar-sesion" class="btn-logout"><i class="fa-solid fa-right-from-bracket"></i> Salir</button>
         </div>
-
-        <div class="form-group">
-          <label for="emp-dui">DUI *</label>
-          <input type="text" id="emp-dui" required placeholder="00000000-0">
-        </div>
-
-        <div class="form-group">
-          <label for="emp-cargo">Cargo *</label>
-          <input type="text" id="emp-cargo" required placeholder="Contador / Auxiliar">
-        </div>
-
-        <div class="form-group">
-          <label for="emp-fecha-ingreso">Fecha de Ingreso *</label>
-          <input type="date" id="emp-fecha-ingreso" required>
-        </div>
-
-        <div class="form-group">
-          <label for="emp-salario">Salario Base ($) *</label>
-          <input type="number" step="0.01" id="emp-salario" required placeholder="365.00">
-        </div>
-
-        <div class="form-group full-width">
-          <button type="submit" class="btn-primary">Guardar Empleado</button>
-        </div>
-      </form>
-
-      <hr class="form-divider">
-
-      <h3>Lista de Empleados Registrados</h3>
-      <div class="tabla-contenedor">
-        <table>
-          <thead>
-            <tr>
-              <th>ID</th>
-              <th>Nombre</th>
-              <th>DUI</th>
-              <th>Cargo</th>
-              <th>Salario Base</th>
-              <th>Estado</th>
-            </tr>
-          </thead>
-          <tbody id="tabla-empleados-body"></tbody>
-        </table>
       </div>
-    </section>
+    </aside>
 
-    <!-- MÓDULO 2: HISTORIAL -->
-    <section id="seccion-historial" class="modulo-card">
-      <h2>Historial de Movimientos</h2>
-      <div class="tabla-contenedor">
-        <table>
-          <thead>
-            <tr>
-              <th>ID</th>
-              <th>Fecha</th>
-              <th>Descripción</th>
-              <th>Detalle</th>
-            </tr>
-          </thead>
-          <tbody id="tabla-historial-body"></tbody>
-        </table>
-      </div>
-    </section>
+    <!-- ÁREA DE CONTENIDO DE LOS MÓDULOS -->
+    <main class="main-content">
 
-    <!-- MÓDULO 3: AUDITORÍA -->
-    <section id="seccion-auditoria" class="modulo-card">
-      <h2>Registro de Auditoría</h2>
-      <div class="tabla-contenedor">
-        <table>
-          <thead>
-            <tr>
-              <th>ID</th>
-              <th>Fecha y Hora</th>
-              <th>Acción</th>
-              <th>Usuario</th>
-              <th>Registro Afectado</th>
-              <th>Resultado</th>
-            </tr>
-          </thead>
-          <tbody id="tabla-auditoria-body"></tbody>
-        </table>
-      </div>
-    </section>
+      <!-- HEADER SUPERIOR -->
+      <header class="top-header">
+        <div class="header-title">
+          <h1 id="page-title">Panel de Control General</h1>
+        </div>
+        <div class="header-status">
+          <span class="status-badge" id="conexion-status"><i class="fa-solid fa-circle"></i> Conectado a GS</span>
+        </div>
+      </header>
 
-    <!-- MÓDULO 4: FUNDAMENTO LEGAL -->
-    <section id="seccion-fundamento" class="modulo-card">
-      <h2>Fundamento Legal</h2>
-      <div id="contenedor-fundamento-legal" class="grid-cards"></div>
-    </section>
-
-    <!-- MÓDULO 5: ASISTENTE VIRTUAL ATENA IA -->
-    <section id="seccion-atena" class="modulo-card">
-      <h2>🤖 Atena - Asistente Virtual IA</h2>
-      <div class="chat-atena-container">
-        <div id="chat-atena-mensajes" class="chat-box">
-          <div class="mensaje-bot">
-            <strong>Atena:</strong> ¡Hola! Soy Atena, tu asistente virtual contable y legal de NEXUS. ¿En qué te puedo ayudar hoy?
+      <!-- VISTA 1: DASHBOARD / RESUMEN -->
+      <section id="tab-dashboard" class="tab-content active">
+        <div class="cards-grid">
+          <div class="kpi-card">
+            <h3>Total Empleados</h3>
+            <p class="kpi-value" id="kpi-total-empleados">0</p>
+          </div>
+          <div class="kpi-card">
+            <h3>Monto Planilla</h3>
+            <p class="kpi-value" id="kpi-monto-planilla">$0.00</p>
+          </div>
+          <div class="kpi-card">
+            <h3>Última Auditoría</h3>
+            <p class="kpi-subtext" id="kpi-ultima-auditoria">Sin registros</p>
           </div>
         </div>
-        <form id="form-chat-atena" class="chat-input-area">
-          <input type="text" id="input-atena-mensaje" placeholder="Hazle una consulta fiscal o legal a Atena..." required>
-          <button type="submit" class="btn-primary">Enviar</button>
-        </form>
-      </div>
-    </section>
+      </section>
 
-  </main>
+      <!-- VISTA 2: GESTIÓN DE EMPLEADOS -->
+      <section id="tab-empleados" class="tab-content">
+        <div class="card-panel">
+          <h2>Registro de Empleados</h2>
+          <form id="form-empleado" class="form-grid">
+            <div class="input-group">
+              <label for="emp-nombre">Nombre Completo *</label>
+              <input type="text" id="emp-nombre" required placeholder="Ej. Juan Pérez">
+            </div>
+            <div class="input-group">
+              <label for="emp-dui">DUI *</label>
+              <input type="text" id="emp-dui" required placeholder="00000000-0">
+            </div>
+            <div class="input-group">
+              <label for="emp-cargo">Cargo *</label>
+              <input type="text" id="emp-cargo" required placeholder="Contador / Auxiliar">
+            </div>
+            <div class="input-group">
+              <label for="emp-fecha-ingreso">Fecha de Ingreso *</label>
+              <input type="date" id="emp-fecha-ingreso" required>
+            </div>
+            <div class="input-group">
+              <label for="emp-salario">Salario Base ($) *</label>
+              <input type="number" step="0.01" id="emp-salario" required placeholder="365.00">
+            </div>
+            <div class="input-group btn-container">
+              <button type="submit" class="btn-action"><i class="fa-solid fa-user-plus"></i> Guardar Empleado</button>
+            </div>
+          </form>
+        </div>
 
-  <!-- VENTANA MODAL DE INICIO DE SESIÓN Y REGISTRO -->
-  <div id="nexus-login-overlay" class="modal-overlay">
-    <div class="modal-container">
-      
-      <!-- INICIO DE SESIÓN -->
-      <div id="contenedor-login" class="auth-box">
-        <h2>Iniciar Sesión - NEXUS</h2>
-        <form id="nexus-login-form">
-          <div class="form-group">
-            <label for="login-correo">Correo Electrónico:</label>
-            <input type="email" id="login-correo" required placeholder="ejemplo@empresa.com">
+        <div class="card-panel">
+          <h3>Personal Registrado</h3>
+          <div class="table-responsive">
+            <table>
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Nombre</th>
+                  <th>DUI</th>
+                  <th>Cargo</th>
+                  <th>Salario Base</th>
+                  <th>Estado</th>
+                </tr>
+              </thead>
+              <tbody id="tabla-empleados-body"></tbody>
+            </table>
           </div>
+        </div>
+      </section>
+
+      <!-- VISTA 3: MOTOR FISCAL Y CÁLCULOS -->
+      <section id="tab-fiscal" class="tab-content">
+        <div class="card-panel">
+          <h2>Calculadora de Deducciones y Planilla (El Salvador)</h2>
+          <div id="fiscal-engine-container">
+            <!-- Interfaz generada o controlada por fiscal-engine.js -->
+            <form id="form-calculo-fiscal" class="form-grid">
+              <div class="input-group">
+                <label for="calc-salario">Salario Bruto ($):</label>
+                <input type="number" step="0.01" id="calc-salario" placeholder="365.00">
+              </div>
+              <div class="input-group btn-container">
+                <button type="button" id="btn-calcular-deducciones" class="btn-action">Calcular ISSS, AFP y Renta</button>
+              </div>
+            </form>
+            <div id="resultado-calculo-fiscal" class="results-box" style="margin-top: 15px;"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- VISTA 4: HISTORIAL -->
+      <section id="tab-historial" class="tab-content">
+        <div class="card-panel">
+          <h2>Historial de Operaciones NEXUS</h2>
+          <div class="table-responsive">
+            <table>
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Fecha</th>
+                  <th>Descripción</th>
+                  <th>Detalle</th>
+                </tr>
+              </thead>
+              <tbody id="tabla-historial-body"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- VISTA 5: REGISTRO DE AUDITORÍA -->
+      <section id="tab-auditoria" class="tab-content">
+        <div class="card-panel">
+          <h2>Bitácora de Auditoría del Sistema</h2>
+          <div class="table-responsive">
+            <table>
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Fecha y Hora</th>
+                  <th>Acción</th>
+                  <th>Usuario</th>
+                  <th>Registro Afectado</th>
+                  <th>Resultado</th>
+                </tr>
+              </thead>
+              <tbody id="tabla-auditoria-body"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- VISTA 6: BASE LEGAL Y NORMATIVA -->
+      <section id="tab-fundamento" class="tab-content">
+        <div class="card-panel">
+          <h2>Marco Legal y Articulado Contable/Laboral</h2>
+          <div id="contenedor-fundamento-legal" class="legal-cards-grid"></div>
+        </div>
+      </section>
+
+      <!-- VISTA 7: ASISTENTE ATENA IA -->
+      <section id="tab-atena" class="tab-content">
+        <div class="card-panel atena-panel">
+          <h2><i class="fa-solid fa-robot"></i> Atena - Asistente Consultor IA</h2>
+          <p class="panel-desc">Consulta dudas del Código de Trabajo, Ley del ISSS, Código Tributario y procedimientos de NEXUS.</p>
           
-          <div class="form-group">
+          <div class="atena-chat-wrapper">
+            <div id="chat-atena-mensajes" class="chat-display">
+              <div class="msg bot-msg">
+                <strong>Atena:</strong> Hola. Soy el asistente virtual de NEXUS. ¿En qué tema fiscal, legal o de nómina puedo orientarte hoy?
+              </div>
+            </div>
+            <form id="form-chat-atena" class="chat-controls">
+              <input type="text" id="input-atena-mensaje" placeholder="Escribe tu consulta legal o contable..." autocomplete="off" required>
+              <button type="submit" class="btn-send"><i class="fa-solid fa-paper-plane"></i> Enviar</button>
+            </form>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- VENTANA MODAL DE INICIO DE SESIÓN / REGISTRO -->
+  <div id="nexus-login-overlay" class="modal-overlay">
+    <div class="modal-card">
+      
+      <!-- FORMULARIO LOGIN -->
+      <div id="contenedor-login" class="auth-wrapper">
+        <h2>Ingreso a NEXUS</h2>
+        <form id="nexus-login-form">
+          <div class="input-group">
+            <label for="login-correo">Correo Electrónico:</label>
+            <input type="email" id="login-correo" required placeholder="usuario@empresa.com">
+          </div>
+          <div class="input-group">
             <label for="login-password">Contraseña:</label>
             <input type="password" id="login-password" required placeholder="••••••••">
           </div>
-
-          <button type="submit" class="btn-primary">Ingresar</button>
+          <button type="submit" class="btn-primary-full">Iniciar Sesión</button>
         </form>
-        <p class="auth-switch">
-          ¿No tienes cuenta de empresa? 
-          <a href="#" id="link-ir-a-registro">Regístrala aquí</a>
-        </p>
+        <p class="auth-toggle">¿No registraron su empresa? <a href="#" id="link-ir-a-registro">Registrar nueva empresa</a></p>
       </div>
 
-      <!-- REGISTRO -->
-      <div id="contenedor-registro" class="auth-box" style="display: none;">
-        <h2>Registrar Empresa</h2>
+      <!-- FORMULARIO REGISTRO -->
+      <div id="contenedor-registro" class="auth-wrapper" style="display: none;">
+        <h2>Registro de Empresa en NEXUS</h2>
         <form id="nexus-registro-form">
-          
-          <div class="form-group">
-            <label for="reg-razon-social">Razón Social / Nombre Empresa *</label>
+          <div class="input-group">
+            <label for="reg-razon-social">Razón Social *</label>
             <input type="text" id="reg-razon-social" required placeholder="NEXUS S.A. de C.V.">
           </div>
-
           <div class="form-row">
-            <div class="form-group">
+            <div class="input-group">
               <label for="reg-nit">NIT *</label>
               <input type="text" id="reg-nit" required placeholder="0614-000000-000-0">
             </div>
-            <div class="form-group">
+            <div class="input-group">
               <label for="reg-nrc">NRC *</label>
               <input type="text" id="reg-nrc" required placeholder="123456-7">
             </div>
           </div>
-
-          <div class="form-group">
+          <div class="input-group">
             <label for="reg-actividad">Actividad Económica *</label>
-            <input type="text" id="reg-actividad" required placeholder="Servicios Contables y Administrativos">
+            <input type="text" id="reg-actividad" required>
           </div>
-
-          <div class="form-group">
-            <label for="reg-direccion">Dirección Completa *</label>
-            <input type="text" id="reg-direccion" required placeholder="San Salvador, El Salvador">
+          <div class="input-group">
+            <label for="reg-direccion">Dirección *</label>
+            <input type="text" id="reg-direccion" required>
           </div>
-
           <div class="form-row">
-            <div class="form-group">
+            <div class="input-group">
               <label for="reg-telefono">Teléfono *</label>
-              <input type="tel" id="reg-telefono" required placeholder="2222-0000">
+              <input type="tel" id="reg-telefono" required>
             </div>
-            <div class="form-group">
+            <div class="input-group">
               <label for="reg-representante">Representante Legal *</label>
-              <input type="text" id="reg-representante" required placeholder="Nombre del Representante">
+              <input type="text" id="reg-representante" required>
             </div>
           </div>
-
-          <hr class="form-divider">
-
-          <div class="form-group">
-            <label for="reg-correo">Correo Electrónico Administrador *</label>
-            <input type="email" id="reg-correo" required placeholder="admin@empresa.com">
+          <hr>
+          <div class="input-group">
+            <label for="reg-correo">Correo Administrador *</label>
+            <input type="email" id="reg-correo" required>
           </div>
-
-          <div class="form-group">
+          <div class="input-group">
             <label for="reg-password">Contraseña *</label>
-            <input type="password" id="reg-password" required placeholder="••••••••">
+            <input type="password" id="reg-password" required>
           </div>
-
-          <button type="submit" class="btn-primary">Registrar e Ingresar</button>
+          <button type="submit" class="btn-primary-full">Completar Registro</button>
         </form>
-        <p class="auth-switch">
-          ¿Ya tienes cuenta? 
-          <a href="#" id="link-ir-a-login">Inicia sesión aquí</a>
-        </p>
+        <p class="auth-toggle">¿Ya poseen cuenta? <a href="#" id="link-ir-a-login">Volver al inicio de sesión</a></p>
       </div>
 
     </div>
   </div>
 
-  <!-- ENLACE DE TODOS TUS ARCHIVOS JS DE LA CARPETA JS -->
+  <!-- ENLACES A TODOS LOS ARCHIVOS JS DE TU REPOSITORIO EN ORDEN DE DEPENDENCIA -->
   <script src="js/config.js"></script>
   <script src="js/state.js"></script>
   <script src="js/validaciones.js"></script>
