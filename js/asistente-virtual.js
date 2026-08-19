@@ -25,26 +25,21 @@ const AsistenteVirtual = {
     this.agregarBurbuja(contenedorChat, mensaje, 'usuario');
     const idPensando = this.agregarBurbuja(contenedorChat, "Consultando base de conocimientos e IA...", 'atena-pensando');
 
+    const accionIA = (typeof NEXUS_CONFIG !== 'undefined' && NEXUS_CONFIG.POST_ACTIONS) 
+      ? NEXUS_CONFIG.POST_ACTIONS.PREGUNTAR_IA 
+      : 'preguntar_ia';
+
     try {
-      const idEmpresa = localStorage.getItem("ID_Empresa") || "EMP01";
-
-      // Usar 'consultar_ia' o 'obtener_respuesta' compatible con Apps Script
-      const payload = {
-        accion: "consultar_ia",
+      const res = await API.post({
+        accion: accionIA,
         pregunta: mensaje,
-        ID_Empresa: idEmpresa
-      };
-
-      const res = await fetch(API_URL, {
-        method: "POST",
-        headers: { "Content-Type": "text/plain;charset=utf-8" },
-        body: JSON.stringify(payload)
-      }).then(r => r.json());
+        ID_Empresa: localStorage.getItem("ID_Empresa") || "EMP01"
+      });
 
       const elementoPensando = document.getElementById(idPensando);
       if (elementoPensando) elementoPensando.remove();
 
-      const respuestaText = res.respuesta || res.mensaje || res.resultado || "Hola, he recibido tu mensaje. ¿Deseas consultar sobre tablas del ISSS, AFP o Aguinaldos?";
+      const respuestaText = res.respuesta || res.mensaje || res.resultado || "Hola, recibí tu mensaje. ¿Deseas consultar sobre tablas del ISSS, AFP o Aguinaldos en El Salvador?";
       
       this.agregarBurbuja(contenedorChat, respuestaText, 'atena');
       this.hablar(respuestaText);
@@ -53,8 +48,7 @@ const AsistenteVirtual = {
       const elementoPensando = document.getElementById(idPensando);
       if (elementoPensando) elementoPensando.remove();
 
-      // Respuesta de contingencia local si el servidor backend no tiene la acción configurada
-      const respuestaFallback = "Hola. Como asistente de NEXUS te informo: El aguinaldo se calcula según los artículos 196 a 202 del Código de Trabajo, las retenciones de ISSS tope son $30.00 y AFP 7.25%.";
+      const respuestaFallback = "Hola. Como asistente de NEXUS te informo: El aguinaldo se calcula según el Código de Trabajo (Art. 196-202), las retenciones de ISSS tope son $30.00 y AFP 7.25%.";
       this.agregarBurbuja(contenedorChat, respuestaFallback, 'atena');
     }
   },
