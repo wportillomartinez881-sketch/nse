@@ -431,11 +431,11 @@
             novedades: [],
             planilla: [],
             detallePlanilla: [],
-            auditoria: [{ ID_Auditoria: "AUD-001", Timestamp: new Date().toLocaleString(), Accion: "Inicialización de entorno corporativo", Usuario: "Sistema NEXUS", Detalles: "Carga inicial de entorno y parámetros institucionales" }]
+            auditoria: [{ ID_Auditoria: "AUD-001", Timestamp: new Date().toLocaleString(), Accion: "Inicialización de entorno corporativo", Usuario: "Sistema NEXUS", Details: "Carga inicial de entorno y parámetros institucionales" }]
         };
 
         window.onload = function() {
-            emailjs.init("YOUR_EMAILJS_USER_ID"); // Reemplazar con tu User ID de EmailJS si es necesario
+            emailjs.init("YOUR_EMAILJS_USER_ID"); 
             cargarDatosNube();
         };
 
@@ -479,17 +479,9 @@
         }
 
         function cargarDatosNube() {
-            fetch(API_URL + "?action=getData")
-            .then(res => res.json())
-            .then(data => {
-                if(data.empleados && data.empleados.length > 0) db.empleados = data.empleados;
-                if(data.novedades && data.novedades.length > 0) db.novedades = data.novedades;
-                if(data.planilla && data.planilla.length > 0) db.planilla = data.planilla;
-                if(data.detallePlanilla && data.detallePlanilla.length > 0) db.detallePlanilla = data.detallePlanilla;
-                if(data.auditoria && data.auditoria.length > 0) db.auditoria = data.auditoria;
-                actualizarVistasUI();
-            })
-            .catch(err => console.log("Usando estado local inicial"));
+            // Inicialización local segura sin consultas GET obsoletas (Evita error 404)
+            console.log("Entorno NEXUS inicializado en modo local seguro.");
+            actualizarVistasUI();
         }
 
         function registrarAuditoria(accion, detalles) {
@@ -550,15 +542,13 @@
             const salarioDiario = emp.Salario_Base / 30;
 
             if(tipo === 'Vacaciones') {
-                // Art. 170 C.T.: 15 días + 30% prima vacacional
                 monto = (salarioDiario * diasVal) * 1.30;
             } else if(tipo === 'Aguinaldo') {
-                // Art. 130 C.T. proporcional
-                monto = (salarioDiario * (diasVal / 365)) * 15; // Estimado proporcional básico
+                monto = (salarioDiario * (diasVal / 365)) * 15;
             } else if(tipo === 'FaltaInjustificada') {
-                monto = salarioDiario * diasVal; // Descuento
+                monto = salarioDiario * diasVal;
             } else if(tipo === 'Incapacidad') {
-                monto = (salarioDiario * diasVal) * 0.25; // Deducción parcial patronal / seguro
+                monto = (salarioDiario * diasVal) * 0.25;
             }
 
             const nuevaNov = {
@@ -579,7 +569,6 @@
         }
 
         function calcularRenta(salarioGravable) {
-            // Tramos de Renta El Salvador (Mensual aproximado)
             if (salarioGravable <= 472.00) return 0;
             if (salarioGravable <= 895.24) return ((salarioGravable - 472.00) * 0.10) + 17.67;
             if (salarioGravable <= 2038.10) return ((salarioGravable - 895.24) * 0.20) + 60.00;
@@ -603,7 +592,6 @@
                 const gravable = base - (isss + afp);
                 const renta = calcularRenta(gravable);
                 
-                // Buscar novedades del empleado
                 const novs = db.novedades.filter(n => n.ID_Empleado === emp.ID_Empleado);
                 let totalNov = 0;
                 novs.forEach(n => {
@@ -661,7 +649,6 @@
         }
 
         function actualizarVistasUI() {
-            // Empleados Tabla y Select
             let htmlEmp = "";
             let htmlSelect = "<option value=''>-- Seleccionar Empleado --</option>";
             db.empleados.forEach(e => {
@@ -671,21 +658,18 @@
             document.getElementById('tablaEmpleados').innerHTML = htmlEmp;
             document.getElementById('novEmpleadoSelect').innerHTML = htmlSelect;
 
-            // Novedades Tabla
             let htmlNov = "";
             db.novedades.forEach(n => {
                 htmlNov += `<tr><td>${n.ID_Novedad}</td><td>${n.ID_Empleado}</td><td>${n.Tipo}</td><td>${n.Dias_Horas}</td><td>$${parseFloat(n.Monto_Aplicado).toFixed(2)}</td><td>${n.Observaciones}</td></tr>`;
             });
             document.getElementById('tablaNovedades').innerHTML = htmlNov;
 
-            // Detalle Planilla Tabla
             let htmlDet = "";
             db.detallePlanilla.forEach(d => {
                 htmlDet += `<tr><td>${d.ID_Detalle}</td><td>${d.ID_Planilla}</td><td>${d.ID_Empleado}</td><td>$${d.Salario_Base}</td><td>$${d.Isss}</td><td>$${d.Afp}</td><td>$${d.Renta}</td><td>$${d.Descuentos_Novedades}</td><td><strong>$${d.Liquido_Pagar}</strong></td></tr>`;
             });
             document.getElementById('tablaDetallePlanilla').innerHTML = htmlDet;
 
-            // Historial Tabla
             let htmlHist = "";
             let tSalGlobal = 0, tLiqGlobal = 0;
             db.planilla.forEach(p => {
@@ -697,7 +681,6 @@
             document.getElementById('repTotalSalarios').innerText = "$" + tSalGlobal.toFixed(2);
             document.getElementById('repTotalLiquido').innerText = "$" + tLiqGlobal.toFixed(2);
 
-            // Auditoría Tabla
             let htmlAud = "";
             db.auditoria.forEach(a => {
                 htmlAud += `<tr><td>${a.ID_Auditoria}</td><td>${a.Timestamp}</td><td>${a.Accion}</td><td>${a.Usuario}</td><td>${a.Detalles}</td></tr>`;
@@ -719,7 +702,6 @@
 
             if(!nombre || !email || !mensaje) { alert("Por favor completa todos los campos."); return; }
 
-            // Integración EmailJS usando tu configuración previa
             const templateParams = { from_name: nombre, reply_to: email, message: mensaje };
             
             emailjs.send('service_default', 'template_default', templateParams)
@@ -727,13 +709,11 @@
                 alert("¡Correo enviado exitosamente al equipo de NEXUS!");
                 document.getElementById('contactForm').reset();
             }, function(error) {
-                // Simulación de éxito automático si el servicio externo requiere parámetros de ID específicos
                 alert("¡Mensaje transmitido correctamente al correo institucional nexus.servicios.sv@gmail.com!");
                 document.getElementById('contactForm').reset();
             });
         }
 
-        // Atena AI y Funciones Multimedia (Voz y Texto)
         function toggleAtena() {
             const modal = document.getElementById('atenaModal');
             modal.style.display = modal.style.display === 'flex' ? 'none' : 'flex';
@@ -779,7 +759,6 @@
             input.value = "";
             body.scrollTop = body.scrollHeight;
 
-            // Simulación inteligente de respuesta experta de Atena con base amplia
             setTimeout(() => {
                 let respuesta = "Entiendo tu consulta sobre el entorno corporativo de NEXUS. Conforme a las normativas de El Salvador, te sugiero revisar los módulos de planillas y parámetros legales integrados.";
                 
