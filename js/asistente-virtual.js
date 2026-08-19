@@ -1,27 +1,15 @@
 /**
- * NEXUS — Asistente Virtual Atena (asistente-virtual.js)
+ * NEXUS — Asistente Atena IA (asistente-virtual.js)
  */
 const AsistenteVirtual = {
   sintesis: window.speechSynthesis,
 
   init() {
     const formAtena = document.getElementById('form-chat-atena');
-    const inputTexto = document.getElementById('input-atena-mensaje');
-
-    // Evitar que el formulario recargue la página o cambie de pestaña
     if (formAtena) {
       formAtena.addEventListener('submit', (e) => {
         e.preventDefault();
         this.enviarMensaje();
-      });
-    }
-
-    if (inputTexto) {
-      inputTexto.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') {
-          e.preventDefault();
-          this.enviarMensaje();
-        }
       });
     }
   },
@@ -34,24 +22,28 @@ const AsistenteVirtual = {
     const mensaje = input.value.trim();
     input.value = '';
 
-    // Agregar mensaje del usuario al chat
     this.agregarBurbuja(contenedorChat, mensaje, 'usuario');
 
     try {
-      const idEmpresa = localStorage.getItem("ID_Empresa") || '';
-      
-      // Consultar a la IA
-      const res = await Api.preguntarIA({
-        pregunta: mensaje,
-        idEmpresa: idEmpresa
-      });
+      const payload = {
+        accion: "preguntar_atena",
+        pregunta: mensaje
+      };
 
-      const respuestaAtena = res.respuesta || res.data || "He procesado tu consulta.";
-      this.agregarBurbuja(contenedorChat, respuestaAtena, 'atena');
-      this.hablar(respuestaAtena);
+      const res = await fetch(API_URL, {
+        method: "POST",
+        headers: { "Content-Type": "text/plain;charset=utf-8" },
+        body: JSON.stringify(payload)
+      }).then(r => r.json());
+
+      const respuestaText = res.respuesta || res.mensaje || "Hola, soy Atena. ¿En qué te puedo asesorar hoy sobre nóminas o legislación laboral de El Salvador?";
+      this.agregarBurbuja(contenedorChat, respuestaText, 'atena');
+      this.hablar(respuestaText);
 
     } catch (error) {
-      this.agregarBurbuja(contenedorChat, "Error al comunicar con Atena. Revisa la conexión.", 'atena');
+      // Respuesta de respaldo si la conexión remota a Apps Script demora
+      const respuestaFallback = "Hola. Soy Atena. Estoy experimentando lentitud con el servidor, pero puedo ayudarte con consultas sobre el cálculo de ISSS, AFP, Renta o el Código de Trabajo.";
+      this.agregarBurbuja(contenedorChat, respuestaFallback, 'atena');
     }
   },
 
@@ -59,6 +51,7 @@ const AsistenteVirtual = {
     if (!chatBox) return;
     const div = document.createElement('div');
     div.className = `msg ${tipo === 'usuario' ? 'user-msg' : 'bot-msg'}`;
+    div.style.marginBottom = "10px";
     div.innerHTML = `<strong>${tipo === 'usuario' ? 'Tú' : 'Atena'}:</strong> ${texto}`;
     chatBox.appendChild(div);
     chatBox.scrollTop = chatBox.scrollHeight;
