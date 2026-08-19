@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NEXUS - Servicios Empresariales</title>
+    <title>NEXUS - Sistema de Gestión Empresarial</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- FontAwesome Icons -->
@@ -11,15 +11,15 @@
     <style>
         .auth-card {
             backdrop-filter: blur(10px);
-            background: rgba(255, 255, 255, 0.95);
+            background: rgba(255, 255, 255, 0.96);
         }
     </style>
 </head>
 <body class="bg-slate-900 text-slate-800 font-sans min-h-screen flex flex-col">
 
-    <!-- PANTALLA DE AUTENTICACIÓN (LOGIN / REGISTRO) -->
+    <!-- ==================== PANTALLA DE AUTENTICACIÓN (LOGIN / REGISTRO) ==================== -->
     <div id="authScreen" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 overflow-y-auto">
-        <div class="auth-card w-full max-w-md p-8 rounded-2xl shadow-2xl border border-slate-700 my-8">
+        <div class="auth-card w-full max-w-2xl p-8 rounded-2xl shadow-2xl border border-slate-700 my-8">
             
             <!-- LOGO / ENCABEZADO -->
             <div class="text-center mb-6">
@@ -31,7 +31,7 @@
             </div>
 
             <!-- FORMULARIO: INICIAR SESIÓN -->
-            <form id="loginForm" onsubmit="handleLogin(event)" class="space-y-4">
+            <form id="loginForm" onsubmit="handleLogin(event)" class="space-y-4 max-w-md mx-auto">
                 <h2 class="text-lg font-semibold text-slate-700 text-center mb-2">Iniciar Sesión</h2>
                 
                 <div>
@@ -40,7 +40,7 @@
                         <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">
                             <i class="fa-solid fa-envelope"></i>
                         </span>
-                        <input type="email" required placeholder="empresa@nexus.com" class="w-full pl-10 pr-4 py-2.5 rounded-lg border border-slate-300 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm outline-none transition">
+                        <input type="email" required placeholder="empresa@nexus.com" class="w-full pl-10 pr-4 py-2.5 rounded-lg border border-slate-300 focus:ring-2 focus:ring-indigo-500 text-sm outline-none transition">
                     </div>
                 </div>
 
@@ -50,7 +50,7 @@
                         <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">
                             <i class="fa-solid fa-lock"></i>
                         </span>
-                        <input type="password" required placeholder="••••••••" class="w-full pl-10 pr-4 py-2.5 rounded-lg border border-slate-300 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm outline-none transition">
+                        <input type="password" required placeholder="••••••••" class="w-full pl-10 pr-4 py-2.5 rounded-lg border border-slate-300 focus:ring-2 focus:ring-indigo-500 text-sm outline-none transition">
                     </div>
                 </div>
 
@@ -66,30 +66,71 @@
                 </div>
             </form>
 
-            <!-- FORMULARIO: REGISTRAR EMPRESA -->
+            <!-- FORMULARIO COMPLETO: REGISTRAR EMPRESA -->
             <form id="registerForm" onsubmit="handleRegister(event)" class="space-y-4 hidden">
-                <h2 class="text-lg font-semibold text-slate-700 text-center mb-2">Registrar Nueva Empresa</h2>
+                <h2 class="text-lg font-semibold text-slate-700 text-center mb-4">Registro de Nueva Empresa</h2>
 
-                <div>
-                    <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Nombre de la Empresa</label>
-                    <input type="text" required placeholder="Ej. Mi Empresa S.A. de C.V." class="w-full px-4 py-2.5 rounded-lg border border-slate-300 focus:ring-2 focus:ring-indigo-500 text-sm outline-none">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <!-- ID_Empresa -->
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">ID Empresa</label>
+                        <input type="text" id="regIdEmpresa" required placeholder="EMP001" class="w-full px-3 py-2 rounded-lg border border-slate-300 text-sm outline-none focus:ring-2 focus:ring-indigo-500">
+                    </div>
+
+                    <!-- Razon_Social -->
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Razón Social</label>
+                        <input type="text" id="regRazonSocial" required placeholder="Ej. NEXUS S.A. DE C.V." class="w-full px-3 py-2 rounded-lg border border-slate-300 text-sm outline-none focus:ring-2 focus:ring-indigo-500">
+                    </div>
+
+                    <!-- NIT -->
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">NIT</label>
+                        <input type="text" id="regNIT" required placeholder="0614-000000-000-0" class="w-full px-3 py-2 rounded-lg border border-slate-300 text-sm outline-none focus:ring-2 focus:ring-indigo-500">
+                    </div>
+
+                    <!-- NRC -->
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">NRC</label>
+                        <input type="text" id="regNRC" required placeholder="000000-0" class="w-full px-3 py-2 rounded-lg border border-slate-300 text-sm outline-none focus:ring-2 focus:ring-indigo-500">
+                    </div>
+
+                    <!-- Actividad_Economica -->
+                    <div class="md:col-span-2">
+                        <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Actividad Económica</label>
+                        <input type="text" id="regActividadEconomica" required placeholder="Servicios de Gestión Empresarial y Planillas" class="w-full px-3 py-2 rounded-lg border border-slate-300 text-sm outline-none focus:ring-2 focus:ring-indigo-500">
+                    </div>
+
+                    <!-- Direccion -->
+                    <div class="md:col-span-2">
+                        <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Dirección</label>
+                        <input type="text" id="regDireccion" required placeholder="San Salvador, El Salvador" class="w-full px-3 py-2 rounded-lg border border-slate-300 text-sm outline-none focus:ring-2 focus:ring-indigo-500">
+                    </div>
+
+                    <!-- Telefono -->
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Teléfono</label>
+                        <input type="tel" id="regTelefono" required placeholder="+503 2200-0000" class="w-full px-3 py-2 rounded-lg border border-slate-300 text-sm outline-none focus:ring-2 focus:ring-indigo-500">
+                    </div>
+
+                    <!-- Correo -->
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Correo Institucional</label>
+                        <input type="email" id="regCorreo" required placeholder="contacto@empresa.com" class="w-full px-3 py-2 rounded-lg border border-slate-300 text-sm outline-none focus:ring-2 focus:ring-indigo-500">
+                    </div>
+
+                    <!-- Representante -->
+                    <div class="md:col-span-2">
+                        <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Representante Legal</label>
+                        <input type="text" id="regRepresentante" required placeholder="Nombre Completo del Representante" class="w-full px-3 py-2 rounded-lg border border-slate-300 text-sm outline-none focus:ring-2 focus:ring-indigo-500">
+                    </div>
                 </div>
 
-                <div>
-                    <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Correo del Administrador</label>
-                    <input type="email" required placeholder="admin@empresa.com" class="w-full px-4 py-2.5 rounded-lg border border-slate-300 focus:ring-2 focus:ring-indigo-500 text-sm outline-none">
-                </div>
-
-                <div>
-                    <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Contraseña</label>
-                    <input type="password" required placeholder="••••••••" class="w-full px-4 py-2.5 rounded-lg border border-slate-300 focus:ring-2 focus:ring-indigo-500 text-sm outline-none">
-                </div>
-
-                <button type="submit" class="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-medium rounded-lg shadow-md hover:shadow-lg transition duration-200">
-                    Crear Cuenta y Acceder
+                <button type="submit" class="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-medium rounded-lg shadow-md hover:shadow-lg transition duration-200 mt-2">
+                    Crear Cuenta Empresarial y Acceder
                 </button>
 
-                <div class="pt-4 border-t border-slate-200 text-center">
+                <div class="pt-3 border-t border-slate-200 text-center">
                     <p class="text-xs text-slate-600">¿Ya tienes una cuenta?</p>
                     <button type="button" onclick="toggleAuthMode('login')" class="mt-1 text-sm text-indigo-600 hover:text-indigo-800 font-semibold underline">
                         Volver al Inicio de Sesión
@@ -100,34 +141,131 @@
         </div>
     </div>
 
-    <!-- PANEL PRINCIPAL (DASHBOARD - OCULTO INICIALMENTE) -->
-    <div id="mainApp" class="hidden flex-1 flex flex-col min-h-screen bg-slate-100">
-        <!-- BARRA SUPERIOR DE NAVEGACIÓN -->
-        <header class="bg-white border-b border-slate-200 px-6 py-4 flex items-center justify-between shadow-sm">
-            <div class="flex items-center space-x-3">
-                <div class="w-10 h-10 rounded-lg bg-indigo-600 text-white flex items-center justify-center font-bold">
-                    N
+    <!-- ==================== PANEL PRINCIPAL COMPLETO (DASHBOARD) ==================== -->
+    <div id="mainApp" class="hidden flex-1 flex min-h-screen bg-slate-100">
+        
+        <!-- BARRA LATERAL DE NAVEGACIÓN -->
+        <aside class="w-64 bg-slate-900 text-white flex flex-col justify-between shadow-xl">
+            <div>
+                <!-- Header Lateral -->
+                <div class="p-5 border-b border-slate-800 flex items-center space-x-3">
+                    <div class="w-10 h-10 rounded-lg bg-indigo-600 flex items-center justify-center font-bold text-white shadow-md">
+                        N
+                    </div>
+                    <div>
+                        <h2 class="font-bold text-sm text-slate-100 tracking-wide">NEXUS APP</h2>
+                        <p class="text-xs text-slate-400" id="dashIdEmpresa">ID: EMP000</p>
+                    </div>
                 </div>
-                <div>
-                    <h2 class="text-base font-bold text-slate-800">NEXUS Servicios Empresariales</h2>
-                    <p class="text-xs text-slate-500" id="userCompanyDisplay">Panel General</p>
-                </div>
-            </div>
-            <button onclick="handleLogout()" class="px-4 py-2 text-xs font-medium text-slate-600 hover:text-red-600 hover:bg-red-50 rounded-lg border border-slate-200 transition">
-                <i class="fa-solid fa-right-from-bracket mr-1"></i> Cerrar Sesión
-            </button>
-        </header>
 
-        <!-- CONTENIDO DEL PANEL -->
-        <main class="flex-1 p-6 max-w-7xl mx-auto w-full">
-            <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200 mb-6">
-                <h3 class="text-lg font-bold text-slate-800 mb-2">Bienvenido al Sistema</h3>
-                <p class="text-sm text-slate-600">Has ingresado correctamente al panel de administración empresarial.</p>
+                <!-- Menú de Navegación -->
+                <nav class="p-4 space-y-1 text-sm">
+                    <a href="#" class="flex items-center space-x-3 px-4 py-3 bg-indigo-600 text-white rounded-lg font-medium shadow-sm">
+                        <i class="fa-solid fa-house w-5"></i>
+                        <span>Inicio</span>
+                    </a>
+                    <a href="#" class="flex items-center space-x-3 px-4 py-3 text-slate-300 hover:bg-slate-800 hover:text-white rounded-lg transition">
+                        <i class="fa-solid fa-building w-5"></i>
+                        <span>Empresa</span>
+                    </a>
+                    <a href="#" class="flex items-center space-x-3 px-4 py-3 text-slate-300 hover:bg-slate-800 hover:text-white rounded-lg transition">
+                        <i class="fa-solid fa-users w-5"></i>
+                        <span>Empleados</span>
+                    </a>
+                    <a href="#" class="flex items-center space-x-3 px-4 py-3 text-slate-300 hover:bg-slate-800 hover:text-white rounded-lg transition">
+                        <i class="fa-solid fa-calculator w-5"></i>
+                        <span>Planillas</span>
+                    </a>
+                    <a href="#" class="flex items-center space-x-3 px-4 py-3 text-slate-300 hover:bg-slate-800 hover:text-white rounded-lg transition">
+                        <i class="fa-solid fa-chart-pie w-5"></i>
+                        <span>Reportes</span>
+                    </a>
+                </nav>
+            </div>
+
+            <!-- Footer Lateral -->
+            <div class="p-4 border-t border-slate-800">
+                <button onclick="handleLogout()" class="w-full flex items-center justify-center space-x-2 px-4 py-2.5 text-xs font-semibold text-red-400 hover:bg-red-950/40 rounded-lg border border-red-900/50 transition">
+                    <i class="fa-solid fa-right-from-bracket"></i>
+                    <span>Cerrar Sesión</span>
+                </button>
+            </div>
+        </aside>
+
+        <!-- ÁREA CENTRAL DE CONTENIDO -->
+        <main class="flex-1 flex flex-col min-h-screen overflow-y-auto">
+            
+            <!-- Barra Superior del Panel -->
+            <header class="bg-white border-b border-slate-200 px-8 py-4 flex items-center justify-between shadow-sm">
+                <div>
+                    <h1 class="text-xl font-bold text-slate-800" id="dashRazonSocial">NEXUS Servicios Empresariales, S.A. de C.V.</h1>
+                    <p class="text-xs text-slate-500">Panel General de Gestión y Control de Planillas</p>
+                </div>
+                <div class="flex items-center space-x-3">
+                    <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800">
+                        <span class="w-2 h-2 mr-1.5 rounded-full bg-emerald-500"></span> Sistema Conectado
+                    </span>
+                </div>
+            </header>
+
+            <!-- Contenido Interno Dashboard -->
+            <div class="p-8 space-y-6">
+                
+                <!-- Tarjetas de Información Registrada -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
+                        <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">NIT</p>
+                        <p class="text-sm font-semibold text-slate-800 mt-1" id="dashNIT">0614-000000-000-0</p>
+                    </div>
+                    <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
+                        <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">NRC</p>
+                        <p class="text-sm font-semibold text-slate-800 mt-1" id="dashNRC">000000-0</p>
+                    </div>
+                    <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
+                        <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Teléfono</p>
+                        <p class="text-sm font-semibold text-slate-800 mt-1" id="dashTelefono">+503 2200-0000</p>
+                    </div>
+                    <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
+                        <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Correo</p>
+                        <p class="text-sm font-semibold text-slate-800 mt-1" id="dashCorreo">contacto@empresa.com</p>
+                    </div>
+                </div>
+
+                <!-- Detalle de la Empresa -->
+                <div class="bg-white rounded-xl border border-slate-200 p-6 shadow-sm space-y-4">
+                    <h3 class="text-base font-bold text-slate-800 border-b border-slate-100 pb-3">Detalles de la Empresa Registrada</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                        <div>
+                            <span class="text-xs text-slate-400 block uppercase">Actividad Económica</span>
+                            <span class="font-medium text-slate-700" id="dashActividad">Servicios Empresariales y Gestión Integrada</span>
+                        </div>
+                        <div>
+                            <span class="text-xs text-slate-400 block uppercase">Representante Legal</span>
+                            <span class="font-medium text-slate-700" id="dashRepresentante">Representante Registrado</span>
+                        </div>
+                        <div class="md:col-span-2">
+                            <span class="text-xs text-slate-400 block uppercase">Dirección Física</span>
+                            <span class="font-medium text-slate-700" id="dashDireccion">San Salvador, El Salvador</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Resumen Operativo -->
+                <div class="bg-indigo-900 text-white p-6 rounded-xl shadow-md flex items-center justify-between">
+                    <div>
+                        <h4 class="font-bold text-lg">Módulo de Gestión de Planillas Listo</h4>
+                        <p class="text-xs text-indigo-200 mt-1">Puedes comenzar a ingresar empleados y procesar planillas operativas.</p>
+                    </div>
+                    <button class="px-4 py-2 bg-indigo-500 hover:bg-indigo-400 text-white text-xs font-semibold rounded-lg transition shadow">
+                        Ir a Planillas
+                    </button>
+                </div>
+
             </div>
         </main>
     </div>
 
-    <!-- LÓGICA JAVASCRIPT -->
+    <!-- ==================== LÓGICA JAVASCRIPT ==================== -->
     <script>
         // Alternar entre el formulario de Login y Registro
         function toggleAuthMode(mode) {
@@ -143,26 +281,60 @@
             }
         }
 
-        // Simulación de Inicio de Sesión
+        // Manejar Inicio de Sesión
         function handleLogin(event) {
             event.preventDefault();
-            enterApp('Empresa Registrada');
+            
+            // Cargar datos por defecto para login de demostración
+            document.getElementById('dashIdEmpresa').innerText = "ID: EMP001";
+            document.getElementById('dashRazonSocial').innerText = "NEXUS SERVICIOS EMPRESARIALES, S.A. DE C.V.";
+            document.getElementById('dashNIT').innerText = "0511-300176-101-1";
+            document.getElementById('dashNRC').innerText = "123456-7";
+            document.getElementById('dashTelefono').innerText = "+503 2255-8800";
+            document.getElementById('dashCorreo').innerText = "contacto@nexus.com.sv";
+            document.getElementById('dashActividad').innerText = "Gestión de Planilla Única para Empresas y Outsourcing";
+            document.getElementById('dashRepresentante').innerText = "Mauricio Javier De León Cornejo";
+            document.getElementById('dashDireccion').innerText = "Centro Corporativo Escalón, Calle El Mirador, Torre Empresarial, Nivel 5, San Salvador";
+
+            showDashboard();
         }
 
-        // Simulación de Registro de Empresa
+        // Manejar Registro de Nueva Empresa
         function handleRegister(event) {
             event.preventDefault();
-            enterApp('Nueva Empresa S.A.');
+
+            // Extraer datos ingresados por el usuario
+            const idEmpresa = document.getElementById('regIdEmpresa').value;
+            const razonSocial = document.getElementById('regRazonSocial').value;
+            const nit = document.getElementById('regNIT').value;
+            const nrc = document.getElementById('regNRC').value;
+            const actividad = document.getElementById('regActividadEconomica').value;
+            const direccion = document.getElementById('regDireccion').value;
+            const telefono = document.getElementById('regTelefono').value;
+            const correo = document.getElementById('regCorreo').value;
+            const representante = document.getElementById('regRepresentante').value;
+
+            // Reflejar datos en la pantalla del Dashboard
+            document.getElementById('dashIdEmpresa').innerText = "ID: " + idEmpresa;
+            document.getElementById('dashRazonSocial').innerText = razonSocial;
+            document.getElementById('dashNIT').innerText = nit;
+            document.getElementById('dashNRC').innerText = nrc;
+            document.getElementById('dashTelefono').innerText = telefono;
+            document.getElementById('dashCorreo').innerText = correo;
+            document.getElementById('dashActividad').innerText = actividad;
+            document.getElementById('dashRepresentante').innerText = representante;
+            document.getElementById('dashDireccion').innerText = direccion;
+
+            showDashboard();
         }
 
-        // Función para ingresar a la aplicación
-        function enterApp(companyName) {
+        // Mostrar Panel Principal
+        function showDashboard() {
             document.getElementById('authScreen').classList.add('hidden');
             document.getElementById('mainApp').classList.remove('hidden');
-            document.getElementById('userCompanyDisplay').innerText = companyName;
         }
 
-        // Función para cerrar sesión
+        // Cerrar Sesión
         function handleLogout() {
             document.getElementById('mainApp').classList.add('hidden');
             document.getElementById('authScreen').classList.remove('hidden');
