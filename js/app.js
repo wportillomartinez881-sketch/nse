@@ -1,4 +1,4 @@
-// URL de la API de Google Apps Script (Actualizada con tu nueva implementación)
+// URL de la API de Google Apps Script (Actualizada con tu implementación actual)
 const API_URL = "https://script.google.com/macros/s/AKfycbzoCo98Z-eYWrQfNZOGzUByhF9Y1Bcb1QqMh0akVPgwYUdWC8xIg5ZqmWGCzaD0T5SB/exec";
 
 // Estado local de la sesión
@@ -77,32 +77,38 @@ async function ejecutarLogin(e) {
 
 async function ejecutarRegistro(e) {
   e.preventDefault();
-  const razonSocial = document.getElementById('reg-razon').value;
-  const nit = document.getElementById('reg-nit').value;
-  const nombre = document.getElementById('reg-nombre').value;
-  const correo = document.getElementById('reg-email').value;
-  const password = document.getElementById('reg-pass').value;
+  
+  // Payload completo con todos los campos solicitados por tu estructura de Google Sheets
+  const payload = {
+    accion: "registrar_empresa_usuario",
+    Razon_Social: document.getElementById('reg-razon').value,
+    NIT: document.getElementById('reg-nit').value,
+    NRC: document.getElementById('reg-nrc').value,
+    Actividad_Economica: document.getElementById('reg-actividad').value,
+    Direccion: document.getElementById('reg-direccion').value,
+    Telefono: document.getElementById('reg-telefono').value,
+    Representante: document.getElementById('reg-representante').value,
+    Nombre: document.getElementById('reg-nombre').value,
+    Correo: document.getElementById('reg-email').value,
+    Password: document.getElementById('reg-pass').value
+  };
 
   mostrarMensajeAuth("Registrando empresa y usuario...", "normal");
 
   try {
     const respuesta = await fetch(API_URL, {
       method: "POST",
-      body: JSON.stringify({
-        accion: "registrar_empresa_usuario",
-        Razon_Social: razonSocial,
-        NIT: nit,
-        Nombre: nombre,
-        Correo: correo,
-        Password: password
-      })
+      body: JSON.stringify(payload)
     });
 
     const data = await respuesta.json();
 
     if (data.estado === "correcto") {
       mostrarMensajeAuth("¡Empresa registrada con éxito! Por favor inicia sesión.", "exito");
-      setTimeout(() => mostrarTab('login'), 2000);
+      setTimeout(() => {
+        mostrarTab('login');
+        document.getElementById('form-register').reset();
+      }, 2000);
     } else {
       mostrarMensajeAuth(data.mensaje || "Error al registrar", "error");
     }
@@ -149,7 +155,7 @@ async function cargarEmpleados() {
   tbody.innerHTML = '<tr><td colspan="6" class="text-center">Cargando...</td></tr>';
 
   try {
-    const res = await fetch(`${API_URL}?accion=empleados`);
+    const res = await fetch(`${API_URL}?accion=empleados&ID_Empresa=${usuarioSesion.ID_Empresa}`);
     const lista = await res.json();
 
     if (Array.isArray(lista)) {
@@ -225,7 +231,7 @@ async function cargarNovedades() {
   tbody.innerHTML = '<tr><td colspan="7" class="text-center">Cargando...</td></tr>';
 
   try {
-    const res = await fetch(`${API_URL}?accion=novedades`);
+    const res = await fetch(`${API_URL}?accion=novedades&ID_Empresa=${usuarioSesion.ID_Empresa}`);
     const lista = await res.json();
 
     if (Array.isArray(lista)) {
@@ -262,7 +268,7 @@ async function cargarAuditoria() {
   tbody.innerHTML = '<tr><td colspan="6" class="text-center">Cargando...</td></tr>';
 
   try {
-    const res = await fetch(`${API_URL}?accion=auditoria`);
+    const res = await fetch(`${API_URL}?accion=auditoria&ID_Empresa=${usuarioSesion.ID_Empresa}`);
     const lista = await res.json();
 
     if (Array.isArray(lista)) {
