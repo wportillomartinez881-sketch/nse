@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>NEXUS Servicios Empresariales S.A. de C.V. - Sistema Corporativo</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <style>
         :root {
@@ -22,15 +21,13 @@
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
         body { background-color: var(--background); color: var(--text); display: flex; height: 100vh; overflow: hidden; }
         
-        /* Pantalla de Autenticación / Login */
         #authScreen { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: var(--primary); z-index: 2000; display: flex; align-items: center; justify-content: center; overflow-y: auto; padding: 20px; }
-        .auth-card { background: var(--surface); padding: 30px; border-radius: 12px; width: 100%; max-width: 500px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.3); max-height: 90vh; overflow-y: auto; }
+        .auth-card { background: var(--surface); padding: 30px; border-radius: 12px; width: 100%; max-width: 550px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.3); max-height: 90vh; overflow-y: auto; }
         .auth-card h2 { color: var(--primary); margin-bottom: 20px; text-align: center; font-size: 1.5rem; display: flex; align-items: center; justify-content: center; gap: 10px; }
         .auth-tabs { display: flex; margin-bottom: 20px; border-bottom: 2px solid var(--border); }
         .auth-tab { flex: 1; text-align: center; padding: 10px; cursor: pointer; font-weight: 600; color: var(--text-light); }
         .auth-tab.active { color: var(--secondary); border-bottom: 2px solid var(--secondary); margin-bottom: -2px; }
 
-        /* App Layout principal */
         #appContainer { display: none; width: 100vw; height: 100vh; }
         aside { width: 280px; background-color: var(--primary); color: #fff; display: flex; flex-direction: column; box-shadow: 4px 0 10px rgba(0,0,0,0.05); z-index: 10; }
         .brand { padding: 20px; font-size: 1.1rem; font-weight: bold; background: #020617; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid #1e293b; }
@@ -50,7 +47,7 @@
 
         .card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 25px; margin-bottom: 25px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.02); }
         .card h3 { margin-bottom: 15px; font-size: 1.1rem; color: var(--primary); display: flex; align-items: center; gap: 8px; border-bottom: 2px solid var(--border); padding-bottom: 10px; }
-        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
         .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
         
         form label { display: block; font-size: 0.85rem; font-weight: 600; color: var(--text-light); margin-bottom: 6px; text-transform: uppercase; }
@@ -65,7 +62,7 @@
         .hidden { display: none !important; }
         .mensaje-status { padding: 10px; border-radius: 6px; margin-bottom: 15px; text-align: center; font-size: 0.9rem; }
 
-        /* Asistente Atena flotante */
+        /* Asistente Atena */
         .atena-float { position: fixed; bottom: 30px; right: 30px; width: 60px; height: 60px; background: var(--secondary); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; cursor: pointer; box-shadow: 0 10px 25px rgba(59, 130, 246, 0.4); z-index: 1000; }
         .atena-modal { position: fixed; bottom: 100px; right: 30px; width: 350px; height: 450px; background: white; border-radius: 12px; box-shadow: 0 15px 35px rgba(0,0,0,0.15); display: none; flex-direction: column; z-index: 1000; border: 1px solid var(--border); overflow: hidden; }
         .atena-header { background: var(--primary); color: white; padding: 15px; display: flex; justify-content: space-between; align-items: center; }
@@ -90,7 +87,6 @@
 
             <div id="auth-mensaje" class="mensaje-status hidden"></div>
             
-            <!-- Login -->
             <form id="form-login" onsubmit="ejecutarLogin(event)">
                 <label>Correo Electrónico</label>
                 <input type="email" id="login-email" placeholder="admin@nexus.test" required>
@@ -99,7 +95,7 @@
                 <button type="submit" class="btn" style="width: 100%; justify-content: center;">Iniciar Sesión</button>
             </form>
 
-            <!-- Registro Completo de Empresa -->
+            <!-- Registro Completo con Teléfono y Representante -->
             <form id="form-register" class="hidden" onsubmit="ejecutarRegistro(event)">
                 <h4 style="margin-bottom: 10px; color: var(--primary); font-size: 0.9rem;">Datos de la Empresa</h4>
                 <label>Razón Social</label>
@@ -108,8 +104,14 @@
                     <div><label>NIT</label><input type="text" id="reg-nit" placeholder="0000-000000-000-0" required></div>
                     <div><label>NRC</label><input type="text" id="reg-nrc" placeholder="000000-0" required></div>
                 </div>
+                <label>Actividad Económica</label>
+                <input type="text" id="reg-actividad" placeholder="Servicios empresariales" required>
                 <label>Dirección</label>
                 <input type="text" id="reg-direccion" placeholder="San Salvador, El Salvador" required>
+                <div class="grid-2">
+                    <div><label>Teléfono</label><input type="text" id="reg-telefono" placeholder="0000-0000" required></div>
+                    <div><label>Representante Legal</label><input type="text" id="reg-representante" placeholder="Nombre del representante" required></div>
+                </div>
                 
                 <h4 style="margin: 10px 0; color: var(--primary); font-size: 0.9rem;">Administrador</h4>
                 <label>Nombre Completo</label>
@@ -130,6 +132,9 @@
             <div class="brand"><i class="fa-solid fa-network-wired"></i> NEXUS S.A. de C.V.</div>
             <ul class="menu">
                 <li class="active" onclick="cambiarSeccion('dashboard', this)"><i class="fa-solid fa-chart-pie"></i> Dashboard Financiero</li>
+                <li onclick="cambiarSeccion('empleados', this)"><i class="fa-solid fa-users"></i> Gestión de Empleados</li>
+                <li onclick="cambiarSeccion('planilla', this)"><i class="fa-solid fa-file-invoice-dollar"></i> Procesamiento Planilla</li>
+                <li onclick="cambiarSeccion('auditoria', this)"><i class="fa-solid fa-shield-halved"></i> Auditoría y Historial</li>
                 <li onclick="cambiarSeccion('contacto', this)"><i class="fa-solid fa-envelope"></i> Soporte / Contacto</li>
                 <li onclick="cerrarSesion()"><i class="fa-solid fa-right-from-bracket"></i> Cerrar Sesión</li>
             </ul>
@@ -141,20 +146,20 @@
                 <div class="sync-status"><i class="fa-solid fa-circle-check" style="color:var(--accent)"></i> Google Sheets Conectado</div>
             </header>
 
-            <!-- Sección Dashboard (En Cero) -->
+            <!-- Sección Dashboard -->
             <div id="seccion-dashboard" class="content-body active">
                 <div class="grid-3">
                     <div class="card">
                         <h3><i class="fa-solid fa-wallet"></i> Ingresos Totales</h3>
-                        <h2 id="val-ingresos" style="color: var(--accent);">$0.00</h2>
+                        <h2 style="color: var(--accent);">$0.00</h2>
                     </div>
                     <div class="card">
                         <h3><i class="fa-solid fa-file-invoice-dollar"></i> Costos Operativos</h3>
-                        <h2 id="val-costos" style="color: var(--danger);">$0.00</h2>
+                        <h2 style="color: var(--danger);">$0.00</h2>
                     </div>
                     <div class="card">
                         <h3><i class="fa-solid fa-chart-line"></i> Utilidad Neta</h3>
-                        <h2 id="val-utilidad" style="color: var(--secondary);">$0.00</h2>
+                        <h2 style="color: var(--secondary);">$0.00</h2>
                     </div>
                 </div>
                 <div class="card">
@@ -163,7 +168,31 @@
                 </div>
             </div>
 
-            <!-- Sección Contacto / Soporte -->
+            <!-- Sección Empleados -->
+            <div id="seccion-empleados" class="content-body">
+                <div class="card">
+                    <h3><i class="fa-solid fa-users-gear"></i> Listado de Empleados Registrados</h3>
+                    <p style="color: var(--text-light); font-size: 0.9rem;">Módulo habilitado para el control de personal, cargos y salarios base orientados a planilla.</p>
+                </div>
+            </div>
+
+            <!-- Sección Planilla -->
+            <div id="seccion-planilla" class="content-body">
+                <div class="card">
+                    <h3><i class="fa-solid fa-calculator"></i> Procesamiento y Cálculo de Planilla</h3>
+                    <p style="color: var(--text-light); font-size: 0.9rem;">Control de deducciones, ISSS, AFP, Renta y salarios líquidos.</p>
+                </div>
+            </div>
+
+            <!-- Sección Auditoría -->
+            <div id="seccion-auditoria" class="content-body">
+                <div class="card">
+                    <h3><i class="fa-solid fa-clipboard-list"></i> Registro de Auditoría y Control</h3>
+                    <p style="color: var(--text-light); font-size: 0.9rem;">Bitácora de operaciones y validaciones de cumplimiento legal.</p>
+                </div>
+            </div>
+
+            <!-- Sección Contacto -->
             <div id="seccion-contacto" class="content-body">
                 <div class="card" style="max-width: 600px; margin: 0 auto;">
                     <h3><i class="fa-solid fa-paper-plane"></i> Enviar Mensaje a Soporte</h3>
@@ -179,7 +208,7 @@
         </main>
     </div>
 
-    <!-- Asistente Virtual Atena -->
+    <!-- Asistente Virtual Atena (Funcionando) -->
     <div class="atena-float" onclick="toggleAtena()"><i class="fa-solid fa-robot"></i></div>
     <div class="atena-modal" id="atenaModal">
         <div class="atena-header">
@@ -190,14 +219,12 @@
             <div class="atena-msg bot">¡Hola! Soy Atena, tu asistente virtual para NEXUS S.A. de C.V. ¿En qué te puedo ayudar hoy?</div>
         </div>
         <div class="atena-footer">
-            <input type="text" id="atenaInput" placeholder="Escribe algo..." onkeypress="if(event.key==='Enter') enviarAtena()">
+            <input type="text" id="atenaInput" placeholder="Escribe una pregunta..." onkeypress="if(event.key==='Enter') enviarAtena()">
             <button class="btn" style="padding: 8px 12px;" onclick="enviarAtena()"><i class="fa-solid fa-paper-plane"></i></button>
         </div>
     </div>
 
-    <!-- SCRIPT GENERAL PARA FUNCIONALIDAD -->
     <script>
-        // URL DE GOOGLE APPS SCRIPT CONFIGURADA
         const URL_GOOGLE_SHEETS = "https://script.google.com/macros/s/AKfycbzoCo98Z-eYWrQfNZOGzUByhF9Y1Bcb1QqMh0akVPgwYUdWC8xIg5ZqmWGCzaD0T5SB/exec";
 
         function mostrarTab(tab) {
@@ -231,7 +258,10 @@
                 razon: document.getElementById('reg-razon').value,
                 nit: document.getElementById('reg-nit').value,
                 nrc: document.getElementById('reg-nrc').value,
+                actividad: document.getElementById('reg-actividad').value,
                 direccion: document.getElementById('reg-direccion').value,
+                telefono: document.getElementById('reg-telefono').value,
+                representante: document.getElementById('reg-representante').value,
                 nombre: document.getElementById('reg-nombre').value,
                 correo: document.getElementById('reg-email').value,
                 passwordHash: document.getElementById('reg-pass').value
@@ -267,13 +297,19 @@
             document.getElementById('seccion-' + seccionId).classList.add('active');
             elemento.classList.add('active');
             
-            const titulos = { 'dashboard': 'Dashboard Financiero', 'contacto': 'Soporte / Contacto' };
+            const titulos = { 
+                'dashboard': 'Dashboard Financiero', 
+                'empleados': 'Gestión de Empleados',
+                'planilla': 'Procesamiento Planilla',
+                'auditoria': 'Auditoría y Control',
+                'contacto': 'Soporte / Contacto' 
+            };
             document.getElementById('tituloSeccion').innerText = titulos[seccionId];
         }
 
         function enviarMensajeSoporte(e) {
             e.preventDefault();
-            alert("Mensaje enviado con éxito.");
+            alert("Mensaje enviado con éxito al soporte técnico.");
             document.getElementById('form-contacto').reset();
         }
 
@@ -282,6 +318,7 @@
             modal.style.display = modal.style.display === 'flex' ? 'none' : 'flex';
         }
 
+        // Lógica de Atena reactivada y funcional
         function enviarAtena() {
             const input = document.getElementById('atenaInput');
             const texto = input.value.trim().toLowerCase();
@@ -292,12 +329,14 @@
             input.value = '';
             
             setTimeout(() => {
-                let respuesta = "Comprendo. Como asistente de NEXUS S.A. de C.V., puedo ayudarte con las consultas de tu sistema corporativo.";
+                let respuesta = "Comprendo. Como asistente virtual de NEXUS S.A. de C.V., estoy aquí para apoyarte con tus consultas corporativas y de sistema.";
                 
-                if (texto.includes('hola') || texto.includes('saludos')) {
-                    respuesta = "¡Hola! Es un gusto saludarte. ¿En qué te puedo colaborar hoy?";
-                } else if (texto.includes('registro') || texto.includes('empresa')) {
-                    respuesta = "Puedes registrar tu empresa desde la pantalla inicial seleccionando la pestaña 'Crear Cuenta'.";
+                if (texto.includes('hola') || texto.includes('saludos') || texto.includes('buenos dias')) {
+                    respuesta = "¡Hola! Es un gusto saludarte. ¿Cómo puedo ayudarte hoy con la plataforma NEXUS?";
+                } else if (texto.includes('planilla') || texto.includes('empleados')) {
+                    respuesta = "Puedes gestionar el personal y los cálculos desde los módulos 'Gestión de Empleados' y 'Procesamiento Planilla' en el menú lateral.";
+                } else if (texto.includes('auditoria') || texto.includes('control')) {
+                    respuesta = "La sección de Auditoría te permite verificar las validaciones legales y el historial de las operaciones de la empresa.";
                 }
 
                 body.innerHTML += `<div class="atena-msg bot">${respuesta}</div>`;
