@@ -1,19 +1,12 @@
-// URL de la API de Google Apps Script V5.1 (Modo Escritura Unidireccional)
-const API_URL = "https://script.google.com/macros/s/AKfycbzuqC4RclUYdMhgTXA3iIVdp7WZuF5kwMZDcPv4NmAncVWAvZnNOPu0FajuBK1DkK95/exec";
+// URL de la API de Google Apps Script (Actualizada con tu nueva implementación)
+const API_URL = "https://script.google.com/macros/s/AKfycbzoCo98Z-eYWrQfNZOGzUByhF9Y1Bcb1QqMh0akVPgwYUdWC8xIg5ZqmWGCzaD0T5SB/exec";
 
-// Estado local de la sesión y arreglos vacíos para ingreso manual
+// Estado local de la sesión
 let usuarioSesion = null;
-let empleadosLocales = [];
-let novedadesLocales = [];
 
 // ==========================================
 // INICIALIZACIÓN Y NAVEGACIÓN
 // ==========================================
-
-document.addEventListener('DOMContentLoaded', () => {
-  // Forzar inicio en pantalla de login limpia
-  cerrarSesion();
-});
 
 function mostrarTab(tab) {
   document.getElementById('form-login').classList.toggle('hidden', tab !== 'login');
@@ -30,9 +23,9 @@ function navegarA(moduloId) {
   const navItems = document.querySelectorAll('.nav-item');
   navItems.forEach(n => n.classList.remove('active'));
 
-  const moduloActual = document.getElementById(moduloId);
-  if (moduloActual) moduloActual.classList.remove('hidden');
+  document.getElementById(moduloId).classList.remove('hidden');
   
+  // Actualizar título
   const titulos = {
     'modulo-dashboard': 'Panel Principal',
     'modulo-empleados': 'Gestión de Empleados',
@@ -40,12 +33,12 @@ function navegarA(moduloId) {
     'modulo-planillas': 'Procesamiento de Planilla',
     'modulo-auditoria': 'Bitácora de Auditoría'
   };
-  const tituloEl = document.getElementById('page-title');
-  if (tituloEl) tituloEl.innerText = titulos[moduloId] || 'Panel';
+  document.getElementById('page-title').innerText = titulos[moduloId] || 'Panel';
 
-  // Renderizar vistas locales vacías para ingreso manual
-  if (moduloId === 'modulo-empleados') renderizarEmpleadosLocales();
-  if (moduloId === 'modulo-novedades') renderizarNovedadesLocales();
+  // Cargar datos según el módulo activo
+  if (moduloId === 'modulo-empleados') cargarEmpleados();
+  if (moduloId === 'modulo-novedades') cargarNovedades();
+  if (moduloId === 'modulo-auditoria') cargarAuditoria();
 }
 
 // ==========================================
@@ -131,175 +124,216 @@ function iniciarPantallaPrincipal() {
 
 function cerrarSesion() {
   usuarioSesion = null;
-  empleadosLocales = [];
-  novedadesLocales = [];
-  const appContainer = document.getElementById('app-container');
-  const authContainer = document.getElementById('auth-container');
-  if (appContainer) appContainer.classList.add('hidden');
-  if (authContainer) authContainer.classList.remove('hidden');
+  document.getElementById('app-container').classList.add('hidden');
+  document.getElementById('auth-container').classList.remove('hidden');
   mostrarTab('login');
 }
 
 function mostrarMensajeAuth(msg, tipo) {
   const box = document.getElementById('auth-mensaje');
-  if (!box) return;
   box.innerText = msg;
   box.className = `mensaje-status ${tipo}`;
   box.classList.remove('hidden');
 }
 
 function ocultarMensajeAuth() {
-  const box = document.getElementById('auth-mensaje');
-  if (box) box.classList.add('hidden');
+  document.getElementById('auth-mensaje').classList.add('hidden');
 }
 
 // ==========================================
-// MÓDULO EMPLEADOS (Ingreso Manual Local)
+// MÓDULO EMPLEADOS
 // ==========================================
 
-function renderizarEmpleadosLocales() {
+async function cargarEmpleados() {
   const tbody = document.getElementById('tabla-empleados-body');
-  if (!tbody) return;
+  tbody.innerHTML = '<tr><td colspan="6" class="text-center">Cargando...</td></tr>';
 
-  const kpi = document.getElementById('kpi-empleados');
-  if (kpi) kpi.innerText = empleadosLocales.length;
+  try {
+    const res = await fetch(`${API_URL}?accion=empleados`);
+    const lista = await res.json();
 
-  if (empleadosLocales.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="6" class="text-center">No hay empleados registrados manualmente. Ingrese los datos.</td></tr>';
-    return;
+    if (Array.isArray(lista)) {
+      const misEmpleados = lista.filter(emp => emp.ID_Empresa === usuarioSesion.ID_Empresa);
+      
+      document.getElementById('kpi-empleados').innerText = misEmpleados.length;
+
+      if (misEmpleados.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="6" class="text-center">No hay empleados registrados.</td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = misEmpleados.map(emp => `
+        <tr>
+          <td>${emp.ID_Empleado}</td>
+          <td>${emp.Nombre_Completo}</td>
+          <td>${emp.DUI}</td>
+          <td>${emp.Cargo}</td>
+          <td>$${parseFloat(emp.Salario_Base || 0).toFixed(2)}</td>
+          <td><span class="badge">${emp.Estado}</span></td>
+        </tr>
+      `).join('');
+    }
+  } catch (err) {
+    tbody.innerHTML = '<tr><td colspan="6" class="text-center">Error al cargar datos.</td></tr>';
   }
-
-  tbody.innerHTML = empleadosLocales.map(emp => `
-    <tr>
-      <td>${emp.ID_Empleado}</td>
-      <td>${emp.Nombre_Completo}</td>
-      <td>${emp.DUI}</td>
-      <td>${emp.Cargo}</td>
-      <td>$${parseFloat(emp.Salario_Base || 0).toFixed(2)}</td>
-      <td><span class="badge">Activo</span></td>
-    </tr>
-  `).join('');
 }
 
 function abrirModalEmpleado() {
-  const modal = document.getElementById('modal-empleado');
-  if (modal) modal.classList.remove('hidden');
+  document.getElementById('modal-empleado').classList.remove('hidden');
 }
 
 function cerrarModalEmpleado() {
-  const modal = document.getElementById('modal-empleado');
-  if (modal) modal.classList.add('hidden');
+  document.getElementById('modal-empleado').classList.add('hidden');
 }
 
-function guardarEmpleado(e) {
+async function guardarEmpleado(e) {
   e.preventDefault();
   
-  const nuevoEmp = {
-    ID_Empleado: "EMP-" + Math.floor(1000 + Math.random() * 9000),
+  const payload = {
+    accion: "registrar_empleado",
     ID_Empresa: usuarioSesion.ID_Empresa,
     Nombre_Completo: document.getElementById('emp-nombre').value,
     DUI: document.getElementById('emp-dui').value,
     Cargo: document.getElementById('emp-cargo').value,
-    Salario_Base: parseFloat(document.getElementById('emp-salario').value) || 0
+    Salario_Base: parseFloat(document.getElementById('emp-salario').value)
   };
 
-  empleadosLocales.push(nuevoEmp);
-  cerrarModalEmpleado();
-  renderizarEmpleadosLocales();
+  try {
+    const res = await fetch(API_URL, {
+      method: "POST",
+      body: JSON.stringify(payload)
+    });
+    const data = await res.json();
 
-  // Envío unidireccional al backend para que Google Sheets lo guarde
-  fetch(API_URL, {
-    method: "POST",
-    body: JSON.stringify({ accion: "registrar_empleado", ...nuevoEmp })
-  }).catch(err => console.error("Error al sincronizar con hoja:", err));
-}
-
-// ==========================================
-// MÓDULO NOVEDADES (Campos Separados)
-// ==========================================
-
-function renderizarNovedadesLocales() {
-  const tbody = document.getElementById('tabla-novedades-body');
-  if (!tbody) return;
-
-  const kpi = document.getElementById('kpi-novedades');
-  if (kpi) kpi.innerText = novedadesLocales.length;
-
-  if (novedadesLocales.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="7" class="text-center">No hay novedades registradas.</td></tr>';
-    return;
+    if (data.estado === "correcto") {
+      cerrarModalEmpleado();
+      cargarEmpleados();
+    } else {
+      alert(data.mensaje);
+    }
+  } catch (err) {
+    alert("Error al registrar empleado");
   }
-
-  tbody.innerHTML = novedadesLocales.map(nov => `
-    <tr>
-      <td>${nov.ID_Novedad}</td>
-      <td>${nov.ID_Empleado}</td>
-      <td>${nov.Periodo || '-'}</td>
-      <td>${nov.Tipo_Novedad}</td>
-      <td>${nov.Dias_Aplicar} días / ${nov.Horas_Aplicar} hrs</td>
-      <td>$${parseFloat(nov.Valor || 0).toFixed(2)}</td>
-      <td>Registrado</td>
-    </tr>
-  `).join('');
 }
 
 // ==========================================
-// WIDGET ATENA (ASISTENTE VIRTUAL CON VOZ E INTERRUPCIÓN)
+// MÓDULO NOVEDADES
 // ==========================================
 
-let synth = window.speechSynthesis;
+async function cargarNovedades() {
+  const tbody = document.getElementById('tabla-novedades-body');
+  tbody.innerHTML = '<tr><td colspan="7" class="text-center">Cargando...</td></tr>';
+
+  try {
+    const res = await fetch(`${API_URL}?accion=novedades`);
+    const lista = await res.json();
+
+    if (Array.isArray(lista)) {
+      document.getElementById('kpi-novedades').innerText = lista.length;
+
+      if (lista.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="7" class="text-center">No hay novedades registradas.</td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = lista.map(nov => `
+        <tr>
+          <td>${nov.ID_Novedad}</td>
+          <td>${nov.ID_Empleado}</td>
+          <td>${nov.Periodo || '-'}</td>
+          <td>${nov.Tipo_Novedad}</td>
+          <td>${nov.Cantidad}</td>
+          <td>$${parseFloat(nov.Valor || 0).toFixed(2)}</td>
+          <td>${nov.Estado}</td>
+        </tr>
+      `).join('');
+    }
+  } catch (err) {
+    tbody.innerHTML = '<tr><td colspan="7" class="text-center">Error al cargar novedades.</td></tr>';
+  }
+}
+
+// ==========================================
+// MÓDULO AUDITORÍA
+// ==========================================
+
+async function cargarAuditoria() {
+  const tbody = document.getElementById('tabla-auditoria-body');
+  tbody.innerHTML = '<tr><td colspan="6" class="text-center">Cargando...</td></tr>';
+
+  try {
+    const res = await fetch(`${API_URL}?accion=auditoria`);
+    const lista = await res.json();
+
+    if (Array.isArray(lista)) {
+      tbody.innerHTML = lista.map(aud => `
+        <tr>
+          <td>${aud.ID_Auditoria}</td>
+          <td>${new Date(aud.Fecha_Hora).toLocaleString()}</td>
+          <td>${aud.Accion}</td>
+          <td>${aud.Usuario}</td>
+          <td>${aud.Registro_Afectado}</td>
+          <td>${aud.Resultado}</td>
+        </tr>
+      `).join('');
+    }
+  } catch (err) {
+    tbody.innerHTML = '<tr><td colspan="6" class="text-center">Error al cargar auditoría.</td></tr>';
+  }
+}
+
+// ==========================================
+// WIDGET ATENA (ASISTENTE VIRTUAL) CON IA REAL
+// ==========================================
 
 function toggleAtena() {
-  const box = document.getElementById('atena-box');
-  if (box) box.classList.toggle('hidden');
+  document.getElementById('atena-box').classList.toggle('hidden');
 }
 
 function evaluarAtenaTecla(e) {
   if (e.key === 'Enter') enviarMensajeAtena();
 }
 
-function hablarAtena(texto) {
-  if (!synth) return;
-  if (synth.speaking) {
-    synth.cancel(); // Interrumpe de inmediato cualquier lectura anterior
-  }
-  let utterance = new SpeechSynthesisUtterance(texto);
-  utterance.lang = 'es-ES';
-  synth.speak(utterance);
-}
-
-function stopVoice() {
-  if (synth) synth.cancel(); // Botón para silenciar la voz
-}
-
-function enviarMensajeAtena() {
+async function enviarMensajeAtena() {
   const input = document.getElementById('atena-input');
-  if (!input) return;
   const texto = input.value.trim();
   if (!texto) return;
 
   const box = document.getElementById('atena-messages');
-  if (!box) return;
   
+  // Mensaje usuario
   box.innerHTML += `<div class="msg user-msg">${texto}</div>`;
   input.value = '';
+  box.scrollTop = box.scrollHeight;
 
-  setTimeout(() => {
-    let resp = "Con gusto puedo apoyarte en el sistema Nexus.";
-    let textoLower = texto.toLowerCase();
-    
-    if (textoLower.includes('isss')) {
-      resp = "La cuota laboral del ISSS en El Salvador es del 3% sobre el salario tope de $1,000.00.";
-    } else if (textoLower.includes('afp')) {
-      resp = "La cotización laboral de AFP es del 7.25% sobre el salario nominal.";
-    } else if (textoLower.includes('planilla')) {
-      resp = "Asegúrese de registrar a sus empleados manualmente antes de procesar el cálculo de planilla.";
+  // Mensaje temporal de carga de Atena
+  const idCarga = "atena-carga-" + Date.now();
+  box.innerHTML += `<div id="${idCarga}" class="msg atena-msg">Atena está pensando...</div>`;
+  box.scrollTop = box.scrollHeight;
+
+  try {
+    const respuesta = await fetch(API_URL, {
+      method: "POST",
+      body: JSON.stringify({
+        accion: "preguntar_ia",
+        pregunta: texto
+      })
+    });
+
+    const data = await respuesta.json();
+    const elemCarga = document.getElementById(idCarga);
+    if (elemCarga) elemCarga.remove();
+
+    if (data.estado === "correcto" && data.respuesta) {
+      box.innerHTML += `<div class="msg atena-msg">${data.respuesta}</div>`;
+    } else {
+      box.innerHTML += `<div class="msg atena-msg">Lo siento, tuve un problema al procesar tu consulta: ${data.mensaje || "Error desconocido"}</div>`;
     }
-
-    box.innerHTML += `<div class="msg atena-msg">${resp}</div>`;
-    box.scrollTop = box.scrollHeight;
-    
-    // Activar voz de Atena con soporte de interrupción
-    hablarAtena(resp);
-  }, 400);
+  } catch (err) {
+    const elemCarga = document.getElementById(idCarga);
+    if (elemCarga) elemCarga.remove();
+    box.innerHTML += `<div class="msg atena-msg">Error de conexión con la asistente virtual.</div>`;
+  }
+  
+  box.scrollTop = box.scrollHeight;
 }
