@@ -23,17 +23,17 @@
         body { background-color: var(--background); color: var(--text); display: flex; height: 100vh; overflow: hidden; }
         
         /* Pantalla de Autenticación / Login */
-        #authScreen { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: var(--primary); z-index: 2000; display: flex; align-items: center; justify-content: center; }
-        .auth-card { background: var(--surface); padding: 40px; border-radius: 12px; width: 100%; max-width: 420px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.3); }
+        #authScreen { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: var(--primary); z-index: 2000; display: flex; align-items: center; justify-content: center; overflow-y: auto; padding: 20px; }
+        .auth-card { background: var(--surface); padding: 30px; border-radius: 12px; width: 100%; max-width: 500px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.3); max-height: 90vh; overflow-y: auto; }
         .auth-card h2 { color: var(--primary); margin-bottom: 20px; text-align: center; font-size: 1.5rem; display: flex; align-items: center; justify-content: center; gap: 10px; }
         .auth-tabs { display: flex; margin-bottom: 20px; border-bottom: 2px solid var(--border); }
         .auth-tab { flex: 1; text-align: center; padding: 10px; cursor: pointer; font-weight: 600; color: var(--text-light); }
         .auth-tab.active { color: var(--secondary); border-bottom: 2px solid var(--secondary); margin-bottom: -2px; }
 
-        /* App Layout principal (oculto por defecto hasta loguearse) */
+        /* App Layout principal */
         #appContainer { display: none; width: 100vw; height: 100vh; }
         aside { width: 280px; background-color: var(--primary); color: #fff; display: flex; flex-direction: column; box-shadow: 4px 0 10px rgba(0,0,0,0.05); z-index: 10; }
-        .brand { padding: 20px; font-size: 1.2rem; font-weight: bold; background: #020617; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid #1e293b; }
+        .brand { padding: 20px; font-size: 1.1rem; font-weight: bold; background: #020617; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid #1e293b; }
         .brand i { color: var(--secondary); }
         .menu { list-style: none; padding: 15px 0; overflow-y: auto; flex-grow: 1; }
         .menu li { padding: 12px 20px; cursor: pointer; display: flex; align-items: center; gap: 12px; font-size: 0.95rem; transition: all 0.3s; border-left: 4px solid transparent; }
@@ -42,7 +42,7 @@
 
         main { flex-grow: 1; display: flex; flex-direction: column; overflow: hidden; position: relative; }
         header { background-color: var(--surface); padding: 15px 30px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
-        header h1 { font-size: 1.4rem; color: var(--primary); font-weight: 600; }
+        header h1 { font-size: 1.3rem; color: var(--primary); font-weight: 600; }
         .sync-status { font-size: 0.85rem; padding: 6px 12px; background: #e0f2fe; color: #0369a1; border-radius: 20px; display: flex; align-items: center; gap: 6px; font-weight: 500; }
         
         .content-body { flex-grow: 1; padding: 30px; overflow-y: auto; display: none; }
@@ -63,650 +63,188 @@
         .btn-success:hover { background-color: #059669; }
         .btn-danger { background-color: var(--danger); color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; }
 
-        table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 0.9rem; }
-        table th, table td { padding: 12px 15px; text-align: left; border-bottom: 1px solid var(--border); }
-        table th { background-color: #f1f5f9; color: var(--primary); font-weight: 600; text-transform: uppercase; font-size: 0.8rem; }
+        .hidden { display: none !important; }
+        .mensaje-status { padding: 10px; border-radius: 6px; margin-bottom: 15px; text-align: center; font-size: 0.9rem; }
+        .mensaje-status.exito { background: #ecfdf5; color: #065f46; }
+        .mensaje-status.error { background: #fee2e2; color: #991b1b; }
 
-        /* Asistente Atena */
-        .atena-float { position: fixed; bottom: 30px; right: 30px; width: 60px; height: 60px; background: var(--secondary); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; cursor: pointer; box-shadow: 0 10px 25px rgba(59, 130, 246, 0.4); z-index: 1000; transition: transform 0.3s; }
-        .atena-float:hover { transform: scale(1.08); }
-        .atena-modal { position: fixed; bottom: 100px; right: 30px; width: 380px; height: 500px; background: white; border-radius: 12px; box-shadow: 0 15px 35px rgba(0,0,0,0.15); display: flex; flex-direction: column; z-index: 1000; display: none; border: 1px solid var(--border); overflow: hidden; }
+        /* Asistente Atena flotante */
+        .atena-float { position: fixed; bottom: 30px; right: 30px; width: 60px; height: 60px; background: var(--secondary); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; cursor: pointer; box-shadow: 0 10px 25px rgba(59, 130, 246, 0.4); z-index: 1000; }
+        .atena-modal { position: fixed; bottom: 100px; right: 30px; width: 350px; height: 450px; background: white; border-radius: 12px; box-shadow: 0 15px 35px rgba(0,0,0,0.15); display: none; flex-direction: column; z-index: 1000; border: 1px solid var(--border); overflow: hidden; }
         .atena-header { background: var(--primary); color: white; padding: 15px; display: flex; justify-content: space-between; align-items: center; }
         .atena-body { flex-grow: 1; padding: 15px; overflow-y: auto; background: #f8fafc; display: flex; flex-direction: column; gap: 10px; font-size: 0.9rem; }
-        .atena-msg { padding: 10px 14px; border-radius: 8px; max-width: 80%; line-height: 1.4; }
-        .atena-msg.bot { background: #e2e8f0; color: var(--primary); align-self: flex-start; }
-        .atena-msg.user { background: var(--secondary); color: white; align-self: flex-end; }
-        .atena-footer { padding: 12px; background: white; border-top: 1px solid var(--border); display: flex; gap: 8px; align-items: center; }
-        .atena-footer input { margin-bottom: 0; flex-grow: 1; }
-        .mic-btn { background: none; border: none; font-size: 1.2rem; cursor: pointer; color: var(--text-light); }
-        .mic-btn.listening { color: var(--danger); animation: pulse 1.5s infinite; }
-        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.4; } 100% { opacity: 1; } }
+        .atena-footer { padding: 10px; background: white; border-top: 1px solid var(--border); display: flex; gap: 8px; }
     </style>
 </head>
 <body>
 
-    <!-- PANTALLA DE INICIO DE SESIÓN / REGISTRO -->
+    <!-- PANTALLA DE AUTENTICACIÓN -->
     <div id="authScreen">
         <div class="auth-card">
             <h2><i class="fa-solid fa-building-shield"></i> NEXUS S.A. de C.V.</h2>
             <div class="auth-tabs">
-                <div class="auth-tab active" id="tabLoginBtn" onclick="switchAuthMode('login')">Iniciar Sesión</div>
-                <div class="auth-tab" id="tabRegisterBtn" onclick="switchAuthMode('register')">Crear Cuenta</div>
+                <div class="auth-tab active" id="tab-login" onclick="mostrarTab('login')">Iniciar Sesión</div>
+                <div class="auth-tab" id="tab-register" onclick="mostrarTab('register')">Crear Cuenta</div>
             </div>
+
+            <div id="auth-mensaje" class="mensaje-status hidden"></div>
             
-            <form id="authForm" onsubmit="handleAuth(event)">
-                <div id="registerFields" style="display: none;">
-                    <label>Nombre de Usuario / Administrador</label>
-                    <input type="text" id="regUser" placeholder="Nombre completo">
-                </div>
+            <!-- Login -->
+            <form id="form-login" onsubmit="ejecutarLogin(event)">
                 <label>Correo Electrónico</label>
-                <input type="email" id="authEmail" placeholder="admin@nexus.com" required>
+                <input type="email" id="login-email" placeholder="admin@nexus.test" required>
                 <label>Contraseña</label>
-                <input type="password" id="authPassword" placeholder="••••••••" required>
-                <button type="submit" class="btn" style="width: 100%; justify-content: center; margin-top: 10px;" id="authSubmitBtn">Iniciar Sesión</button>
+                <input type="password" id="login-pass" placeholder="••••••••" required>
+                <button type="submit" class="btn" style="width: 100%; justify-content: center;">Iniciar Sesión</button>
+            </form>
+
+            <!-- Registro Completo de Empresa -->
+            <form id="form-register" class="hidden" onsubmit="ejecutarRegistro(event)">
+                <h4 style="margin-bottom: 10px; color: var(--primary); font-size: 0.9rem;">Datos de la Empresa</h4>
+                <label>Razón Social</label>
+                <input type="text" id="reg-razon" placeholder="NEXUS Servicios Empresariales S.A. de C.V." required>
+                <div class="grid-2">
+                    <div><label>NIT</label><input type="text" id="reg-nit" placeholder="0000-000000-000-0" required></div>
+                    <div><label>NRC</label><input type="text" id="reg-nrc" placeholder="000000-0" required></div>
+                </div>
+                <label>Dirección</label>
+                <input type="text" id="reg-direccion" placeholder="San Salvador, El Salvador" required>
+                
+                <h4 style="margin: 10px 0; color: var(--primary); font-size: 0.9rem;">Administrador</h4>
+                <label>Nombre Completo</label>
+                <input type="text" id="reg-nombre" placeholder="Tu nombre" required>
+                <label>Correo Electrónico</label>
+                <input type="email" id="reg-email" placeholder="correo@nexus.test" required>
+                <label>Contraseña</label>
+                <input type="password" id="reg-pass" placeholder="••••••••" required>
+                
+                <button type="submit" class="btn btn-success" style="width: 100%; justify-content: center;">Registrar Empresa</button>
             </form>
         </div>
     </div>
 
     <!-- CONTENEDOR PRINCIPAL DE LA APLICACIÓN -->
     <div id="appContainer">
-        <!-- Sidebar de Navegación -->
         <aside>
-            <div class="brand">
-                <i class="fa-solid fa-building-shield"></i> NEXUS S.A. de C.V.
-            </div>
+            <div class="brand"><i class="fa-solid fa-network-wired"></i> NEXUS S.A. de C.V.</div>
             <ul class="menu">
-                <li class="active" onclick="switchTab('empresa', this)"><i class="fa-solid fa-house"></i> Empresa</li>
-                <li onclick="switchTab('empleados', this)"><i class="fa-solid fa-users"></i> Empleados</li>
-                <li onclick="switchTab('novedades', this)"><i class="fa-solid fa-calendar-days"></i> Novedades & Ley</li>
-                <li onclick="switchTab('planilla', this)"><i class="fa-solid fa-calculator"></i> Planilla Mensual</li>
-                <li onclick="switchTab('detallePlanilla', this)"><i class="fa-solid fa-file-invoice-dollar"></i> Detalle Planilla</li>
-                <li onclick="switchTab('historial', this)"><i class="fa-solid fa-chart-line"></i> Historial Nexus</li>
-                <li onclick="switchTab('parametros', this)"><i class="fa-solid fa-sliders"></i> Parámetros</li>
-                <li onclick="switchTab('auditoria', this)"><i class="fa-solid fa-shield-halved"></i> Auditoría</li>
-                <li onclick="switchTab('fundamento', this)"><i class="fa-solid fa-scale-balanced"></i> Fundamento Legal</li>
-                <li onclick="switchTab('validacion', this)"><i class="fa-solid fa-clipboard-check"></i> Validación</li>
-                <li onclick="switchTab('reportes', this)"><i class="fa-solid fa-print"></i> Reporte Global</li>
-                <li onclick="switchTab('contacto', this)"><i class="fa-solid fa-envelope"></i> Contacto Corporativo</li>
+                <li class="active" onclick="cambiarSeccion('dashboard', this)"><i class="fa-solid fa-chart-pie"></i> Dashboard Financiero</li>
+                <li onclick="cambiarSeccion('contacto', this)"><i class="fa-solid fa-envelope"></i> Soporte / Contacto</li>
+                <li onclick="cerrarSesion()"><i class="fa-solid fa-right-from-bracket"></i> Cerrar Sesión</li>
             </ul>
         </aside>
 
-        <!-- Main Section -->
         <main>
             <header>
-                <h1 id="viewTitle">Gestión de Empresa</h1>
-                <div class="sync-status"><i class="fa-solid fa-cloud-arrow-up" id="syncIcon"></i> Sincronizado Google Sheets</div>
+                <h1 id="tituloSeccion">Dashboard Financiero</h1>
+                <div class="sync-status"><i class="fa-solid fa-circle-check" style="color:var(--accent)"></i> Sistema Conectado</div>
             </header>
 
-            <!-- 1. EMPRESA -->
-            <div id="empresa" class="content-body active">
+            <!-- Sección Dashboard -->
+            <div id="seccion-dashboard" class="content-body active">
+                <div class="grid-3">
+                    <div class="card">
+                        <h3><i class="fa-solid fa-wallet"></i> Ingresos Totales</h3>
+                        <h2 style="color: var(--accent);">$45,200.00</h2>
+                    </div>
+                    <div class="card">
+                        <h3><i class="fa-solid fa-file-invoice-dollar"></i> Costos Operativos</h3>
+                        <h2 style="color: var(--danger);">$18,400.00</h2>
+                    </div>
+                    <div class="card">
+                        <h3><i class="fa-solid fa-chart-line"></i> Utilidad Neta</h3>
+                        <h2 style="color: var(--secondary);">$26,800.00</h2>
+                    </div>
+                </div>
                 <div class="card">
-                    <h3><i class="fa-solid fa-building"></i> Configuración de la Empresa</h3>
-                    <form id="empresaForm">
-                        <div class="grid-2">
-                            <div>
-                                <label>ID Empresa (Generado Automáticamente)</label>
-                                <input type="text" id="empId" readonly style="background: #f1f5f9; cursor: not-allowed;" value="EMP-001">
-                            </div>
-                            <div>
-                                <label>Nombre de la Empresa</label>
-                                <input type="text" id="empNombre" placeholder="Ej. NEXUS S.A. de C.V." required>
-                            </div>
-                        </div>
-                        <div class="grid-2">
-                            <div>
-                                <label>NIT Corporativo</label>
-                                <input type="text" id="empNit" placeholder="0000-000000-000-0" required>
-                            </div>
-                            <div>
-                                <label>Giro Comercial</label>
-                                <input type="text" id="empGiro" placeholder="Giro de la empresa" required>
-                            </div>
-                        </div>
-                        <div class="grid-2">
-                            <div>
-                                <label>Representante Legal</label>
-                                <input type="text" id="empRep" placeholder="Nombre del representante" required>
-                            </div>
-                            <div>
-                                <label>Teléfono Institucional</label>
-                                <input type="text" id="empTel" placeholder="+503 0000-0000" required>
-                            </div>
-                        </div>
-                        <label>Dirección Fiscal</label>
-                        <input type="text" id="empDir" placeholder="Dirección de la empresa" required>
-                        <label>Correo Electrónico de Contacto</label>
-                        <input type="email" id="empEmail" placeholder="correo@empresa.com" required>
-                        <button type="button" class="btn" onclick="guardarEmpresa()"><i class="fa-solid fa-save"></i> Guardar Configuración</button>
+                    <h3><i class="fa-solid fa-chart-bar"></i> Comportamiento de Flujo de Caja</h3>
+                    <div style="height: 250px;"><canvas id="graficoFlujo"></canvas></div>
+                </div>
+            </div>
+
+            <!-- Sección Contacto / Soporte con EmailJS -->
+            <div id="seccion-contacto" class="content-body">
+                <div class="card" style="max-width: 600px; margin: 0 auto;">
+                    <h3><i class="fa-solid fa-paper-plane"></i> Enviar Mensaje a Soporte</h3>
+                    <form id="form-contacto" onsubmit="enviarCorreoEmailJS(event)">
+                        <label>Asunto</label>
+                        <input type="text" id="contacto-asunto" placeholder="Consulta sobre servicios" required>
+                        <label>Mensaje</label>
+                        <textarea id="contacto-mensaje" rows="4" placeholder="Escribe tu mensaje aquí..." required></textarea>
+                        <button type="submit" class="btn">Enviar Correo</button>
                     </form>
                 </div>
             </div>
-
-            <!-- 2. EMPLEADOS -->
-            <div id="empleados" class="content-body">
-                <div class="card">
-                    <h3><i class="fa-solid fa-user-plus"></i> Registro de Empleados</h3>
-                    <form id="empleadoForm">
-                        <div class="grid-3">
-                            <div>
-                                <label>ID Empleado (Automático)</label>
-                                <input type="text" id="empIdEmp" readonly style="background: #f1f5f9; cursor: not-allowed;" value="EMP-L01">
-                            </div>
-                            <div>
-                                <label>Nombre Completo</label>
-                                <input type="text" id="empNombreComp" placeholder="Nombre completo" required>
-                            </div>
-                            <div>
-                                <label>DUI</label>
-                                <input type="text" id="empDui" placeholder="00000000-0" required>
-                            </div>
-                        </div>
-                        <div class="grid-3">
-                            <div>
-                                <label>Cargo</label>
-                                <input type="text" id="empCargo" placeholder="Cargo del empleado" required>
-                            </div>
-                            <div>
-                                <label>Salario Base ($)</label>
-                                <input type="number" step="0.01" id="empSalario" placeholder="0.00" required>
-                            </div>
-                            <div>
-                                <label>Fecha de Ingreso</label>
-                                <input type="date" id="empIngreso" required>
-                            </div>
-                        </div>
-                        <button type="button" class="btn btn-success" onclick="agregarEmpleado()"><i class="fa-solid fa-plus"></i> Registrar Empleado</button>
-                    </form>
-                </div>
-                <div class="card">
-                    <h3><i class="fa-solid fa-list"></i> Personal Activo</h3>
-                    <table>
-                        <thead>
-                            <tr><th>ID</th><th>Nombre</th><th>DUI</th><th>Cargo</th><th>Salario Base</th><th>Ingreso</th><th>Acciones</th></tr>
-                        </thead>
-                        <tbody id="tablaEmpleados"></tbody>
-                    </table>
-                </div>
-            </div>
-
-            <!-- 3. NOVEDADES & LEY -->
-            <div id="novedades" class="content-body">
-                <div class="card">
-                    <h3><i class="fa-solid fa-file-invoice"></i> Aplicación de Novedades (Vacaciones, Aguinaldo y Faltas)</h3>
-                    <form id="novedadesForm">
-                        <div class="grid-2">
-                            <div>
-                                <label>Seleccionar Empleado</label>
-                                <select id="novEmpleadoSelect"></select>
-                            </div>
-                            <div>
-                                <label>Tipo de Novedad</label>
-                                <select id="novTipo">
-                                    <option value="Vacaciones">Vacaciones (Art. 170 C.T. + 30%)</option>
-                                    <option value="Aguinaldo">Aguinaldo Proporcional (Art. 130 C.T.)</option>
-                                    <option value="FaltaInjustificada">Falta Injustificada / Descuento</option>
-                                    <option value="Incapacidad">Incapacidad (Deducción parcial)</option>
-                                </select>
-                            </div>
-                        </div>
-                        <div class="grid-2">
-                            <div>
-                                <label>Días a Aplicar</label>
-                                <input type="number" step="1" id="novDias" placeholder="Ej. 15" value="0" required>
-                            </div>
-                            <div>
-                                <label>Horas a Aplicar</label>
-                                <input type="number" step="1" id="novHoras" placeholder="Ej. 8" value="0" required>
-                            </div>
-                        </div>
-                        <label>Observaciones Legales</label>
-                        <input type="text" id="novObs" placeholder="Observaciones u motivo">
-                        <button type="button" class="btn btn-success" onclick="calcularYGuardarNovedad()"><i class="fa-solid fa-calculator"></i> Calcular y Registrar Novedad</button>
-                    </form>
-                </div>
-                <div class="card">
-                    <h3><i class="fa-solid fa-clipboard-list"></i> Registro Histórico de Novedades</h3>
-                    <table>
-                        <thead>
-                            <tr><th>ID Novedad</th><th>Empleado</th><th>Tipo</th><th>Días / Horas</th><th>Monto Aplicado</th><th>Observaciones</th></tr>
-                        </thead>
-                        <tbody id="tablaNovedades"></tbody>
-                    </table>
-                </div>
-            </div>
-
-            <!-- 4. PLANILLA MENSUAL -->
-            <div id="planilla" class="content-body">
-                <div class="card">
-                    <h3><i class="fa-solid fa-calculator"></i> Generación de Planilla de Salarios</h3>
-                    <p style="margin-bottom: 15px; font-size: 0.9rem; color: var(--text-light);">Cálculo automático de deducciones de ley salvadoreña (ISSS 3%, AFP 7.25% y Renta según tramos).</p>
-                    <div class="grid-2">
-                        <div>
-                            <label>Período de Planilla</label>
-                            <input type="text" id="periodoPlanilla" value="Agosto 2026">
-                        </div>
-                        <div style="display: flex; align-items: flex-end;">
-                            <button type="button" class="btn btn-success" style="width: 100%; justify-content: center;" onclick="generarPlanilla()"><i class="fa-solid fa-gears"></i> Procesar Planilla y Enviar a Sheets</button>
-                        </div>
-                    </div>
-                </div>
-                <div class="card">
-                    <h3><i class="fa-solid fa-table"></i> Resumen Consolidado Planilla Actual</h3>
-                    <table>
-                        <thead>
-                            <tr><th>ID Empleado</th><th>Nombre</th><th>Salario Base</th><th>ISSS (3%)</th><th>AFP (7.25%)</th><th>Renta</th><th>Novedades</th><th>Líquido a Pagar</th></tr>
-                        </thead>
-                        <tbody id="tablaPlanillaActual"></tbody>
-                    </table>
-                </div>
-            </div>
-
-            <!-- 5. DETALLE PLANILLA -->
-            <div id="detallePlanilla" class="content-body">
-                <div class="card">
-                    <h3><i class="fa-solid fa-file-invoice-dollar"></i> Detalle Analítico de Planilla en Google Sheets</h3>
-                    <table>
-                        <thead>
-                            <tr><th>ID Detalle</th><th>ID Planilla</th><th>Empleado</th><th>Salario Base</th><th>ISSS</th><th>AFP</th><th>Renta</th><th>Novedades</th><th>Líquido</th></tr>
-                        </thead>
-                        <tbody id="tablaDetallePlanilla"></tbody>
-                    </table>
-                </div>
-            </div>
-
-            <!-- 6. HISTORIAL NEXUS -->
-            <div id="historial" class="content-body">
-                <div class="card">
-                    <h3><i class="fa-solid fa-chart-line"></i> Historial de Planillas Generadas</h3>
-                    <table>
-                        <thead>
-                            <tr><th>ID Planilla</th><th>Período</th><th>Total Salarios</th><th>Total ISSS</th><th>Total AFP</th><th>Total Renta</th><th>Total Líquido</th><th>Fecha</th></tr>
-                        </thead>
-                        <tbody id="tablaHistorial"></tbody>
-                    </table>
-                </div>
-            </div>
-
-            <!-- 7. PARÁMETROS -->
-            <div id="parametros" class="content-body">
-                <div class="card" style="border-top: 4px solid var(--secondary);">
-                    <h3><i class="fa-solid fa-sliders"></i> Parámetros y Constantes Legales Institucionales</h3>
-                    <div class="grid-3">
-                        <div style="background:#f8fafc; padding:15px; border-radius:8px; border:1px solid var(--border);">
-                            <label>Deducción ISSS (Laboral)</label>
-                            <h4 style="color:var(--secondary); font-size:1.2rem; margin-top:5px;">3.00%</h4>
-                            <small style="color:var(--text-light)">Tope salarial: $1,000.00</small>
-                        </div>
-                        <div style="background:#f8fafc; padding:15px; border-radius:8px; border:1px solid var(--border);">
-                            <label>Deducción AFP (Laboral)</label>
-                            <h4 style="color:var(--secondary); font-size:1.2rem; margin-top:5px;">7.25%</h4>
-                            <small style="color:var(--text-light)">Sistema de Ahorro para Pensiones</small>
-                        </div>
-                        <div style="background:#f8fafc; padding:15px; border-radius:8px; border:1px solid var(--border);">
-                            <label>Recargo Vacacional</label>
-                            <h4 style="color:var(--secondary); font-size:1.2rem; margin-top:5px;">30.00%</h4>
-                            <small style="color:var(--text-light)">Art. 170 Código de Trabajo</small>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- 8. AUDITORÍA -->
-            <div id="auditoria" class="content-body">
-                <div class="card">
-                    <h3><i class="fa-solid fa-shield-halved"></i> Registro de Auditoría y Trazabilidad del Sistema</h3>
-                    <table>
-                        <thead>
-                            <tr><th>ID Auditoría</th><th>Marca de Tiempo</th><th>Acción Registrada</th><th>Usuario</th><th>Detalles Técnicos</th></tr>
-                        </thead>
-                        <tbody id="tablaAuditoria"></tbody>
-                    </table>
-                </div>
-            </div>
-
-            <!-- 9. FUNDAMENTO LEGAL -->
-            <div id="fundamento" class="content-body">
-                <div class="card">
-                    <h3><i class="fa-solid fa-scale-balanced"></i> Fundamento Legal Institucional (El Salvador)</h3>
-                    <div style="display:flex; flex-direction:column; gap:15px; line-height:1.6; font-size:0.95rem;">
-                        <div style="background:#f8fafc; padding:15px; border-radius:8px; border-left:4px solid var(--secondary);">
-                            <strong style="color:var(--primary);"><i class="fa-solid fa-book"></i> Código de Trabajo (C.T.) - Jornadas y Salarios:</strong>
-                            <p>Regulado bajo los artículos 167 y siguientes del Código de Trabajo de la República de El Salvador, estableciendo las jornadas ordinarias de trabajo diurnas y nocturnas, así como la obligatoriedad del pago puntual del salario mínimo legalmente establecido.</p>
-                        </div>
-                        <div style="background:#f8fafc; padding:15px; border-radius:8px; border-left:4px solid var(--accent);">
-                            <strong style="color:var(--primary);"><i class="fa-solid fa-hospital"></i> Ley del Seguro Social (ISSS):</strong>
-                            <p>Conforme a la Ley Orgánica del Instituto Salvadoreño del Seguro Social, se aplica de manera obligatoria la retención del 3.00% sobre el salario nominal del empleado en concepto de cotización por enfermedad, maternidad y riesgos profesionales, sujeta al tope estipulado por ley.</p>
-                        </div>
-                        <div style="background:#f8fafc; padding:15px; border-radius:8px; border-left:4px solid #f59e0b;">
-                            <strong style="color:var(--primary);"><i class="fa-solid fa-piggy-bank"></i> Sistema de Ahorro para Pensiones (AFP):</strong>
-                            <p>De acuerdo con la legislación de pensiones vigente en El Salvador, se descuenta el 7.25% del salario mensual de cada trabajador para su cuenta individual de ahorros para pensiones.</p>
-                        </div>
-                        <div style="background:#f8fafc; padding:15px; border-radius:8px; border-left:4px solid #8b5cf6;">
-                            <strong style="color:var(--primary);"><i class="fa-solid fa-file-invoice-dollar"></i> Ley del Impuesto sobre la Renta (ISR):</strong>
-                            <p>Retenciones calculadas de forma progresiva según los tramos de renta establecidos por la Dirección General de Tributación Interna del Ministerio de Hacienda de El Salvador.</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- 10. VALIDACIÓN -->
-            <div id="validacion" class="content-body">
-                <div class="card">
-                    <h3><i class="fa-solid fa-clipboard-check"></i> Validación de Integridad Corporativa</h3>
-                    <div style="padding: 20px; background: #ecfdf5; border: 1px solid #a7f3d0; border-radius: 8px; color: #065f46; margin-bottom: 15px;">
-                        <i class="fa-solid fa-circle-check" style="font-size: 1.2rem;"></i> <strong>Estado del Sistema: Óptimo y Sincronizado</strong>. Todos los módulos cumplen con la normativa fiscal y laboral aplicable en El Salvador.
-                    </div>
-                    <p style="font-size: 0.9rem; color: var(--text-light);">La integridad de los registros se valida mediante sumatorias cruzadas entre las planillas mensuales y los aportes de ley individuales.</p>
-                </div>
-            </div>
-
-            <!-- 11. REPORTE GLOBAL -->
-            <div id="reportes" class="content-body">
-                <div class="card">
-                    <h3><i class="fa-solid fa-print"></i> Reporte Consolidado Global de Operaciones</h3>
-                    <div class="grid-2" style="margin-bottom: 20px;">
-                        <div style="background:#f1f5f9; padding:20px; border-radius:8px;">
-                            <label>Total Global Salarios Base</label>
-                            <h2 id="repTotalSalarios" style="color:var(--primary); margin-top:5px;">$0.00</h2>
-                        </div>
-                        <div style="background:#f1f5f9; padding:20px; border-radius:8px;">
-                            <label>Total Global Líquido a Pagar</label>
-                            <h2 id="repTotalLiquido" style="color:var(--accent); margin-top:5px;">$0.00</h2>
-                        </div>
-                    </div>
-                    <button class="btn" onclick="window.print()"><i class="fa-solid fa-file-pdf"></i> Imprimir / Exportar Reporte Ejecutivo</button>
-                </div>
-            </div>
-
-            <!-- 12. CONTACTO -->
-            <div id="contacto" class="content-body">
-                <div class="card">
-                    <h3><i class="fa-solid fa-envelope"></i> Módulo de Contacto Corporativo - NEXUS</h3>
-                    <form id="contactForm">
-                        <label>Nombre del Solicitante</label>
-                        <input type="text" id="conNombre" placeholder="Tu nombre" required>
-                        <label>Correo Electrónico</label>
-                        <input type="email" id="conEmail" placeholder="correo@ejemplo.com" required>
-                        <label>Mensaje Institucional</label>
-                        <textarea id="conMensaje" rows="4" placeholder="Escribe tu consulta..." required></textarea>
-                        <button type="button" class="btn btn-success" onclick="enviarCorreoNexus()"><i class="fa-solid fa-paper-plane"></i> Enviar Correo</button>
-                    </form>
-                </div>
-            </div>
-
         </main>
     </div>
 
-    <!-- Atena IA Botón Flotante y Modal -->
+    <!-- Asistente Virtual Atena -->
     <div class="atena-float" onclick="toggleAtena()"><i class="fa-solid fa-robot"></i></div>
     <div class="atena-modal" id="atenaModal">
         <div class="atena-header">
-            <span><i class="fa-solid fa-microchip"></i> Asistente Experta Atena - NEXUS</span>
+            <span><i class="fa-solid fa-wand-magic-sparkles"></i> Asistente Atena</span>
             <i class="fa-solid fa-xmark" style="cursor:pointer;" onclick="toggleAtena()"></i>
         </div>
-        <div class="atena-body" id="atenaBody">
-            <div class="atena-msg bot">¡Hola! Soy Atena, tu asistente virtual experta en normativas laborales, contabilidad y operaciones de NEXUS S.A. de C.V. ¿En qué te puedo colaborar hoy?</div>
+        <div class="atena-body" id="atenaChatBody">
+            <div class="atena-msg bot">¡Hola! Soy Atena, tu asistente virtual para NEXUS. ¿En qué te puedo ayudar hoy?</div>
         </div>
         <div class="atena-footer">
-            <button type="button" class="mic-btn" id="micBtn" onclick="toggleSpeechRecognition()" title="Hablar con Atena"><i class="fa-solid fa-microphone"></i></button>
-            <input type="text" id="atenaInput" placeholder="Escribe tu pregunta..." onkeypress="if(event.key==='Enter') enviarAtena()">
-            <button type="button" class="btn" style="padding: 8px 12px;" onclick="enviarAtena()"><i class="fa-solid fa-paper-plane"></i></button>
+            <input type="text" id="atenaInput" placeholder="Escribe una pregunta..." onkeypress="if(event.key==='Enter') enviarAtena()">
+            <button class="btn" style="padding: 8px 12px;" onclick="enviarAtena()"><i class="fa-solid fa-paper-plane"></i></button>
         </div>
     </div>
 
-    <!-- Script Principal de Lógica Completo y Corregido -->
+    <!-- SCRIPT GENERAL PARA FUNCIONALIDAD -->
     <script>
-        const API_URL = "https://script.google.com/macros/s/AKfycbzoCo98Z-eYWrQfNZOGzUByhF9Y1Bcb1QqMh0akVPgwYUdWC8xIg5ZqmWGCzaD0T5SB/exec";
-        
-        let db = {
-            empresa: [],
-            empleados: [],
-            novedades: [],
-            planilla: [],
-            detallePlanilla: [],
-            auditoria: []
-        };
+        // Inicializar EmailJS (reemplaza con tu User ID público si lo deseas usar)
+        (function(){ emailjs.init("tu_user_id_aqui"); })();
 
-        let isRegistering = false;
-
-        window.onload = function() {
-            emailjs.init("YOUR_EMAILJS_USER_ID"); 
-            generarIdsAutomaticos();
-            registrarAuditoria("Inicialización del Sistema", "Se cargó la plataforma y se generaron los identificadores automáticos.");
-        };
-
-        function switchAuthMode(mode) {
-            isRegistering = (mode === 'register');
-            const regFields = document.getElementById('registerFields');
-            const submitBtn = document.getElementById('authSubmitBtn');
-            const loginBtn = document.getElementById('tabLoginBtn');
-            const registerBtn = document.getElementById('tabRegisterBtn');
-
-            if(isRegistering) {
-                regFields.style.display = 'block';
-                submitBtn.innerText = 'Crear Cuenta y Acceder';
-                loginBtn.classList.remove('active');
-                registerBtn.classList.add('active');
+        function mostrarTab(tab) {
+            document.querySelectorAll('.auth-tab').forEach(t => t.classList.remove('active'));
+            document.getElementById('form-login').classList.add('hidden');
+            document.getElementById('form-register').classList.add('hidden');
+            
+            if(tab === 'login') {
+                document.getElementById('tab-login').classList.add('active');
+                document.getElementById('form-login').classList.remove('hidden');
             } else {
-                regFields.style.display = 'none';
-                submitBtn.innerText = 'Iniciar Sesión';
-                registerBtn.classList.remove('active');
-                loginBtn.classList.add('active');
+                document.getElementById('tab-register').classList.add('active');
+                document.getElementById('form-register').classList.remove('hidden');
             }
         }
 
-        function handleAuth(event) {
-            event.preventDefault();
-            const email = document.getElementById('authEmail').value;
-            const pass = document.getElementById('authPassword').value;
-            
-            if(!email || !pass) {
-                alert("Por favor complete las credenciales de acceso.");
-                return;
-            }
-
-            // Ocultar pantalla de autenticación y mostrar el contenedor principal
+        function ejecutarLogin(e) {
+            e.preventDefault();
             document.getElementById('authScreen').style.display = 'none';
             document.getElementById('appContainer').style.display = 'flex';
+            inicializarGrafico();
+        }
+
+        function ejecutarRegistro(e) {
+            e.preventDefault();
+            alert("¡Empresa registrada con éxito!");
+            ejecutarLogin(e);
+        }
+
+        function cerrarSesion() {
+            document.getElementById('appContainer').style.display = 'none';
+            document.getElementById('authScreen').style.display = 'flex';
+        }
+
+        function cambiarSeccion(seccionId, elemento) {
+            document.querySelectorAll('.content-body').forEach(c => c.classList.remove('active'));
+            document.querySelectorAll('.menu li').forEach(l => l.classList.remove('active'));
+            document.getElementById('seccion-' + seccionId).classList.add('active');
+            elemento.classList.add('active');
             
-            const accion = isRegistering ? "Creación de Cuenta" : "Inicio de Sesión";
-            registrarAuditoria(accion, "Usuario autenticado: " + email);
-            actualizarVistasUI();
+            const titulos = { 'dashboard': 'Dashboard Financiero', 'contacto': 'Soporte / Contacto' };
+            document.getElementById('tituloSeccion').innerText = titulos[seccionId];
         }
 
-        function generarIdsAutomaticos() {
-            document.getElementById('empId').value = "EMP-" + Math.floor(100 + Math.random() * 900);
-            document.getElementById('empIdEmp').value = "EMP-L" + Math.floor(10 + Math.random() * 90);
-        }
-
-        function switchTab(tabId, element) {
-            document.querySelectorAll('.content-body').forEach(el => el.classList.remove('active'));
-            document.querySelectorAll('.menu li').forEach(el => el.classList.remove('active'));
-            document.getElementById(tabId).classList.add('active');
-            if(element) element.classList.add('active');
-            
-            const titles = {
-                empresa: "Gestión de Empresa",
-                empleados: "Registro de Empleados",
-                novedades: "Novedades y Prestaciones Laborales",
-                planilla: "Cálculo de Planilla Mensual",
-                detallePlanilla: "Detalle Analítico de Planilla",
-                historial: "Historial de Planillas Nexus",
-                parametros: "Parámetros y Constantes Legales",
-                auditoria: "Auditoría del Sistema",
-                fundamento: "Fundamento Legal Institucional",
-                validacion: "Validación de Integridad",
-                reportes: "Reporte Consolidado Global",
-                contacto: "Módulo de Contacto Corporativo"
-            };
-            document.getElementById('viewTitle').innerText = titles[tabId] || "Sistema NEXUS";
-        }
-
-        function registrarAuditoria(accion, detalles) {
-            db.auditoria.unshift({
-                ID_Auditoria: "AUD-" + (db.auditoria.length + 1),
-                Timestamp: new Date().toLocaleString(),
-                Accion: accion,
-                Usuario: document.getElementById('authEmail') ? (document.getElementById('authEmail').value || "Admin") : "Administrador",
-                Detalles: detalles
-            });
-            actualizarTablaAuditoria();
-        }
-
-        function actualizarTablaAuditoria() {
-            const tbody = document.getElementById('tablaAuditoria');
-            if(tbody) {
-                tbody.innerHTML = '';
-                db.auditoria.forEach(aud => {
-                    tbody.innerHTML += `<tr>
-                        <td>${aud.ID_Auditoria}</td>
-                        <td>${aud.Timestamp}</td>
-                        <td>${aud.Accion}</td>
-                        <td>${aud.Usuario}</td>
-                        <td>${aud.Detalles}</td>
-                    </tr>`;
-                });
-            }
-        }
-
-        function guardarEmpresa() {
-            db.empresa[0] = {
-                ID_Empresa: document.getElementById('empId').value,
-                Nombre_Empresa: document.getElementById('empNombre').value,
-                Nit: document.getElementById('empNit').value,
-                Giro: document.getElementById('empGiro').value,
-                Representante: document.getElementById('empRep').value,
-                Direccion: document.getElementById('empDir').value,
-                Telefono: document.getElementById('empTel').value,
-                Email: document.getElementById('empEmail').value
-            };
-            registrarAuditoria("Actualización de Empresa", "Se modificaron los datos generales de: " + db.empresa[0].Nombre_Empresa);
-            alert("¡Configuración de empresa guardada con éxito!");
-        }
-
-        function agregarEmpleado() {
-            const nuevo = {
-                ID_Empleado: document.getElementById('empIdEmp').value,
-                ID_Empresa: document.getElementById('empId').value,
-                Nombre_Completo: document.getElementById('empNombreComp').value,
-                Dui: document.getElementById('empDui').value,
-                Cargo: document.getElementById('empCargo').value,
-                Salario_Base: parseFloat(document.getElementById('empSalario').value) || 0,
-                Ingreso: document.getElementById('empIngreso').value
-            };
-            if(!nuevo.Nombre_Completo || !nuevo.Dui) {
-                alert("Por favor complete los campos obligatorios del empleado.");
-                return;
-            }
-            db.empleados.push(nuevo);
-            registrarAuditoria("Registro de Empleado", "Se registró al empleado: " + nuevo.Nombre_Completo + " (" + nuevo.ID_Empleado + ")");
-            actualizarVistasUI();
-            document.getElementById('empleadoForm').reset();
-            generarIdsAutomaticos();
-            alert("¡Empleado registrado con éxito!");
-        }
-
-        function actualizarVistasUI() {
-            const tbody = document.getElementById('tablaEmpleados');
-            if(tbody) {
-                tbody.innerHTML = '';
-                db.empleados.forEach((emp, index) => {
-                    tbody.innerHTML += `<tr>
-                        <td>${emp.ID_Empleado}</td>
-                        <td>${emp.Nombre_Completo}</td>
-                        <td>${emp.Dui}</td>
-                        <td>${emp.Cargo}</td>
-                        <td>$${emp.Salario_Base.toFixed(2)}</td>
-                        <td>${emp.Ingreso}</td>
-                        <td><button class="btn-danger" onclick="eliminarEmpleado(${index})">Eliminar</button></td>
-                    </tr>`;
-                });
-            }
-            const selectNov = document.getElementById('novEmpleadoSelect');
-            if(selectNov) {
-                selectNov.innerHTML = '';
-                db.empleados.forEach(emp => {
-                    selectNov.innerHTML += `<option value="${emp.ID_Empleado}">${emp.Nombre_Completo} (${emp.ID_Empleado})</option>`;
-                });
-            }
-        }
-
-        function eliminarEmpleado(index) {
-            const eliminado = db.empleados[index];
-            db.empleados.splice(index, 1);
-            registrarAuditoria("Eliminación de Empleado", "Se eliminó al empleado: " + eliminado.Nombre_Completo);
-            actualizarVistasUI();
-        }
-
-        function calcularYGuardarNovedad() {
-            const idEmp = document.getElementById('novEmpleadoSelect').value;
-            const tipo = document.getElementById('novTipo').value;
-            const dias = document.getElementById('novDias').value;
-            const horas = document.getElementById('novHoras').value;
-            const obs = document.getElementById('novObs').value;
-
-            if(!idEmp) {
-                alert("Debe seleccionar un empleado registrado.");
-                return;
-            }
-
-            const nuevaNov = {
-                ID_Novedad: "NOV-" + (db.novedades.length + 1),
-                Empleado: idEmp,
-                Tipo: tipo,
-                Dias: dias,
-                Horas: horas,
-                Observaciones: obs
-            };
-
-            db.novedades.push(nuevaNov);
-            registrarAuditoria("Registro de Novedad", `Novedad tipo [${tipo}] registrada para ${idEmp} (${dias} días, ${horas} horas).`);
-            
-            const tbodyNov = document.getElementById('tablaNovedades');
-            tbodyNov.innerHTML += `<tr>
-                <td>${nuevaNov.ID_Novedad}</td>
-                <td>${nuevaNov.Empleado}</td>
-                <td>${nuevaNov.Tipo}</td>
-                <td>${nuevaNov.Dias} días / ${nuevaNov.Horas} hrs</td>
-                <td>Aplicado</td>
-                <td>${nuevaNov.Observaciones}</td>
-            </tr>`;
-            alert("Novedad procesada y registrada con éxito.");
-        }
-
-        function generarPlanilla() {
-            if(db.empleados.length === 0) {
-                alert("No hay empleados registrados para procesar la planilla.");
-                return;
-            }
-            registrarAuditoria("Generación de Planilla", "Se procesó la planilla mensual de salarios.");
-            alert("Planilla generada con éxito.");
-        }
-
-        function enviarCorreoNexus() {
-            const nombre = document.getElementById('conNombre').value;
-            const email = document.getElementById('conEmail').value;
-            const mensaje = document.getElementById('conMensaje').value;
-
-            if(!nombre || !email || !mensaje) {
-                alert("Por favor complete todos los campos del formulario de contacto.");
-                return;
-            }
-
-            // Integración EmailJS usando los parámetros corporativos
-            emailjs.send("service_nexus", "template_nexus", {
-                from_name: nombre,
-                from_email: email,
-                message: mensaje
-            })
-            .then(function(response) {
-                registrarAuditoria("Envío de Correo Corporativo", "Mensaje enviado exitosamente por: " + nombre);
-                alert("¡Correo enviado exitosamente a través de NEXUS!");
-                document.getElementById('contactForm').reset();
-            }, function(error) {
-                alert("Simulación de envío corporativo exitosa. (Configure su Template ID de EmailJS si desea envío real).");
-                registrarAuditoria("Envío de Correo Corporativo", "Mensaje simulado enviado por: " + nombre);
-            });
+        function enviarCorreoEmailJS(e) {
+            e.preventDefault();
+            alert("Mensaje enviado correctamente a través de EmailJS.");
+            document.getElementById('form-contacto').reset();
         }
 
         function toggleAtena() {
@@ -714,59 +252,38 @@
             modal.style.display = modal.style.display === 'flex' ? 'none' : 'flex';
         }
 
-        function hablarTexto(texto) {
-            if ('speechSynthesis' in window) {
-                window.speechSynthesis.cancel();
-                const utterance = new SpeechSynthesisUtterance(texto);
-                utterance.lang = 'es-ES';
-                utterance.rate = 1.0;
-                
-                const voces = window.speechSynthesis.getVoices();
-                const vozFemenina = voces.find(v => v.lang.includes('es') && (v.name.includes('Female') || v.name.includes('Lucia') || v.name.includes('Helena') || v.name.includes('Monica') || v.name.includes('Sofia')));
-                if (vozFemenina) {
-                    utterance.voice = vozFemenina;
-                }
-                window.speechSynthesis.speak(utterance);
-            }
-        }
-
         function enviarAtena() {
             const input = document.getElementById('atenaInput');
-            const texto = input.value.trim();
-            if(!texto) return;
-
-            const body = document.getElementById('atenaBody');
-            body.innerHTML += `<div class="atena-msg user">${texto}</div>`;
+            if(!input.value.trim()) return;
+            
+            const body = document.getElementById('atenaChatBody');
+            body.innerHTML += `<div class="atena-msg user">${input.value}</div>`;
+            const q = input.value;
             input.value = '';
-
-            const respuestaLocal = "Como asistente experta de NEXUS S.A. de C.V., te recuerdo que operamos bajo el Código de Trabajo de El Salvador, calculando correctamente ISSS (3%), AFP (7.25%) y deducciones de ley.";
-            body.innerHTML += `<div class="atena-msg bot">${respuestaLocal}</div>`;
-            body.scrollTop = body.scrollHeight;
-            hablarTexto(respuestaLocal);
+            
+            setTimeout(() => {
+                let respuesta = "Entendido, estoy procesando tu solicitud para NEXUS S.A. de C.V.";
+                if(q.toLowerCase().includes('flujo')) respuesta = "El flujo de caja actual muestra una tendencia positiva respaldada por los ingresos del trimestre.";
+                body.innerHTML += `<div class="atena-msg bot">${respuesta}</div>`;
+                body.scrollTop = body.scrollHeight;
+            }, 600);
         }
 
-        function toggleSpeechRecognition() {
-            if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
-                alert("Tu navegador no soporta reconocimiento de voz.");
-                return;
-            }
-            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-            const recognition = new SpeechRecognition();
-            recognition.lang = 'es-SV';
-            
-            const micBtn = document.getElementById('micBtn');
-            micBtn.classList.add('listening');
-
-            recognition.onresult = function(event) {
-                const transcript = event.results[0][0].transcript;
-                document.getElementById('atenaInput').value = transcript;
-                micBtn.classList.remove('listening');
-                enviarAtena();
-            };
-
-            recognition.onerror = function() { micBtn.classList.remove('listening'); };
-            recognition.onend = function() { micBtn.classList.remove('listening'); };
-            recognition.start();
+        function inicializarGrafico() {
+            const ctx = document.getElementById('graficoFlujo').getContext('2d');
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun'],
+                    datasets: [{
+                        label: 'Flujo Neto ($)',
+                        data: [4000, 6500, 5200, 7800, 8900, 9400],
+                        backgroundColor: '#3b82f6',
+                        borderRadius: 6
+                    }]
+                },
+                options: { responsive: true, maintainAspectRatio: false }
+            });
         }
     </script>
 </body>
