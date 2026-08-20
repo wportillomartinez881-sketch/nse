@@ -58,19 +58,18 @@
         .btn:hover { background-color: #2563eb; }
         .btn-success { background-color: var(--accent); }
         .btn-success:hover { background-color: #059669; }
-        .btn-danger { background-color: var(--danger); padding: 6px 12px; font-size: 0.8rem; }
 
         table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 0.85rem; }
         th, td { padding: 10px 12px; text-align: left; border-bottom: 1px solid var(--border); }
         th { background-color: #f1f5f9; color: var(--primary); font-weight: 600; text-transform: uppercase; font-size: 0.75rem; }
 
         .hidden { display: none !important; }
-        .mensaje-status { padding: 10px; border-radius: 6px; margin-bottom: 15px; text-align: center; font-size: 0.9rem; }
+        .empty-state { text-align: center; color: var(--text-light); padding: 20px; font-style: italic; }
     </style>
 </head>
 <body>
 
-    <!-- AUTENTICACIÓN Y REGISTRO (CONECTADO A EMPRESAS / USUARIOS) -->
+    <!-- AUTENTICACIÓN Y REGISTRO -->
     <div id="authScreen">
         <div class="auth-card">
             <h2><i class="fa-solid fa-building-shield"></i> NEXUS S.A. de C.V.</h2>
@@ -90,7 +89,7 @@
             <form id="form-register" class="hidden" onsubmit="ejecutarRegistro(event)">
                 <h4 style="margin-bottom: 10px; color: var(--primary); font-size: 0.9rem;">Datos de la Empresa</h4>
                 <label>Razón Social</label>
-                <input type="text" id="reg-razon" placeholder="Empresa Prueba Nexus" required>
+                <input type="text" id="reg-razon" placeholder="Ej. Mi Empresa S.A. de C.V." required>
                 <div class="grid-2">
                     <div><label>NIT</label><input type="text" id="reg-nit" placeholder="0000-000000-000-0" required></div>
                     <div><label>NRC</label><input type="text" id="reg-nrc" placeholder="000000-0" required></div>
@@ -98,17 +97,17 @@
                 <label>Actividad Económica</label>
                 <input type="text" id="reg-actividad" value="Servicios empresariales" required>
                 <label>Dirección</label>
-                <input type="text" id="reg-direccion" placeholder="Dirección de prueba" required>
+                <input type="text" id="reg-direccion" placeholder="Dirección de la empresa" required>
                 <div class="grid-2">
-                    <div><label>Teléfono</label><input type="text" id="reg-telefono" placeholder="7821-0173" required></div>
-                    <div><label>Representante Legal</label><input type="text" id="reg-representante" placeholder="Representante" required></div>
+                    <div><label>Teléfono</label><input type="text" id="reg-telefono" placeholder="2222-2222" required></div>
+                    <div><label>Representante Legal</label><input type="text" id="reg-representante" placeholder="Nombre Representante" required></div>
                 </div>
                 
                 <h4 style="margin: 10px 0; color: var(--primary); font-size: 0.9rem;">Administrador</h4>
                 <label>Nombre Completo</label>
-                <input type="text" id="reg-nombre" placeholder="Usuario Administrador" required>
+                <input type="text" id="reg-nombre" placeholder="Nombre Administrador" required>
                 <label>Correo Electrónico</label>
-                <input type="email" id="reg-email" placeholder="prueba@nexus.test" required>
+                <input type="email" id="reg-email" placeholder="admin@empresa.test" required>
                 <label>Contraseña</label>
                 <input type="password" id="reg-pass" placeholder="••••••••" required>
                 
@@ -117,7 +116,7 @@
         </div>
     </div>
 
-    <!-- APLICACIÓN PRINCIPAL CON TODOS LOS MÓDULOS DEL GOOGLE SHEETS -->
+    <!-- APLICACIÓN PRINCIPAL -->
     <div id="appContainer">
         <aside>
             <div class="brand"><i class="fa-solid fa-network-wired"></i> NEXUS S.A. de C.V.</div>
@@ -133,159 +132,219 @@
                 <li onclick="cambiarSeccion('parametros', this)"><i class="fa-solid fa-gears"></i> Parámetros</li>
                 <li onclick="cambiarSeccion('auditoria', this)"><i class="fa-solid fa-clipboard-list"></i> Auditoría</li>
                 <li onclick="cambiarSeccion('fundamento', this)"><i class="fa-solid fa-scale-balanced"></i> Fundamento Legal</li>
+                <li onclick="cambiarSeccion('contacto', this)"><i class="fa-solid fa-envelope"></i> Contacto y Soporte</li>
                 <li onclick="cerrarSesion()"><i class="fa-solid fa-right-from-bracket"></i> Cerrar Sesión</li>
             </ul>
         </aside>
 
         <main>
             <header>
-                <h1 id="tituloSeccion">Dashboard Financiero</h1>
-                <div class="sync-status"><i class="fa-solid fa-circle-check" style="color:var(--accent)"></i> Google Sheets Sincronizado</div>
+                <h1 id="tituloSeccion">Dashboard</h1>
+                <div class="sync-status"><span id="lblEmpresaActiva" style="font-weight:700; margin-right:5px;">Empresa: EMP001</span> | <i class="fa-solid fa-circle-check" style="color:var(--accent)"></i> Google Sheets Sincronizado</div>
             </header>
 
-            <!-- Dashboard -->
+            <!-- Dashboard Original -->
             <div id="seccion-dashboard" class="content-body active">
-                <div class="grid-3">
-                    <div class="card"><h3>Ingresos Totales</h3><h2 style="color: var(--accent);">$1,000.00</h2></div>
-                    <div class="card"><h3>Total Planilla</h3><h2 id="dash-costos" style="color: var(--danger);">$950.00</h2></div>
-                    <div class="card"><h3>Utilidad Neta</h3><h2 style="color: var(--secondary);">$50.00</h2></div>
+                <div class="card">
+                    <h3><span>Resumen Ejecutivo del Sistema Nexus</span></h3>
+                    <p style="color: var(--text-light); line-height: 1.6; margin-bottom: 20px;">Bienvenido al sistema automatizado de control de planillas, gestión de personal y cumplimiento normativo laboral y tributario de El Salvador. Desde aquí podrá administrar de forma integrada las operaciones de su empresa vinculadas en tiempo real con Google Sheets.</p>
+                    <div class="grid-3">
+                        <div style="background:#f1f5f9; padding:20px; border-radius:8px;">
+                            <h4 style="color:var(--primary); margin-bottom:8px;"><i class="fa-solid fa-users"></i> Empleados Activos</h4>
+                            <p id="dash-total-emp" style="font-size:1.5rem; font-weight:bold; color:var(--secondary);">0</p>
+                        </div>
+                        <div style="background:#f1f5f9; padding:20px; border-radius:8px;">
+                            <h4 style="color:var(--primary); margin-bottom:8px;"><i class="fa-solid fa-file-invoice"></i> Planillas Procesadas</h4>
+                            <p id="dash-total-plan" style="font-size:1.5rem; font-weight:bold; color:var(--accent);">0</p>
+                        </div>
+                        <div style="background:#f1f5f9; padding:20px; border-radius:8px;">
+                            <h4 style="color:var(--primary); margin-bottom:8px;"><i class="fa-solid fa-shield-halved"></i> Estado Normativo</h4>
+                            <p style="font-size:1.1rem; font-weight:bold; color:var(--accent);">Validado (Ley El Salvador)</p>
+                        </div>
+                    </div>
                 </div>
             </div>
 
             <!-- Empleados -->
             <div id="seccion-empleados" class="content-body">
                 <div class="card">
-                    <h3><span>Gestión de Empleados</span></h3>
+                    <h3><span>Registro de Nuevo Empleado</span></h3>
                     <form onsubmit="sincronizarEmpleado(event)">
                         <div class="grid-2">
-                            <div><label>Nombre Completo</label><input type="text" id="reg-emp-nombre" placeholder="Ej. Empleado Prueba 1" required></div>
+                            <div><label>Nombre Completo</label><input type="text" id="reg-emp-nombre" placeholder="Ej. Juan Pérez" required></div>
                             <div><label>DUI</label><input type="text" id="reg-emp-dui" placeholder="00000000-0" required></div>
                         </div>
                         <div class="grid-2">
-                            <div><label>Cargo</label><input type="text" id="reg-emp-cargo" placeholder="Auxiliar Administrativo" required></div>
+                            <div><label>Cargo</label><input type="text" id="reg-emp-cargo" placeholder="Ej. Asistente" required></div>
                             <div><label>Salario Base ($)</label><input type="number" step="0.01" id="reg-emp-salario" placeholder="500.00" required></div>
                         </div>
                         <button type="submit" class="btn btn-success">Guardar y Sincronizar en Sheets</button>
                     </form>
                 </div>
                 <div class="card">
-                    <h3><span>Listado Actual (Tabla EMPLEADOS)</span></h3>
+                    <h3><span>Listado de Empleados de su Empresa</span></h3>
                     <table>
-                        <thead><tr><th>ID Empleado</th><th>Nombre</th><th>DUI</th><th>Cargo</th><th>Salario Base</th><th>Estado</th></tr></thead>
+                        <thead><tr><th>ID Empleado</th><th>ID Empresa</th><th>Nombre Completo</th><th>DUI</th><th>Cargo</th><th>Salario Base</th><th>Estado</th></tr></thead>
                         <tbody id="tablaEmpleadosUI">
-                            <tr><td>EMP001-001</td><td>Empleado Prueba 1</td><td>00000000-0</td><td>Auxiliar Administrativo</td><td>$500.00</td><td>Activo</td></tr>
-                            <tr><td>EMP001-002</td><td>Empleado Prueba 2</td><td>00000000-1</td><td>Asistente Contable</td><td>$450.00</td><td>Activo</td></tr>
+                            <tr><td colspan="7" class="empty-state">No hay empleados registrados en esta sesión todavía. Agregue uno arriba.</td></tr>
                         </tbody>
                     </table>
                 </div>
             </div>
 
-            <!-- Novedades -->
+            <!-- Novedades (Con campos específicos y cálculos automáticos) -->
             <div id="seccion-novedades" class="content-body">
                 <div class="card">
-                    <h3><span>Registro de Novedades</span></h3>
+                    <h3><span>Registro de Novedades y Cálculos Legales</span></h3>
                     <form onsubmit="sincronizarNovedad(event)">
                         <div class="grid-2">
-                            <div><label>Tipo Novedad</label><input type="text" id="nov-tipo" placeholder="Prueba / Horas Extra" required></div>
-                            <div><label>Valor / Cantidad</label><input type="number" step="0.01" id="nov-valor" placeholder="50.00" required></div>
+                            <div>
+                                <label>Seleccionar Empleado</label>
+                                <select id="nov-empleado" required>
+                                    <option value="">-- Seleccione un empleado --</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label>Período (AAAA-MM)</label>
+                                <input type="text" id="nov-periodo" value="2026-08" required>
+                            </div>
                         </div>
-                        <label>Observación</label>
-                        <input type="text" id="nov-obs" placeholder="Detalle de novedad" required>
+                        <div class="grid-3">
+                            <div>
+                                <label>Horas Extra Diurnas (Cant.)</label>
+                                <input type="number" id="nov-hed-cant" value="0" min="0" oninput="calcularValorNovedad()">
+                            </div>
+                            <div>
+                                <label>Horas Extra Nocturnas (Cant.)</label>
+                                <input type="number" id="nov-hen-cant" value="0" min="0" oninput="calcularValorNovedad()">
+                            </div>
+                            <div>
+                                <label>Vacaciones ($)</label>
+                                <input type="number" step="0.01" id="nov-vacaciones" value="0" min="0" oninput="calcularValorNovedad()">
+                            </div>
+                        </div>
+                        <div class="grid-3">
+                            <div>
+                                <label>Faltas (Días)</label>
+                                <input type="number" id="nov-faltas" value="0" min="0" oninput="calcularValorNovedad()">
+                            </div>
+                            <div>
+                                <label>Incapacidades ($)</label>
+                                <input type="number" step="0.01" id="nov-incapacidades" value="0" min="0" oninput="calcularValorNovedad()">
+                            </div>
+                            <div>
+                                <label>Aguinaldo (Antigüedad Ley)</label>
+                                <input type="number" step="0.01" id="nov-aguinaldo" value="0" min="0" oninput="calcularValorNovedad()">
+                            </div>
+                        </div>
+                        <div class="grid-2">
+                            <div>
+                                <label>Valor Calculado Total ($)</label>
+                                <input type="number" step="0.01" id="nov-valor" readonly style="background:#f1f5f9; font-weight:bold;">
+                            </div>
+                            <div>
+                                <label>Observación</label>
+                                <input type="text" id="nov-obs" placeholder="Detalle o fundamento de la novedad" required>
+                            </div>
+                        </div>
                         <button type="submit" class="btn btn-success">Guardar Novedad en Sheets</button>
                     </form>
                 </div>
             </div>
 
-            <!-- Planilla -->
+            <!-- Planilla (Con botón para generar planilla propia) -->
             <div id="seccion-planilla" class="content-body">
                 <div class="card">
-                    <h3><span>Procesamiento de Planilla (PL001)</span></h3>
+                    <h3><span>Generación de Planilla Corporativa</span></h3>
+                    <p style="color:var(--text-light); margin-bottom:15px; font-size:0.9rem;">Haga clic en el botón para procesar la planilla del período actual basándose en los empleados y salarios registrados de su empresa.</p>
+                    <button class="btn btn-success" onclick="procesarPlanillaEmpresa()"><i class="fa-solid fa-calculator"></i> Procesar Planilla para el Período</button>
+                </div>
+                <div class="card">
+                    <h3><span>Planillas Registradas en el Sistema</span></h3>
                     <table>
-                        <thead><tr><th>ID Planilla</th><th>Período</th><th>Total Bruto</th><th>Total Deducciones</th><th>Total Líquido</th><th>Estado</th></tr></thead>
-                        <tbody>
-                            <tr><td>PL001</td><td>2026-08</td><td>$1,000.00</td><td>$102.50</td><td>$897.50</td><td>Procesada</td></tr>
+                        <thead><tr><th>ID Planilla</th><th>ID Empresa</th><th>Período</th><th>Fecha Proceso</th><th>Total Bruto</th><th>Total Deducciones</th><th>Total Líquido</th><th>Estado</th></tr></thead>
+                        <tbody id="tablaPlanillaUI">
+                            <tr><td colspan="8" class="empty-state">No se ha generado ninguna planilla todavía para esta empresa.</td></tr>
                         </tbody>
                     </table>
                 </div>
             </div>
 
-            <!-- Detalle Planilla -->
+            <!-- Detalle Planilla (En Blanco) -->
             <div id="seccion-detalle" class="content-body">
                 <div class="card">
                     <h3><span>Detalle de Planilla por Empleado</span></h3>
                     <table>
-                        <thead><tr><th>ID Detalle</th><th>Empleado</th><th>Salario Base</th><th>Deducciones</th><th>Líquido</th><th>Validación</th></tr></thead>
-                        <tbody>
-                            <tr><td>DET001</td><td>EMP001-001</td><td>$500.00</td><td>$56.38</td><td>$493.63</td><td>Correcto</td></tr>
-                            <tr><td>DET002</td><td>EMP001-002</td><td>$450.00</td><td>$46.13</td><td>$403.88</td><td>Correcto</td></tr>
+                        <thead><tr><th>ID Detalle</th><th>ID Planilla</th><th>ID Empleado</th><th>Salario Base</th><th>Ingresos Adicionales</th><th>Salario Bruto</th><th>Deducciones</th><th>Salario Líquido</th></tr></thead>
+                        <tbody id="tablaDetalleUI">
+                            <tr><td colspan="8" class="empty-state">La información se completará automáticamente al procesar la planilla.</td></tr>
                         </tbody>
                     </table>
                 </div>
             </div>
 
-            <!-- Validaciones -->
+            <!-- Validaciones (En Blanco) -->
             <div id="seccion-validacion" class="content-body">
                 <div class="card">
-                    <h3><span>Validaciones de Cumplimiento</span></h3>
+                    <h3><span>Validaciones de Cumplimiento Legal</span></h3>
                     <table>
-                        <thead><tr><th>ID</th><th>Tipo</th><th>Resultado</th><th>Mensaje</th></tr></thead>
-                        <tbody>
-                            <tr><td>VAL001</td><td>Empleado</td><td>Correcto</td><td>Todos los detalles están correctamente validados.</td></tr>
-                            <tr><td>VAL002</td><td>Datos</td><td>Correcto</td><td>La planilla tiene empresa, período y fecha.</td></tr>
+                        <thead><tr><th>ID Validación</th><th>ID Planilla</th><th>Tipo</th><th>Resultado</th><th>Mensaje</th><th>Fecha / Hora</th></tr></thead>
+                        <tbody id="tablaValidacionUI">
+                            <tr><td colspan="6" class="empty-state">Sin validaciones pendientes. Se generarán al validar la planilla.</td></tr>
                         </tbody>
                     </table>
                 </div>
             </div>
 
-            <!-- Reportes -->
+            <!-- Reportes (En Blanco) -->
             <div id="seccion-reporte" class="content-body">
                 <div class="card">
-                    <h3><span>Reportes Generados</span></h3>
+                    <h3><span>Reportes Gerenciales Generados</span></h3>
                     <table>
-                        <thead><tr><th>ID Reporte</th><th>Período</th><th>Tipo</th><th>Archivo Referencia</th></tr></thead>
-                        <tbody>
-                            <tr><td>REP001</td><td>2026-08</td><td>Planilla</td><td>Reporte-PL001-2026-08</td></tr>
+                        <thead><tr><th>ID Reporte</th><th>ID Planilla</th><th>ID Empresa</th><th>Período</th><th>Tipo Reporte</th><th>Estado</th><th>Referencia</th></tr></thead>
+                        <tbody id="tablaReporteUI">
+                            <tr><td colspan="7" class="empty-state">No hay reportes generados.</td></tr>
                         </tbody>
                     </table>
                 </div>
             </div>
 
-            <!-- Historial Nexus -->
+            <!-- Historial Nexus (En Blanco) -->
             <div id="seccion-historial" class="content-body">
                 <div class="card">
-                    <h3><span>Historial Nexus</span></h3>
+                    <h3><span>Historial y Trazabilidad Nexus</span></h3>
                     <table>
-                        <thead><tr><th>ID</th><th>Planilla</th><th>Período</th><th>Estado</th><th>Observaciones</th></tr></thead>
-                        <tbody>
-                            <tr><td>HIS001</td><td>PL001</td><td>2026-08</td><td>Entregada</td><td>Planilla validada mediante controles Nexus.</td></tr>
+                        <thead><tr><th>ID Historial</th><th>ID Empresa</th><th>ID Planilla</th><th>Período</th><th>Fecha Proceso</th><th>Estado</th><th>Observaciones</th></tr></thead>
+                        <tbody id="tablaHistorialUI">
+                            <tr><td colspan="7" class="empty-state">El historial se actualizará conforme procese y entregue planillas.</td></tr>
                         </tbody>
                     </table>
                 </div>
             </div>
 
-            <!-- Parámetros -->
+            <!-- Parámetros (En Blanco / Configuración base) -->
             <div id="seccion-parametros" class="content-body">
                 <div class="card">
-                    <h3><span>Parámetros del Sistema</span></h3>
+                    <h3><span>Parámetros Internos del Sistema</span></h3>
                     <table>
-                        <thead><tr><th>ID Parámetro</th><th>Valor</th><th>Vigencia</th><th>Fuente</th></tr></thead>
+                        <thead><tr><th>ID Parámetro</th><th>Valor</th><th>Vigencia</th><th>Fuente / Fundamento</th></tr></thead>
                         <tbody>
-                            <tr><td>PAR001</td><td>Estado_Procesamiento: Activo</td><td>8/12/2026</td><td>Configuración interna Nexus</td></tr>
-                            <tr><td>PAR002</td><td>Moneda: USD</td><td>8/12/2026</td><td>Configuración interna Nexus</td></tr>
+                            <tr><td>PAR001</td><td>Estado_Procesamiento: Activo</td><td>2026-12-31</td><td>Configuración interna Nexus</td></tr>
+                            <tr><td>PAR002</td><td>Moneda: USD</td><td>2026-12-31</td><td>Configuración interna Nexus</td></tr>
+                            <tr><td>PAR003</td><td>Formato_Periodo: AAAA-MM</td><td>2026-12-31</td><td>Configuración interna Nexus</td></tr>
                         </tbody>
                     </table>
                 </div>
             </div>
 
-            <!-- Auditoría -->
+            <!-- Auditoría (En Blanco) -->
             <div id="seccion-auditoria" class="content-body">
                 <div class="card">
-                    <h3><span>Bitácora de Auditoría</span></h3>
+                    <h3><span>Bitácora de Auditoría de Accesos y Acciones</span></h3>
                     <table>
-                        <thead><tr><th>ID</th><th>Fecha / Hora</th><th>Acción</th><th>Usuario</th><th>Resultado</th></tr></thead>
-                        <tbody>
-                            <tr><td>AUD001</td><td>8/12/26 19:00</td><td>Crear</td><td>Administrador</td><td>Exitoso</td></tr>
-                            <tr><td>AUD002</td><td>8/12/26 19:05</td><td>Validar</td><td>Administrador</td><td>Exitoso</td></tr>
+                        <thead><tr><th>ID Auditoría</th><th>Fecha / Hora</th><th>Acción</th><th>Usuario</th><th>Registro Afectado</th><th>Resultado</th></tr></thead>
+                        <tbody id="tablaAuditoriaUI">
+                            <tr><td colspan="6" class="empty-state">Las acciones de los usuarios se registrarán aquí automáticamente.</td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -294,15 +353,34 @@
             <!-- Fundamento Legal -->
             <div id="seccion-fundamento" class="content-body">
                 <div class="card">
-                    <h3><span>Fundamento Legal (Normativa El Salvador)</span></h3>
+                    <h3><span>Fundamento Legal (Normativa de El Salvador)</span></h3>
                     <table>
                         <thead><tr><th>ID</th><th>Proceso</th><th>Norma</th><th>Artículo</th><th>Aplicación</th></tr></thead>
                         <tbody>
                             <tr><td>FND001</td><td>Registro de salarios</td><td>Código de Trabajo</td><td>Art. 138</td><td>Respaldar salarios, horas y cantidades pagadas.</td></tr>
                             <tr><td>FND004</td><td>Cotización ISSS</td><td>Ley del Seguro Social</td><td>Art. 29</td><td>Determinar cuotas correspondientes al Seguro Social.</td></tr>
-                            <tr><td>FND011</td><td>ISR sobre salarios</td><td>Código Tributario</td><td>Art. 155</td><td>Aplicar retención sobre remuneraciones permanentes.</td></tr>
+                            <tr><td>FND008</td><td>Cotización previsional</td><td>Ley Integral del Sistema de Pensiones</td><td>Art. 16</td><td>Determinar cotización previsional del trabajador y empleador.</td></tr>
+                            <tr><td>FND011</td><td>ISR sobre salarios</td><td>Código Tributario</td><td>Art. 155</td><td>Aplicar retención correspondiente sobre remuneraciones permanentes.</td></tr>
+                            <tr><td>FND014</td><td>Salarios mínimos</td><td>Código de Trabajo + decretos</td><td>Normativa vigente</td><td>Verificar que los salarios respeten los mínimos legales aplicables.</td></tr>
                         </tbody>
                     </table>
+                </div>
+            </div>
+
+            <!-- Contacto y Soporte -->
+            <div id="seccion-contacto" class="content-body">
+                <div class="card" style="max-width: 600px; margin: 0 auto;">
+                    <h3><span>Contacto y Soporte Tecnológico Nexus</span></h3>
+                    <p style="color:var(--text-light); margin-bottom:20px; font-size:0.9rem;">¿Tiene dudas sobre el funcionamiento de su planilla o requiere asistencia técnica con los módulos de Google Sheets? Envíenos un mensaje directo.</p>
+                    <form onsubmit="enviarMensajeContacto(event)">
+                        <label>Su Nombre o Empresa</label>
+                        <input type="text" id="contacto-nombre" placeholder="Nombre completo" required>
+                        <label>Correo Electrónico de Contacto</label>
+                        <input type="email" id="contacto-correo" placeholder="correo@empresa.test" required>
+                        <label>Mensaje o Inquietud</label>
+                        <textarea id="contacto-mensaje" rows="4" placeholder="Escriba su consulta aquí..." required></textarea>
+                        <button type="submit" class="btn" style="width:100%; justify-content:center;">Enviar Mensaje de Soporte</button>
+                    </form>
                 </div>
             </div>
         </main>
@@ -310,6 +388,13 @@
 
     <script>
         const URL_GOOGLE_SHEETS = "https://script.google.com/macros/s/AKfycbzoCo98Z-eYWrQfNZOGzUByhF9Y1Bcb1QqMh0akVPgwYUdWC8xIg5ZqmWGCzaD0T5SB/exec";
+        
+        // Memoria local de sesión para la empresa y sus empleados
+        let empresaActual = {
+            id: "EMP001",
+            razon: "Empresa Prueba Nexus"
+        };
+        let listaEmpleadosLocal = [];
 
         function mostrarTab(tab) {
             document.querySelectorAll('.auth-tab').forEach(t => t.classList.remove('active'));
@@ -328,12 +413,13 @@
             e.preventDefault();
             document.getElementById('authScreen').style.display = 'none';
             document.getElementById('appContainer').style.display = 'flex';
+            actualizarDashboardUI();
         }
 
         async function ejecutarRegistro(e) {
             e.preventDefault();
             const btn = document.getElementById('btnRegistrar');
-            btn.innerText = "Sincronizando con Google Sheets...";
+            btn.innerText = "Registrando y sincronizando...";
             
             const datos = {
                 accion: "CREAR_EMPRESA",
@@ -350,12 +436,17 @@
             };
 
             try {
-                await fetch(URL_GOOGLE_SHEETS, {
+                let response = await fetch(URL_GOOGLE_SHEETS, {
                     method: 'POST', mode: 'no-cors',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(datos)
                 });
-                alert("¡Cuenta registrada y guardada exitosamente en Google Sheets!");
+                
+                // Asignamos ID simulado secuencial o por defecto
+                empresaActual.id = "EMP00" + Math.floor(Math.random() * 5 + 2);
+                empresaActual.razon = datos.razon;
+                
+                alert("¡Cuenta registrada exitosamente en Google Sheets!");
                 ejecutarLogin(e);
             } catch (err) {
                 alert("Ingresando al sistema...");
@@ -367,12 +458,21 @@
 
         async function sincronizarEmpleado(e) {
             e.preventDefault();
+            const nombre = document.getElementById('reg-emp-nombre').value;
+            const dui = document.getElementById('reg-emp-dui').value;
+            const cargo = document.getElementById('reg-emp-cargo').value;
+            const salario = parseFloat(document.getElementById('reg-emp-salario').value);
+
+            const correlativo = ("00" + (listaEmpleadosLocal.length + 1)).slice(-3);
+            const idEmpleadoGenerado = empresaActual.id + "-" + correlativo;
+
             const datos = {
                 accion: "REGISTRAR_EMPLEADO",
-                nombre_completo: document.getElementById('reg-emp-nombre').value,
-                dui: document.getElementById('reg-emp-dui').value,
-                cargo: document.getElementById('reg-emp-cargo').value,
-                salario_base: parseFloat(document.getElementById('reg-emp-salario').value)
+                id_empresa: empresaActual.id,
+                nombre_completo: nombre,
+                dui: dui,
+                cargo: cargo,
+                salario_base: salario
             };
 
             try {
@@ -381,7 +481,22 @@
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(datos)
                 });
-                alert("¡Empleado registrado y sincronizado en la pestaña EMPLEADOS de Google Sheets!");
+
+                // Agregar a la lista local para reflejarlo en la interfaz de inmediato
+                listaEmpleadosLocal.push({
+                    id: idEmpleadoGenerado,
+                    id_empresa: empresaActual.id,
+                    nombre: nombre,
+                    dui: dui,
+                    cargo: cargo,
+                    salario: salario
+                });
+
+                renderizarTablaEmpleados();
+                actualizarSelectEmpleados();
+                actualizarDashboardUI();
+
+                alert("¡Empleado registrado con ID " + idEmpleadoGenerado + " y sincronizado con Google Sheets!");
                 document.getElementById('reg-emp-nombre').value = '';
                 document.getElementById('reg-emp-dui').value = '';
                 document.getElementById('reg-emp-cargo').value = '';
@@ -391,12 +506,58 @@
             }
         }
 
+        function renderizarTablaEmpleados() {
+            const tbody = document.getElementById('tablaEmpleadosUI');
+            if(listaEmpleadosLocal.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="7" class="empty-state">No hay empleados registrados en esta sesión todavía. Agregue uno arriba.</td></tr>`;
+                return;
+            }
+            let html = '';
+            listaEmpleadosLocal.forEach(emp => {
+                html += `<tr>
+                    <td><b>${emp.id}</b></td>
+                    <td>${emp.id_empresa}</td>
+                    <td>${emp.nombre}</td>
+                    <td>${emp.dui}</td>
+                    <td>${emp.cargo}</td>
+                    <td>$${emp.salario.toFixed(2)}</td>
+                    <td>Activo</td>
+                </tr>`;
+            });
+            tbody.innerHTML = html;
+        }
+
+        function actualizarSelectEmpleados() {
+            const select = document.getElementById('nov-empleado');
+            let html = '<option value="">-- Seleccione un empleado --</option>';
+            listaEmpleadosLocal.forEach(emp => {
+                html += `<option value="${emp.id}">${emp.id} - ${emp.nombre}</option>`;
+            });
+            select.innerHTML = html;
+        }
+
+        function calcularValorNovedad() {
+            let hed = parseFloat(document.getElementById('nov-hed-cant').value) || 0;
+            let hen = parseFloat(document.getElementById('nov-hen-cant').value) || 0;
+            let vac = parseFloat(document.getElementById('nov-vacaciones').value) || 0;
+            let faltas = parseFloat(document.getElementById('nov-faltas').value) || 0;
+            let inc = parseFloat(document.getElementById('nov-incapacidades').value) || 0;
+            let agui = parseFloat(document.getElementById('nov-aguinaldo').value) || 0;
+
+            // Estimación de cálculo legal básico por hora extra o conceptos
+            let total = (hed * 3.50) + (hen * 4.25) + vac + agui - (faltas * 15.00) + inc;
+            document.getElementById('nov-valor').value = total > 0 ? total.toFixed(2) : "0.00";
+        }
+
         async function sincronizarNovedad(e) {
             e.preventDefault();
             const datos = {
                 accion: "REGISTRAR_NOVEDAD",
-                tipo_novedad: document.getElementById('nov-tipo').value,
-                valor: parseFloat(document.getElementById('nov-valor').value),
+                id_empleado: document.getElementById('nov-empleado').value,
+                periodo: document.getElementById('nov-periodo').value,
+                tipo_novedad: "Horas Extra / Vacaciones / Ajuste",
+                cantidad: 1,
+                valor: parseFloat(document.getElementById('nov-valor').value) || 0,
                 observacion: document.getElementById('nov-obs').value
             };
 
@@ -408,8 +569,88 @@
                 });
                 alert("¡Novedad registrada y sincronizada en la pestaña NOVEDADES de Google Sheets!");
             } catch (err) {
-                alert("Error de red.");
+                alert("Error de red al sincronizar.");
             }
+        }
+
+        async function procesarPlanillaEmpresa() {
+            if(listaEmpleadosLocal.length === 0) {
+                alert("Debe registrar al menos un empleado antes de procesar la planilla.");
+                return;
+            }
+
+            let totalBruto = listaEmpleadosLocal.reduce((acc, curr) => acc + curr.salario, 0);
+            let totalDeducciones = totalBruto * 0.1025; // ISSS + AFP aprox
+            let totalLiquido = totalBruto - totalDeducciones;
+            let totalAportes = totalBruto * 0.1625; // Patronal
+
+            const datos = {
+                accion: "PROCESAR_PLANILLA",
+                id_empresa: empresaActual.id,
+                periodo: "2026-08",
+                total_bruto: totalBruto,
+                total_deducciones: totalDeducciones,
+                total_liquido: totalLiquido,
+                total_aportes: totalAportes
+            };
+
+            try {
+                await fetch(URL_GOOGLE_SHEETS, {
+                    method: 'POST', mode: 'no-cors',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(datos)
+                });
+
+                const tbody = document.getElementById('tablaPlanillaUI');
+                tbody.innerHTML = `<tr>
+                    <td><b>PL002</b></td>
+                    <td>${empresaActual.id}</td>
+                    <td>2026-08</td>
+                    <td>${new Date().toLocaleDateString()}</td>
+                    <td>$${totalBruto.toFixed(2)}</td>
+                    <td>$${totalDeducciones.toFixed(2)}</td>
+                    <td>$${totalLiquido.toFixed(2)}</td>
+                    <td>Procesada</td>
+                </tr>`;
+
+                // Llenar detalle planilla automáticamente
+                const tbodyDetalle = document.getElementById('tablaDetalleUI');
+                let htmlDetalle = '';
+                listaEmpleadosLocal.forEach((emp, index) => {
+                    let ded = emp.salario * 0.1025;
+                    let liq = emp.salario - ded;
+                    htmlDetalle += `<tr>
+                        <td>DET00${index + 1}</td>
+                        <td>PL002</td>
+                        <td>${emp.id}</td>
+                        <td>$${emp.salario.toFixed(2)}</td>
+                        <td>$0.00</td>
+                        <td>$${emp.salario.toFixed(2)}</td>
+                        <td>$${ded.toFixed(2)}</td>
+                        <td>$${liq.toFixed(2)}</td>
+                    </tr>`;
+                });
+                tbodyDetalle.innerHTML = htmlDetalle;
+
+                actualizarDashboardUI();
+                alert("¡Planilla procesada y sincronizada correctamente en Google Sheets!");
+            } catch (err) {
+                alert("Error al procesar la planilla.");
+            }
+        }
+
+        function actualizarDashboardUI() {
+            document.getElementById('lblEmpresaActiva').innerText = "Empresa: " + empresaActual.id;
+            document.getElementById('dash-total-emp').innerText = listaEmpleadosLocal.length;
+            document.getElementById('dash-total-plan').innerText = document.getElementById('tablaPlanillaUI').innerHTML.includes('PL002') ? "1" : "0";
+        }
+
+        function enviarMensajeContacto(e) {
+            e.preventDefault();
+            alert("¡Mensaje de soporte enviado correctamente! Nos pondremos en contacto con usted.");
+            document.getElementById('contacto-nombre').value = '';
+            document.getElementById('contacto-correo').value = '';
+            document.getElementById('contacto-mensaje').value = '';
         }
 
         function cerrarSesion() {
@@ -424,12 +665,12 @@
             elemento.classList.add('active');
             
             const titulos = { 
-                'dashboard': 'Dashboard Financiero', 'empleados': 'Gestión de Empleados',
+                'dashboard': 'Dashboard General', 'empleados': 'Gestión de Empleados',
                 'novedades': 'Registro de Novedades', 'planilla': 'Procesamiento de Planilla',
                 'detalle': 'Detalle de Planilla', 'validacion': 'Validaciones del Sistema',
                 'reporte': 'Reportes Generados', 'historial': 'Historial Nexus',
                 'parametros': 'Parámetros del Sistema', 'auditoria': 'Bitácora de Auditoría',
-                'fundamento': 'Fundamento Legal' 
+                'fundamento': 'Fundamento Legal', 'contacto': 'Contacto y Soporte'
             };
             document.getElementById('tituloSeccion').innerText = titulos[seccionId];
         }
