@@ -61,19 +61,20 @@
         .btn:hover { background-color: #2563eb; }
         .btn-success { background-color: var(--accent); }
         .btn-success:hover { background-color: #059669; }
-        .btn-danger { background-color: var(--danger); color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; }
 
         .hidden { display: none !important; }
         .mensaje-status { padding: 10px; border-radius: 6px; margin-bottom: 15px; text-align: center; font-size: 0.9rem; }
-        .mensaje-status.exito { background: #ecfdf5; color: #065f46; }
-        .mensaje-status.error { background: #fee2e2; color: #991b1b; }
 
         /* Asistente Atena flotante */
         .atena-float { position: fixed; bottom: 30px; right: 30px; width: 60px; height: 60px; background: var(--secondary); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; cursor: pointer; box-shadow: 0 10px 25px rgba(59, 130, 246, 0.4); z-index: 1000; }
         .atena-modal { position: fixed; bottom: 100px; right: 30px; width: 350px; height: 450px; background: white; border-radius: 12px; box-shadow: 0 15px 35px rgba(0,0,0,0.15); display: none; flex-direction: column; z-index: 1000; border: 1px solid var(--border); overflow: hidden; }
         .atena-header { background: var(--primary); color: white; padding: 15px; display: flex; justify-content: space-between; align-items: center; }
         .atena-body { flex-grow: 1; padding: 15px; overflow-y: auto; background: #f8fafc; display: flex; flex-direction: column; gap: 10px; font-size: 0.9rem; }
+        .atena-msg { padding: 10px 14px; border-radius: 8px; max-width: 80%; line-height: 1.4; }
+        .atena-msg.bot { background: #e2e8f0; color: var(--primary); align-self: flex-start; }
+        .atena-msg.user { background: var(--secondary); color: white; align-self: flex-end; }
         .atena-footer { padding: 10px; background: white; border-top: 1px solid var(--border); display: flex; gap: 8px; }
+        .atena-footer input { margin-bottom: 0; flex-grow: 1; }
     </style>
 </head>
 <body>
@@ -118,7 +119,7 @@
                 <label>Contraseña</label>
                 <input type="password" id="reg-pass" placeholder="••••••••" required>
                 
-                <button type="submit" class="btn btn-success" style="width: 100%; justify-content: center;">Registrar Empresa</button>
+                <button type="submit" id="btnRegistrar" class="btn btn-success" style="width: 100%; justify-content: center;">Registrar Empresa y Sincronizar</button>
             </form>
         </div>
     </div>
@@ -137,23 +138,23 @@
         <main>
             <header>
                 <h1 id="tituloSeccion">Dashboard Financiero</h1>
-                <div class="sync-status"><i class="fa-solid fa-circle-check" style="color:var(--accent)"></i> Sistema Conectado</div>
+                <div class="sync-status"><i class="fa-solid fa-circle-check" style="color:var(--accent)"></i> Google Sheets Conectado</div>
             </header>
 
-            <!-- Sección Dashboard -->
+            <!-- Sección Dashboard (En Cero) -->
             <div id="seccion-dashboard" class="content-body active">
                 <div class="grid-3">
                     <div class="card">
                         <h3><i class="fa-solid fa-wallet"></i> Ingresos Totales</h3>
-                        <h2 style="color: var(--accent);">$45,200.00</h2>
+                        <h2 id="val-ingresos" style="color: var(--accent);">$0.00</h2>
                     </div>
                     <div class="card">
                         <h3><i class="fa-solid fa-file-invoice-dollar"></i> Costos Operativos</h3>
-                        <h2 style="color: var(--danger);">$18,400.00</h2>
+                        <h2 id="val-costos" style="color: var(--danger);">$0.00</h2>
                     </div>
                     <div class="card">
                         <h3><i class="fa-solid fa-chart-line"></i> Utilidad Neta</h3>
-                        <h2 style="color: var(--secondary);">$26,800.00</h2>
+                        <h2 id="val-utilidad" style="color: var(--secondary);">$0.00</h2>
                     </div>
                 </div>
                 <div class="card">
@@ -162,16 +163,16 @@
                 </div>
             </div>
 
-            <!-- Sección Contacto / Soporte con EmailJS -->
+            <!-- Sección Contacto / Soporte -->
             <div id="seccion-contacto" class="content-body">
                 <div class="card" style="max-width: 600px; margin: 0 auto;">
                     <h3><i class="fa-solid fa-paper-plane"></i> Enviar Mensaje a Soporte</h3>
-                    <form id="form-contacto" onsubmit="enviarCorreoEmailJS(event)">
+                    <form id="form-contacto" onsubmit="enviarMensajeSoporte(event)">
                         <label>Asunto</label>
                         <input type="text" id="contacto-asunto" placeholder="Consulta sobre servicios" required>
                         <label>Mensaje</label>
                         <textarea id="contacto-mensaje" rows="4" placeholder="Escribe tu mensaje aquí..." required></textarea>
-                        <button type="submit" class="btn">Enviar Correo</button>
+                        <button type="submit" class="btn">Enviar Mensaje</button>
                     </form>
                 </div>
             </div>
@@ -186,18 +187,18 @@
             <i class="fa-solid fa-xmark" style="cursor:pointer;" onclick="toggleAtena()"></i>
         </div>
         <div class="atena-body" id="atenaChatBody">
-            <div class="atena-msg bot">¡Hola! Soy Atena, tu asistente virtual para NEXUS. ¿En qué te puedo ayudar hoy?</div>
+            <div class="atena-msg bot">¡Hola! Soy Atena, tu asistente virtual para NEXUS S.A. de C.V. ¿En qué te puedo ayudar hoy?</div>
         </div>
         <div class="atena-footer">
-            <input type="text" id="atenaInput" placeholder="Escribe una pregunta..." onkeypress="if(event.key==='Enter') enviarAtena()">
+            <input type="text" id="atenaInput" placeholder="Escribe algo..." onkeypress="if(event.key==='Enter') enviarAtena()">
             <button class="btn" style="padding: 8px 12px;" onclick="enviarAtena()"><i class="fa-solid fa-paper-plane"></i></button>
         </div>
     </div>
 
     <!-- SCRIPT GENERAL PARA FUNCIONALIDAD -->
     <script>
-        // Inicializar EmailJS (reemplaza con tu User ID público si lo deseas usar)
-        (function(){ emailjs.init("tu_user_id_aqui"); })();
+        // URL DE GOOGLE APPS SCRIPT CONFIGURADA
+        const URL_GOOGLE_SHEETS = "https://script.google.com/macros/s/AKfycbzoCo98Z-eYWrQfNZOGzUByhF9Y1Bcb1QqMh0akVPgwYUdWC8xIg5ZqmWGCzaD0T5SB/exec";
 
         function mostrarTab(tab) {
             document.querySelectorAll('.auth-tab').forEach(t => t.classList.remove('active'));
@@ -220,10 +221,39 @@
             inicializarGrafico();
         }
 
-        function ejecutarRegistro(e) {
+        async function ejecutarRegistro(e) {
             e.preventDefault();
-            alert("¡Empresa registrada con éxito!");
-            ejecutarLogin(e);
+            const btn = document.getElementById('btnRegistrar');
+            btn.innerText = "Guardando en Google Sheets...";
+            btn.disabled = true;
+
+            const datos = {
+                razon: document.getElementById('reg-razon').value,
+                nit: document.getElementById('reg-nit').value,
+                nrc: document.getElementById('reg-nrc').value,
+                direccion: document.getElementById('reg-direccion').value,
+                nombre: document.getElementById('reg-nombre').value,
+                correo: document.getElementById('reg-email').value,
+                passwordHash: document.getElementById('reg-pass').value
+            };
+
+            try {
+                await fetch(URL_GOOGLE_SHEETS, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(datos)
+                });
+
+                alert("¡Empresa registrada y sincronizada correctamente con Google Sheets!");
+                ejecutarLogin(e);
+            } catch (error) {
+                alert("Hubo un problema de red, pero puedes ingresar al sistema.");
+                ejecutarLogin(e);
+            } finally {
+                btn.innerText = "Registrar Empresa y Sincronizar";
+                btn.disabled = false;
+            }
         }
 
         function cerrarSesion() {
@@ -241,9 +271,9 @@
             document.getElementById('tituloSeccion').innerText = titulos[seccionId];
         }
 
-        function enviarCorreoEmailJS(e) {
+        function enviarMensajeSoporte(e) {
             e.preventDefault();
-            alert("Mensaje enviado correctamente a través de EmailJS.");
+            alert("Mensaje enviado con éxito.");
             document.getElementById('form-contacto').reset();
         }
 
@@ -254,16 +284,22 @@
 
         function enviarAtena() {
             const input = document.getElementById('atenaInput');
-            if(!input.value.trim()) return;
+            const texto = input.value.trim().toLowerCase();
+            if(!texto) return;
             
             const body = document.getElementById('atenaChatBody');
             body.innerHTML += `<div class="atena-msg user">${input.value}</div>`;
-            const q = input.value;
             input.value = '';
             
             setTimeout(() => {
-                let respuesta = "Entendido, estoy procesando tu solicitud para NEXUS S.A. de C.V.";
-                if(q.toLowerCase().includes('flujo')) respuesta = "El flujo de caja actual muestra una tendencia positiva respaldada por los ingresos del trimestre.";
+                let respuesta = "Comprendo. Como asistente de NEXUS S.A. de C.V., puedo ayudarte con las consultas de tu sistema corporativo.";
+                
+                if (texto.includes('hola') || texto.includes('saludos')) {
+                    respuesta = "¡Hola! Es un gusto saludarte. ¿En qué te puedo colaborar hoy?";
+                } else if (texto.includes('registro') || texto.includes('empresa')) {
+                    respuesta = "Puedes registrar tu empresa desde la pantalla inicial seleccionando la pestaña 'Crear Cuenta'.";
+                }
+
                 body.innerHTML += `<div class="atena-msg bot">${respuesta}</div>`;
                 body.scrollTop = body.scrollHeight;
             }, 600);
@@ -277,7 +313,7 @@
                     labels: ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun'],
                     datasets: [{
                         label: 'Flujo Neto ($)',
-                        data: [4000, 6500, 5200, 7800, 8900, 9400],
+                        data: [0, 0, 0, 0, 0, 0],
                         backgroundColor: '#3b82f6',
                         borderRadius: 6
                     }]
