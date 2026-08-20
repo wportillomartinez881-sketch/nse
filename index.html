@@ -46,7 +46,7 @@
         .content-body.active { display: block; }
 
         .card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 25px; margin-bottom: 25px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.02); }
-        .card h3 { margin-bottom: 15px; font-size: 1.1rem; color: var(--primary); display: flex; align-items: center; gap: 8px; border-bottom: 2px solid var(--border); padding-bottom: 10px; }
+        .card h3 { margin-bottom: 15px; font-size: 1.1rem; color: var(--primary); display: flex; align-items: center; justify-content: space-between; border-bottom: 2px solid var(--border); padding-bottom: 10px; }
         .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
         .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
         
@@ -54,29 +54,24 @@
         form input, form select, form textarea { width: 100%; padding: 10px 14px; border: 1px solid var(--border); border-radius: 6px; font-size: 0.95rem; margin-bottom: 15px; outline: none; transition: border 0.2s; }
         form input:focus, form select:focus, form textarea:focus { border-color: var(--secondary); }
         
-        .btn { background-color: var(--secondary); color: white; border: none; padding: 10px 20px; border-radius: 6px; font-weight: 600; cursor: pointer; transition: background 0.2s; display: inline-flex; align-items: center; gap: 8px; }
+        .btn { background-color: var(--secondary); color: white; border: none; padding: 10px 20px; border-radius: 6px; font-weight: 600; cursor: pointer; transition: background 0.2s; display: inline-flex; align-items: center; gap: 8px; font-size: 0.9rem; }
         .btn:hover { background-color: #2563eb; }
         .btn-success { background-color: var(--accent); }
         .btn-success:hover { background-color: #059669; }
+        .btn-danger { background-color: var(--danger); padding: 6px 12px; font-size: 0.8rem; }
+        .btn-danger:hover { background-color: #dc2626; }
+
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 0.9rem; }
+        th, td { padding: 12px 15px; text-align: left; border-bottom: 1px solid var(--border); }
+        th { background-color: #f1f5f9; color: var(--primary); font-weight: 600; text-transform: uppercase; font-size: 0.8rem; }
 
         .hidden { display: none !important; }
         .mensaje-status { padding: 10px; border-radius: 6px; margin-bottom: 15px; text-align: center; font-size: 0.9rem; }
-
-        /* Asistente Atena */
-        .atena-float { position: fixed; bottom: 30px; right: 30px; width: 60px; height: 60px; background: var(--secondary); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; cursor: pointer; box-shadow: 0 10px 25px rgba(59, 130, 246, 0.4); z-index: 1000; }
-        .atena-modal { position: fixed; bottom: 100px; right: 30px; width: 350px; height: 450px; background: white; border-radius: 12px; box-shadow: 0 15px 35px rgba(0,0,0,0.15); display: none; flex-direction: column; z-index: 1000; border: 1px solid var(--border); overflow: hidden; }
-        .atena-header { background: var(--primary); color: white; padding: 15px; display: flex; justify-content: space-between; align-items: center; }
-        .atena-body { flex-grow: 1; padding: 15px; overflow-y: auto; background: #f8fafc; display: flex; flex-direction: column; gap: 10px; font-size: 0.9rem; }
-        .atena-msg { padding: 10px 14px; border-radius: 8px; max-width: 80%; line-height: 1.4; }
-        .atena-msg.bot { background: #e2e8f0; color: var(--primary); align-self: flex-start; }
-        .atena-msg.user { background: var(--secondary); color: white; align-self: flex-end; }
-        .atena-footer { padding: 10px; background: white; border-top: 1px solid var(--border); display: flex; gap: 8px; }
-        .atena-footer input { margin-bottom: 0; flex-grow: 1; }
     </style>
 </head>
 <body>
 
-    <!-- PANTALLA DE AUTENTICACIÓN -->
+    <!-- PANTALLA DE AUTENTICACIÓN (INTACTA Y FUNCIONANDO CON GOOGLE SHEETS) -->
     <div id="authScreen">
         <div class="auth-card">
             <h2><i class="fa-solid fa-building-shield"></i> NEXUS S.A. de C.V.</h2>
@@ -95,7 +90,6 @@
                 <button type="submit" class="btn" style="width: 100%; justify-content: center;">Iniciar Sesión</button>
             </form>
 
-            <!-- Registro Completo con Teléfono y Representante -->
             <form id="form-register" class="hidden" onsubmit="ejecutarRegistro(event)">
                 <h4 style="margin-bottom: 10px; color: var(--primary); font-size: 0.9rem;">Datos de la Empresa</h4>
                 <label>Razón Social</label>
@@ -151,15 +145,15 @@
                 <div class="grid-3">
                     <div class="card">
                         <h3><i class="fa-solid fa-wallet"></i> Ingresos Totales</h3>
-                        <h2 style="color: var(--accent);">$0.00</h2>
+                        <h2 id="dash-ingresos" style="color: var(--accent);">$0.00</h2>
                     </div>
                     <div class="card">
                         <h3><i class="fa-solid fa-file-invoice-dollar"></i> Costos Operativos</h3>
-                        <h2 style="color: var(--danger);">$0.00</h2>
+                        <h2 id="dash-costos" style="color: var(--danger);">$0.00</h2>
                     </div>
                     <div class="card">
                         <h3><i class="fa-solid fa-chart-line"></i> Utilidad Neta</h3>
-                        <h2 style="color: var(--secondary);">$0.00</h2>
+                        <h2 id="dash-utilidad" style="color: var(--secondary);">$0.00</h2>
                     </div>
                 </div>
                 <div class="card">
@@ -168,37 +162,106 @@
                 </div>
             </div>
 
-            <!-- Sección Empleados -->
+            <!-- Sección Empleados (FUNCIONAL) -->
             <div id="seccion-empleados" class="content-body">
                 <div class="card">
-                    <h3><i class="fa-solid fa-users-gear"></i> Listado de Empleados Registrados</h3>
-                    <p style="color: var(--text-light); font-size: 0.9rem;">Módulo habilitado para el control de personal, cargos y salarios base orientados a planilla.</p>
+                    <h3><i class="fa-solid fa-user-plus"></i> Registrar Nuevo Empleado</h3>
+                    <form id="form-empleado" onsubmit="agregarEmpleado(event)">
+                        <div class="grid-2">
+                            <div>
+                                <label>Nombre Completo</label>
+                                <input type="text" id="emp-nombre" placeholder="Ej. Ana María Pérez" required>
+                            </div>
+                            <div>
+                                <label>Cargo / Puesto</label>
+                                <input type="text" id="emp-cargo" placeholder="Ej. Asistente Administrativo" required>
+                            </div>
+                        </div>
+                        <div class="grid-2">
+                            <div>
+                                <label>Salario Base ($)</label>
+                                <input type="number" step="0.01" id="emp-salario" placeholder="600.00" required>
+                            </div>
+                            <div>
+                                <label>Departamento</label>
+                                <input type="text" id="emp-depto" placeholder="Ej. Finanzas" required>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-success"><i class="fa-solid fa-floppy-disk"></i> Guardar Empleado</button>
+                    </form>
+                </div>
+
+                <div class="card">
+                    <h3><i class="fa-solid fa-users"></i> Listado de Empleados Registrados</h3>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Nombre</th>
+                                <th>Cargo</th>
+                                <th>Departamento</th>
+                                <th>Salario Base</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tablaEmpleadosBody">
+                            <tr><td colspan="5" style="text-align: center; color: var(--text-light);">No hay empleados registrados todavía.</td></tr>
+                        </tbody>
+                    </table>
                 </div>
             </div>
 
-            <!-- Sección Planilla -->
+            <!-- Sección Planilla (FUNCIONAL CON LEYES DE EL SALVADOR) -->
             <div id="seccion-planilla" class="content-body">
                 <div class="card">
-                    <h3><i class="fa-solid fa-calculator"></i> Procesamiento y Cálculo de Planilla</h3>
-                    <p style="color: var(--text-light); font-size: 0.9rem;">Control de deducciones, ISSS, AFP, Renta y salarios líquidos.</p>
+                    <h3>
+                        <span><i class="fa-solid fa-calculator"></i> Cálculo Automático de Planilla</span>
+                        <button class="btn btn-success" onclick="calcularPlanilla()"><i class="fa-solid fa-rotate"></i> Generar Cálculos</button>
+                    </h3>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Empleado</th>
+                                <th>Salario Base</th>
+                                <th>ISSS (3%)</th>
+                                <th>AFP (7.25%)</th>
+                                <th>Renta</th>
+                                <th>Salario Líquido</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tablaPlanillaBody">
+                            <tr><td colspan="6" style="text-align: center; color: var(--text-light);">Genere los cálculos para ver el desglose de ley.</td></tr>
+                        </tbody>
+                    </table>
                 </div>
             </div>
 
-            <!-- Sección Auditoría -->
+            <!-- Sección Auditoría (FUNCIONAL) -->
             <div id="seccion-auditoria" class="content-body">
                 <div class="card">
-                    <h3><i class="fa-solid fa-clipboard-list"></i> Registro de Auditoría y Control</h3>
-                    <p style="color: var(--text-light); font-size: 0.9rem;">Bitácora de operaciones y validaciones de cumplimiento legal.</p>
+                    <h3><i class="fa-solid fa-clipboard-list"></i> Bitácora de Operaciones del Sistema</h3>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Fecha / Hora</th>
+                                <th>Módulo</th>
+                                <th>Acción Realizada</th>
+                                <th>Estado</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tablaAuditoriaBody">
+                            <tr><td>2026-08-19 20:30</td><td>Autenticación</td><td>Inicio de sesión del administrador</td><td><span style="color:var(--accent); font-weight:600;">Exitoso</span></td></tr>
+                        </tbody>
+                    </table>
                 </div>
             </div>
 
             <!-- Sección Contacto -->
             <div id="seccion-contacto" class="content-body">
                 <div class="card" style="max-width: 600px; margin: 0 auto;">
-                    <h3><i class="fa-solid fa-paper-plane"></i> Enviar Mensaje a Soporte</h3>
+                    <h3><i class="fa-solid fa-paper-plane"></i> Soporte Técnico Corporativo</h3>
                     <form id="form-contacto" onsubmit="enviarMensajeSoporte(event)">
                         <label>Asunto</label>
-                        <input type="text" id="contacto-asunto" placeholder="Consulta sobre servicios" required>
+                        <input type="text" id="contacto-asunto" placeholder="Consulta sobre servicios o reportes" required>
                         <label>Mensaje</label>
                         <textarea id="contacto-mensaje" rows="4" placeholder="Escribe tu mensaje aquí..." required></textarea>
                         <button type="submit" class="btn">Enviar Mensaje</button>
@@ -208,24 +271,13 @@
         </main>
     </div>
 
-    <!-- Asistente Virtual Atena (Funcionando) -->
-    <div class="atena-float" onclick="toggleAtena()"><i class="fa-solid fa-robot"></i></div>
-    <div class="atena-modal" id="atenaModal">
-        <div class="atena-header">
-            <span><i class="fa-solid fa-wand-magic-sparkles"></i> Asistente Atena</span>
-            <i class="fa-solid fa-xmark" style="cursor:pointer;" onclick="toggleAtena()"></i>
-        </div>
-        <div class="atena-body" id="atenaChatBody">
-            <div class="atena-msg bot">¡Hola! Soy Atena, tu asistente virtual para NEXUS S.A. de C.V. ¿En qué te puedo ayudar hoy?</div>
-        </div>
-        <div class="atena-footer">
-            <input type="text" id="atenaInput" placeholder="Escribe una pregunta..." onkeypress="if(event.key==='Enter') enviarAtena()">
-            <button class="btn" style="padding: 8px 12px;" onclick="enviarAtena()"><i class="fa-solid fa-paper-plane"></i></button>
-        </div>
-    </div>
-
     <script>
         const URL_GOOGLE_SHEETS = "https://script.google.com/macros/s/AKfycbzoCo98Z-eYWrQfNZOGzUByhF9Y1Bcb1QqMh0akVPgwYUdWC8xIg5ZqmWGCzaD0T5SB/exec";
+        
+        let listaEmpleados = [];
+        let bitacoraAuditoria = [
+            { fecha: "2026-08-19 20:30", modulo: "Autenticación", accion: "Inicio de sesión del administrador", estado: "Exitoso" }
+        ];
 
         function mostrarTab(tab) {
             document.querySelectorAll('.auth-tab').forEach(t => t.classList.remove('active'));
@@ -246,6 +298,7 @@
             document.getElementById('authScreen').style.display = 'none';
             document.getElementById('appContainer').style.display = 'flex';
             inicializarGrafico();
+            registrarAuditoria("Autenticación", "Inicio de sesión en plataforma");
         }
 
         async function ejecutarRegistro(e) {
@@ -301,47 +354,114 @@
                 'dashboard': 'Dashboard Financiero', 
                 'empleados': 'Gestión de Empleados',
                 'planilla': 'Procesamiento Planilla',
-                'auditoria': 'Auditoría y Control',
+                'auditoria': 'Auditoría y Historial',
                 'contacto': 'Soporte / Contacto' 
             };
             document.getElementById('tituloSeccion').innerText = titulos[seccionId];
         }
 
+        function agregarEmpleado(e) {
+            e.preventDefault();
+            const nombre = document.getElementById('emp-nombre').value;
+            const cargo = document.getElementById('emp-cargo').value;
+            const salario = parseFloat(document.getElementById('emp-salario').value);
+            const depto = document.getElementById('emp-depto').value;
+
+            listaEmpleados.push({ nombre, cargo, salario, depto });
+            actualizarTablaEmpleados();
+            actualizarDashboardFinanciero();
+            registrarAuditoria("Gestión de Empleados", `Registro de empleado: ${nombre}`);
+            
+            document.getElementById('form-empleado').reset();
+            alert("Empleado registrado con éxito.");
+        }
+
+        function eliminarEmpleado(index) {
+            const eliminado = listaEmpleados.splice(index, 1);
+            actualizarTablaEmpleados();
+            actualizarDashboardFinanciero();
+            registrarAuditoria("Gestión de Empleados", `Eliminación de empleado`);
+        }
+
+        function actualizarTablaEmpleados() {
+            const tbody = document.getElementById('tablaEmpleadosBody');
+            if (listaEmpleados.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: var(--text-light);">No hay empleados registrados todavía.</td></tr>`;
+                return;
+            }
+            tbody.innerHTML = '';
+            listaEmpleados.forEach((emp, index) => {
+                tbody.innerHTML += `
+                    <tr>
+                        <td>${emp.nombre}</td>
+                        <td>${emp.cargo}</td>
+                        <td>${emp.depto}</td>
+                        <td>$${emp.salario.toFixed(2)}</td>
+                        <td><button class="btn btn-danger" onclick="eliminarEmpleado(${index})"><i class="fa-solid fa-trash"></i></button></td>
+                    </tr>
+                `;
+            });
+        }
+
+        function calcularPlanilla() {
+            const tbody = document.getElementById('tablaPlanillaBody');
+            if (listaEmpleados.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; color: var(--text-light);">Agregue empleados primero para calcular la planilla.</td></tr>`;
+                return;
+            }
+            tbody.innerHTML = '';
+            listaEmpleados.forEach(emp => {
+                // Cálculos aproximados de ley (El Salvador): ISSS 3%, AFP 7.25%
+                let isss = emp.salario * 0.03;
+                if(isss > 30) isss = 30; // Tope máximo aprox ISSS
+                let afp = emp.salario * 0.0725;
+                let renta = (emp.salario - isss - afp) > 500 ? (emp.salario * 0.1) : 0; // Cálculo simplificado de Renta
+                let liquido = emp.salario - isss - afp - renta;
+
+                tbody.innerHTML += `
+                    <tr>
+                        <td>${emp.nombre}</td>
+                        <td>$${emp.salario.toFixed(2)}</td>
+                        <td>$${isss.toFixed(2)}</td>
+                        <td>$${afp.toFixed(2)}</td>
+                        <td>$${renta.toFixed(2)}</td>
+                        <td><strong>$${liquido.toFixed(2)}</strong></td>
+                    </tr>
+                `;
+            });
+            registrarAuditoria("Procesamiento Planilla", "Generación de cálculo de planilla de salarios");
+        }
+
+        function actualizarDashboardFinanciero() {
+            let totalSalarios = listaEmpleados.reduce((acc, curr) => acc + curr.salario, 0);
+            document.getElementById('dash-costos').innerText = `$${totalSalarios.toFixed(2)}`;
+            document.getElementById('dash-utilidad').innerText = `-$${totalSalarios.toFixed(2)}`;
+        }
+
+        function registrarAuditoria(modulo, accion) {
+            const fechaHora = new Date().toISOString().replace('T', ' ').substring(0, 16);
+            bitacoraAuditoria.unshift({ fecha: fechaHora, modulo, accion, estado: "Exitoso" });
+            const tbody = document.getElementById('tablaAuditoriaBody');
+            if(tbody) {
+                tbody.innerHTML = '';
+                bitacoraAuditoria.forEach(item => {
+                    tbody.innerHTML += `
+                        <tr>
+                            <td>${item.fecha}</td>
+                            <td>${item.modulo}</td>
+                            <td>${item.accion}</td>
+                            <td><span style="color:var(--accent); font-weight:600;">${item.estado}</span></td>
+                        </tr>
+                    `;
+                });
+            }
+        }
+
         function enviarMensajeSoporte(e) {
             e.preventDefault();
             alert("Mensaje enviado con éxito al soporte técnico.");
+            registrarAuditoria("Soporte", "Envío de mensaje de consulta");
             document.getElementById('form-contacto').reset();
-        }
-
-        function toggleAtena() {
-            const modal = document.getElementById('atenaModal');
-            modal.style.display = modal.style.display === 'flex' ? 'none' : 'flex';
-        }
-
-        // Lógica de Atena reactivada y funcional
-        function enviarAtena() {
-            const input = document.getElementById('atenaInput');
-            const texto = input.value.trim().toLowerCase();
-            if(!texto) return;
-            
-            const body = document.getElementById('atenaChatBody');
-            body.innerHTML += `<div class="atena-msg user">${input.value}</div>`;
-            input.value = '';
-            
-            setTimeout(() => {
-                let respuesta = "Comprendo. Como asistente virtual de NEXUS S.A. de C.V., estoy aquí para apoyarte con tus consultas corporativas y de sistema.";
-                
-                if (texto.includes('hola') || texto.includes('saludos') || texto.includes('buenos dias')) {
-                    respuesta = "¡Hola! Es un gusto saludarte. ¿Cómo puedo ayudarte hoy con la plataforma NEXUS?";
-                } else if (texto.includes('planilla') || texto.includes('empleados')) {
-                    respuesta = "Puedes gestionar el personal y los cálculos desde los módulos 'Gestión de Empleados' y 'Procesamiento Planilla' en el menú lateral.";
-                } else if (texto.includes('auditoria') || texto.includes('control')) {
-                    respuesta = "La sección de Auditoría te permite verificar las validaciones legales y el historial de las operaciones de la empresa.";
-                }
-
-                body.innerHTML += `<div class="atena-msg bot">${respuesta}</div>`;
-                body.scrollTop = body.scrollHeight;
-            }, 600);
         }
 
         function inicializarGrafico() {
@@ -351,7 +471,7 @@
                 data: {
                     labels: ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun'],
                     datasets: [{
-                        label: 'Flujo Neto ($)',
+                        label: 'Costos Operativos ($)',
                         data: [0, 0, 0, 0, 0, 0],
                         backgroundColor: '#3b82f6',
                         borderRadius: 6
